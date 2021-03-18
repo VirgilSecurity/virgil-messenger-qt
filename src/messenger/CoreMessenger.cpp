@@ -150,6 +150,11 @@ static vssq_messenger_group_ptr_t vssq_messenger_group_wrap_ptr(vssq_messenger_g
     return vssq_messenger_group_ptr_t { ptr, vssq_messenger_group_delete };
 }
 
+static vssq_messenger_group_ptr_t vssq_messenger_group_null()
+{
+    return vssq_messenger_group_ptr_t { nullptr, vssq_messenger_group_delete };
+}
+
 static CoreMessengerStatus mapStatus(vssq_status_t status)
 {
     switch (status) {
@@ -200,8 +205,18 @@ static CoreMessengerStatus mapStatus(vssq_status_t status)
 class Self::GroupImpl
 {
 public:
-    explicit GroupImpl(vssq_messenger_group_ptr_t a_ctx) : ctx(std::move(a_ctx)) { }
-    vssq_messenger_group_ptr_t ctx;
+    explicit GroupImpl(GroupHandler aLocalGroup)
+        : localGroup(std::move(aLocalGroup)), commKitGroup(vssq_messenger_group_null())
+    {
+    }
+
+    GroupImpl(GroupHandler aLocalGroup, vssq_messenger_group_ptr_t aCommKitGroup)
+        : localGroup(std::move(aLocalGroup)), commKitGroup(std::move(aCommKitGroup))
+    {
+    }
+
+    GroupHandler localGroup;
+    vssq_messenger_group_ptr_t commKitGroup;
 };
 
 // --------------------------------------------------------------------------
@@ -214,9 +229,8 @@ public:
 
     vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
 
-    std::map<GroupId, GroupImplHandler> messengerGroups;
-    std::map<GroupId, UserId> groupOwners;
-    std::mutex groupMutex;
+    std::map<GroupId, GroupImplHandler> groups;
+    std::mutex groupsMutex;
 
     VSQNetworkAnalyzer *networkAnalyzer;
 
@@ -260,6 +274,7 @@ struct RegisterMetaTypesOnce
         qRegisterMetaType<vm::ModifiableMessages>("ModifiableMessages");
         qRegisterMetaType<vm::UserHandler>("UserHandler");
         qRegisterMetaType<vm::GroupHandler>("GroupHandler");
+        qRegisterMetaType<vm::Groups>("Groups");
         qRegisterMetaType<vm::ChatHandler>("ChatHandler");
         qRegisterMetaType<vm::ModifiableChatHandler>("ModifiableChatHandler");
         qRegisterMetaType<vm::ModifiableChats>("ModifiableChats");
@@ -304,8 +319,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::deactivate, this, &Self::onDeactivate);
     connect(this, &Self::suspend, this, &Self::onSuspend);
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
-    connect(this, &Self::createGroupChat, this, &Self::onCreateGroupChat);
-    connect(this, &Self::joinGroupChats, this, &Self::onJoinGroupChats);
+    connect(this, &Self::loadGroupChats, this, &Self::loadGroupChats);
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
     connect(this, &Self::requestMessageHistory, this, &Self::onRequestMessageHistory);
@@ -318,6 +332,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::registerPushNotifications, this, &Self::onRegisterPushNotifications);
     connect(this, &Self::deregisterPushNotifications, this, &Self::onDeregisterPushNotifications);
     connect(this, &Self::xmppCreateGroupChat, this, &Self::xmppOnCreateGroupChat);
+    connect(this, &Self::xmppLoadGroupChats, this, &Self::xmppOnLoadGroupChats);
+    connect(this, &Self::xmppJoinRoom, this, &Self::xmppOnJoinRoom);
     connect(this, &Self::xmppMessageDelivered, this, &Self::xmppOnMessageDelivered);
 
     //
@@ -380,8 +396,8 @@ Self::Result Self::resetCommKitConfiguration()
     //
     //  Cleanup caches.
     //
-    std::scoped_lock _(m_impl->groupMutex);
-    m_impl->messengerGroups.clear();
+    std::scoped_lock _(m_impl->groupsMutex);
+    m_impl->groups.clear();
 
     return Self::Result::Success;
 }
@@ -763,9 +779,14 @@ QString Self::userIdToJid(const UserId &userId) const
     return userId + "@" + CustomerEnv::xmppServiceDomain();
 }
 
+QString Self::groupChatsDomain() const
+{
+    return "conference." + CustomerEnv::xmppServiceDomain();
+}
+
 QString Self::groupIdToJid(const GroupId &groupId) const
 {
-    return groupId + "@conference." + CustomerEnv::xmppServiceDomain();
+    return groupId + "@" + groupChatsDomain();
 }
 
 GroupId Self::groupIdFromJid(const QString &jid) const
@@ -1082,13 +1103,13 @@ QFuture<Self::Result> Self::sendMessage(MessageHandler message)
     });
 }
 
-Self::Result Self::sendPersonalMessage(const MessageHandler &message)
+std::variant<CoreMessengerStatus, QByteArray> Self::encryptPersonalMessage(const UserId &recipientId,
+                                                                           const QByteArray &messageData)
 {
-
     //
     //  Find recipient.
     //
-    auto recipient = findUserById(message->recipientId());
+    auto recipient = findUserById(recipientId);
     if (!recipient) {
         //
         //  Got network troubles to find recipient, so cache message and try later.
@@ -1100,7 +1121,6 @@ Self::Result Self::sendPersonalMessage(const MessageHandler &message)
     //
     //  Encrypt message.
     //
-    auto messageData = packMessage(message);
     auto ciphertextDataMinLen = vssq_messenger_encrypted_message_len(m_impl->messenger.get(), messageData.size(),
                                                                      recipient->impl()->user.get());
 
@@ -1120,11 +1140,68 @@ Self::Result Self::sendPersonalMessage(const MessageHandler &message)
 
     adjustMappedBuffer(ciphertext, ciphertextData);
 
+    return ciphertextData;
+}
+
+std::variant<CoreMessengerStatus, QByteArray> Self::decryptPersonalMessage(const UserId &senderId,
+                                                                           const QByteArray &messageCiphertext)
+{
+    //
+    //  Find sender.
+    //
+    auto sender = findUserById(senderId);
+    if (!sender) {
+        //
+        //  Got network troubles to find sender, so cache message and try later.
+        //
+        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext - sender is not found";
+        return Self::Result::Success;
+    }
+
+    //
+    //  Decrypt message.
+    //
+    auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), messageCiphertext.size());
+
+    auto [messageData, plaintext] = makeMappedBuffer(plaintextDataMinLen);
+
+    const vssq_status_t decryptionStatus = vssq_messenger_decrypt_data(
+            m_impl->messenger.get(), vsc_data_from(messageCiphertext), sender->impl()->user.get(), plaintext.get());
+
+    if (decryptionStatus != vssq_status_SUCCESS) {
+        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext:"
+                                   << vsc_str_to_qstring(vssq_error_message_from_status(decryptionStatus));
+        return Self::Result::Error_InvalidMessageCiphertext;
+    }
+
+    adjustMappedBuffer(plaintext, messageData);
+
+    qCDebug(lcCoreMessenger) << "Received XMPP message was decrypted";
+
+    return messageData;
+}
+
+Self::Result Self::sendPersonalMessage(const MessageHandler &message)
+{
+    //
+    //  Encrypt message.
+    //
+    auto messageData = packMessage(message);
+    auto ciphertextResult = encryptPersonalMessage(message->recipientId(), messageData);
+    if (auto status = std::get_if<Self::Result>(&ciphertextResult)) {
+        return *status;
+    }
+
+    auto ciphertextData = std::move(*std::get_if<QByteArray>(&ciphertextResult));
+
     //
     //  Pack JSON body.
     //
     auto messageBody = packXmppMessageBody(ciphertextData, PushType::Alert);
 
+    //
+    //  Send message.
+    //
     qCDebug(lcCoreMessenger) << "Will send XMPP message with body:" << messageBody;
 
     auto senderJid = userIdToJid(message->senderId());
@@ -1255,7 +1332,6 @@ QFuture<Self::Result> Self::processReceivedXmppMessage(const QXmppMessage &xmppM
 
 Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessage)
 {
-
     auto message = std::make_unique<IncomingMessage>();
 
     message->setId(MessageId(xmppMessage.id()));
@@ -1272,61 +1348,40 @@ Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessag
     //
     //  Decode message body from Base64 and JSON.
     //
-    auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
-    if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
+    auto messageCiphertextResult = unpackXmppMessageBody(xmppMessage);
+    if (auto status = std::get_if<CoreMessengerStatus>(&messageCiphertextResult)) {
         return *status;
     }
 
-    auto ciphertext = std::move(*std::get_if<QByteArray>(&ciphertextResult));
-
-    //
-    //  Find sender.
-    //
-    auto sender = findUserById(message->senderId());
-    if (!sender) {
-        //
-        //  Got network troubles to find sender, so cache message and try later.
-        //
-        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext - sender is not found";
-        message->setContent(MessageContentEncrypted(ciphertext));
-        emit messageReceived(std::move(message));
-        return Self::Result::Success;
-    }
+    auto messageCiphertext = std::move(*std::get_if<QByteArray>(&messageCiphertextResult));
 
     //
     //  Decrypt message.
     //
-    auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(m_impl->messenger.get(), ciphertext.size());
-
-    auto [plaintextData, plaintext] = makeMappedBuffer(plaintextDataMinLen);
-
-    const vssq_status_t decryptionStatus = vssq_messenger_decrypt_data(
-            m_impl->messenger.get(), vsc_data_from(ciphertext), sender->impl()->user.get(), plaintext.get());
-
-    if (decryptionStatus != vssq_status_SUCCESS) {
-        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext:"
-                                   << vsc_str_to_qstring(vssq_error_message_from_status(decryptionStatus));
-        return Self::Result::Error_InvalidMessageCiphertext;
+    auto messageDataResult = decryptPersonalMessage(message->senderId(), messageCiphertext);
+    if (auto status = std::get_if<CoreMessengerStatus>(&messageDataResult)) {
+        if (*status == Self::Result::Success) {
+            qCWarning(lcCoreMessenger) << "Can not decrypt message for now, try it later.";
+            message->setContent(MessageContentEncrypted(std::move(messageCiphertext)));
+            emit messageReceived(std::move(message));
+        }
+        return *status;
     }
 
-    adjustMappedBuffer(plaintext, plaintextData);
-
-    message->setStage(IncomingMessageStage::Decrypted);
-
-    qCInfo(lcCoreMessenger) << "Received XMPP message was decrypted";
+    auto messageData = std::move(*std::get_if<QByteArray>(&messageDataResult));
 
     //
     //  Unpack message.
     //
-    if (auto result = unpackMessage(plaintextData, *message); result != Self::Result::Success) {
+    if (auto result = unpackMessage(messageData, *message); result != Self::Result::Success) {
         return result;
     }
-
-    qCInfo(lcCoreMessenger) << "Received XMPP message was parsed";
 
     //
     //  Tell the world we got a message.
     //
+    message->setStage(IncomingMessageStage::Decrypted);
+
     emit messageReceived(std::move(message));
 
     return Self::Result::Success;
@@ -1928,11 +1983,6 @@ void Self::xmppOnConnected()
     presenceOnline.setAvailableStatusType(QXmppPresence::Online);
     m_impl->xmpp->setClientPresence(presenceOnline);
 
-    //
-    //  FIXME: Remove next line. It's only for quick debug.
-    //
-    requestMessageHistory(MessageRequest());
-
     registerPushNotifications();
 }
 
@@ -2208,9 +2258,7 @@ CoreMessengerStatus Self::unpackMessage(const QByteArray &messageData, Message &
 
     message.setContent(std::move(content));
 
-    //
-    //  TODO: Parse addition fields related to group chats if exists.
-    //
+    qCDebug(lcCoreMessenger) << "Received XMPP message was unpacked:" << message.id();
 
     return Self::Result::Success;
 }
@@ -2304,50 +2352,63 @@ const vssq_messenger_cloud_fs_t *Self::cloudFsC() const
 // --------------------------------------------------------------------------
 //  Group chats.
 // --------------------------------------------------------------------------
-void Self::onCreateGroupChat(const GroupHandler &group)
+void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
 {
-
-    QtConcurrent::run([this, group]() {
+    QtConcurrent::run([this, groupName, contacts]() {
         //
         // Find participants.
         //
-        qCInfo(lcCoreMessenger) << "Trying to create group chat";
-        qCDebug(lcCoreMessenger) << "Crate group chat - start to find participants";
-        Users userList;
+        const auto groupId = GroupId::generate();
+
+        qCInfo(lcCoreMessenger) << "Trying to create group chat:" << groupId;
+        qCDebug(lcCoreMessenger) << "Create group chat - start to find participants";
+
+        GroupMembers groupMembers;
         auto userListC = vssq_messenger_user_list_wrap_ptr(vssq_messenger_user_list_new());
-        for (const auto &contact : group->contacts()) {
+        for (const auto &contact : contacts) {
+            std::shared_ptr<User> user { nullptr };
             //
             //  Find by username.
             //
             if (!contact->username().isEmpty()) {
-                auto user = findUserByUsername(contact->username());
-                if (user) {
-                    userList.push_back(user);
-                    vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
-                }
+                user = findUserByUsername(contact->username());
             }
 
             //
             //  TODO: Add contact by email and phone as well.
             //
+
+            if (user) {
+                //
+                //  For now User Identity is used as user nickname.
+                //  This hack is needed to fetch user when decrypt a group message to be able to verify signature.
+                //  Also initial affiliation is "None" that means participant was not added to the XMPP group yet.
+                //
+                auto groupMember = std::make_unique<GroupMember>(groupId, user->id(), user->id() /*nickname*/,
+                                                                 GroupAffiliation::None);
+                groupMembers.push_back(std::move(groupMember));
+
+                vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
+            }
         }
 
-        qCDebug(lcCoreMessenger) << "Crate group chat - found" << userList.size() << " participants";
-        for (const auto &user : userList) {
-            qCDebug(lcCoreMessenger) << "Crate group chat - found participant:" << user->username();
+        qCDebug(lcCoreMessenger) << "Create group chat - found" << groupMembers.size() << " participants";
+        for (const auto &member : groupMembers) {
+            qCDebug(lcCoreMessenger) << "Create group chat - found participant:" << member->memberId();
         }
 
         if (!vssq_messenger_user_list_has_item(userListC.get())) {
-            emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_GroupNoParticipants);
+            emit groupChatCreateFailed(groupId, CoreMessengerStatus::Error_GroupNoParticipants);
             return;
         }
 
         //
-        //  Tell the World that members are found.
+        //  Add self as owner to the group.
         //
         auto owner = currentUser();
-        emit updateGroup(AddGroupOwnersUpdate { group->id(), { owner } });
-        emit updateGroup(AddGroupMembersUpdate { group->id(), userList });
+        auto groupOwner =
+                std::make_unique<GroupMember>(groupId, owner->id(), owner->id() /*nickname*/, GroupAffiliation::Owner);
+        groupMembers.push_back(std::move(groupOwner));
 
         //
         //  Create Comm Kit group chat.
@@ -2357,56 +2418,77 @@ void Self::onCreateGroupChat(const GroupHandler &group)
         vssq_error_t error;
         vssq_error_reset(&error);
 
-        auto groupIdStd = QString(group->id()).toStdString();
+        auto groupIdStd = QString(groupId).toStdString();
         auto groupC = vssq_messenger_group_wrap_ptr(vssq_messenger_create_group(
                 m_impl->messenger.get(), vsc_str_from(groupIdStd), userListC.get(), &error));
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessenger) << "Got error status:"
                                        << vsc_str_to_qstring(vssq_error_message_from_error(&error));
-            emit groupChatCreateFailed(group->id(), mapStatus(vssq_error_status(&error)));
+            emit groupChatCreateFailed(groupId, mapStatus(vssq_error_status(&error)));
             return;
         }
 
-        {
-            std::scoped_lock _(m_impl->groupMutex);
-            m_impl->groupOwners[group->id()] = owner->id();
-            m_impl->messengerGroups[group->id()] = std::make_shared<GroupImpl>(std::move(groupC));
-        }
+        auto groupSessionCacheJson = vssc_json_object_wrap_ptr(vssq_messenger_group_to_json(groupC.get()));
+        auto groupSessionCache = vsc_str_to_qstring(vssc_json_object_as_str(groupSessionCacheJson.get()));
 
-        //
-        //  Tell the world that we have encryption keys for the group.
-        //
-        emit updateGroup(AddGroupUpdate { group->id() });
+        const auto group = std::make_shared<Group>(groupId, currentUser()->id(), groupName,
+                                                   GroupInvitationStatus::Accepted, std::move(groupSessionCache));
+
+        {
+            std::scoped_lock _(m_impl->groupsMutex);
+            m_impl->groups[groupId] = std::make_shared<GroupImpl>(group, std::move(groupC));
+        }
 
         //
         //  Create XMPP multi-user chat room, aka group chat.
         //
-        xmppCreateGroupChat(group, userList);
+        xmppCreateGroupChat(group, groupMembers);
     });
 }
 
-void Self::onJoinGroupChats(const GroupMembers &groupMembers)
+void Self::loadGroupChats(const Groups &groups)
 {
-    Q_ASSERT(m_impl->xmppGroupChatManager != nullptr);
+    Q_ASSERT(isSignedIn());
 
-    std::scoped_lock _(m_impl->groupMutex);
+    QtConcurrent::run([this, groups]() {
+        for (const auto &group : groups) {
+            vssq_error_t error;
+            vssq_error_reset(&error);
 
-    for (const auto &groupMember : groupMembers) {
-        Q_ASSERT(groupMember->memberId() == currentUser()->id());
+            //
+            //  Load CommKit group from cached session.
+            //
+            auto groupImpl = std::make_shared<GroupImpl>(group);
+            if (auto groupSessionCache = group->cache().toStdString(); !groupSessionCache.empty()) {
+                groupImpl->commKitGroup = vssq_messenger_group_wrap_ptr(vssq_messenger_load_group_from_json_str(
+                        m_impl->messenger.get(), vsc_str_from(groupSessionCache), &error));
+            }
 
-        auto roomJid = groupIdToJid(groupMember->groupId());
-        auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
-        room->setNickName(groupMember->memberId());
+            //
+            //  Load CommKit group from the service if online and if the cache loading failed.
+            //
+            if (!groupImpl->commKitGroup && isOnline()) {
+                auto groupOwner = findUserById(group->superOwnerId());
+                if (groupOwner) {
+                    const auto groupId = QString(group->id()).toStdString();
+                    groupImpl->commKitGroup = vssq_messenger_group_wrap_ptr(vssq_messenger_load_group(
+                            m_impl->messenger.get(), vsc_str_from(groupId), groupOwner->impl()->user.get(), &error));
 
-        m_impl->groupOwners[groupMember->groupId()] = groupMember->groupOwnerId();
+                    if (groupImpl->commKitGroup) {
+                        updateGroupCache(groupImpl);
+                    }
+                }
+            }
 
-        connectXmppRoomSignals(room);
+            std::scoped_lock _(m_impl->groupsMutex);
+            m_impl->groups[group->id()] = std::move(groupImpl);
+        }
 
         if (isOnline()) {
-            room->join();
+            xmppLoadGroupChats();
         }
-    }
+    });
 }
 
 void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
@@ -2416,11 +2498,9 @@ void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOw
     auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
     room->setNickName(currentUser()->id());
 
-    m_impl->groupOwners[groupId] = groupOwnerId;
-
     connectXmppRoomSignals(room);
 
-    emit updateGroup(GroupMemberAffiliationUpdate { groupId, currentUser()->id(), GroupAffiliation::Member });
+    emit updateGroup(GroupInvitationUpdate { groupId, GroupInvitationStatus::Accepted });
 
     if (isOnline()) {
         room->join();
@@ -2451,7 +2531,7 @@ void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOw
     }
 }
 
-void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &membersToBeInvited)
+void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &members)
 {
     qCInfo(lcCoreMessenger) << "Trying to create group chat within XMPP server";
 
@@ -2461,10 +2541,10 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &members
     auto roomJid = groupIdToJid(group->id());
 
     QXmppMucRoom *room = m_impl->xmppGroupChatManager->addRoom(roomJid);
-    room->setNickName(currentUser()->id());
+    room->setNickName(group->superOwnerId());
     room->setSubject(group->name());
 
-    connect(room, &QXmppMucRoom::joined, [this, group, currentUser = currentUser(), room, membersToBeInvited]() {
+    connect(room, &QXmppMucRoom::joined, [this, group, room, members]() {
         qCDebug(lcCoreMessenger) << "Joined to the new XMPP room:" << room->jid();
 
         //
@@ -2485,44 +2565,28 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &members
             return;
         }
 
-        emit groupChatCreated(group->id());
+        //
+        //  Now we can be sure that the group chat was created.
+        //
+        emit groupChatCreated(group, members);
 
-        for (const auto &user : membersToBeInvited) {
-            if (user->id() == currentUser->id()) {
+        //
+        //  Add group members to the room.
+        //
+        for (const auto &member : members) {
+            const auto memberId = member->memberId();
+
+            if (memberId == currentUser()->id()) {
                 //  Do not add myself.
                 continue;
             }
-
-            //
-            //  Send invitations.
-            //
-            auto invitationMessage = std::make_shared<OutgoingMessage>();
-            invitationMessage->setId(MessageId::generate());
-            invitationMessage->setSenderId(currentUser->id());
-            invitationMessage->setSenderUsername(currentUser->username());
-            invitationMessage->setRecipientId(user->id());
-            invitationMessage->setRecipientUsername(user->username());
-            invitationMessage->setContent(MessageContentGroupInvitation { group->name(), "Hello!" });
-            invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
-            invitationMessage->setCreatedNow();
-
-            auto invitationMessageData = packMessage(invitationMessage);
-
-            auto encryptedInvitationMessageResult = encryptGroupMessage(group->id(), invitationMessageData);
-
-            if (auto status = std::get_if<Self::Result>(&encryptedInvitationMessageResult)) {
-                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << user->id();
-                continue;
-            }
-
-            auto encryptedInvitationMessage = std::get_if<QByteArray>(&encryptedInvitationMessageResult)->toBase64();
 
             //
             //  Add to the room.
             //
             QXmppMucItem addMemberItem;
             addMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
-            addMemberItem.setJid(userIdToJid(user->id()));
+            addMemberItem.setJid(userIdToJid(memberId));
 
             QXmppMucAdminIq requestAddMember;
             requestAddMember.setFrom(currentUserJid());
@@ -2531,27 +2595,90 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &members
             requestAddMember.setType(QXmppIq::Type::Set);
 
             if (m_impl->xmpp->sendPacket(requestAddMember)) {
-                qCDebug(lcCoreMessenger) << "Requested to add user:" << user->id() << " the XMPP room:" << group->id();
+                qCDebug(lcCoreMessenger) << "Requested to add user:" << memberId << "the XMPP room:" << group->id();
+                emit updateGroup(GroupMemberAffiliationUpdate { group->id(), memberId, GroupAffiliation::Member });
 
             } else {
-                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << user->id();
-                return;
+                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
+                continue;
             }
 
-            if (room->sendInvitation(userIdToJid(user->id()), encryptedInvitationMessage)) {
-                qCDebug(lcCoreMessenger) << "User was invited:" << user->id();
+            //
+            //  Send invitation.
+            //
+            auto invitationMessage = std::make_shared<OutgoingMessage>();
+            invitationMessage->setId(MessageId::generate());
+            invitationMessage->setSenderId(currentUser()->id());
+            invitationMessage->setSenderUsername(currentUser()->username());
+            invitationMessage->setRecipientId(memberId);
+            invitationMessage->setContent(
+                    MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
+            invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
+            invitationMessage->setCreatedNow();
+
+            auto invitationMessageData = packMessage(invitationMessage);
+
+            auto encryptedInvitationMessageResult = encryptPersonalMessage(memberId, invitationMessageData);
+
+            if (auto status = std::get_if<Self::Result>(&encryptedInvitationMessageResult)) {
+                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
+                continue;
+            }
+
+            auto encryptedInvitationMessage = std::get_if<QByteArray>(&encryptedInvitationMessageResult)->toBase64();
+
+            if (room->sendInvitation(userIdToJid(memberId), encryptedInvitationMessage)) {
+                qCDebug(lcCoreMessenger) << "User was invited:" << memberId;
                 invitationMessage->setStage(OutgoingMessageStage::Sent);
-                emit messageReceived(invitationMessage);
 
             } else {
-                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << user->id();
+                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
             }
+
+            emit messageReceived(invitationMessage);
         }
     });
 
     connectXmppRoomSignals(room);
 
-    room->join();
+    if (!room->join()) {
+        emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppFailed);
+    }
+}
+
+void Self::xmppOnLoadGroupChats()
+{
+    qCDebug(lcCoreMessenger) << "Start loading group chats from an XMPP server...";
+
+    //
+    //  Join XMPP rooms first.
+    //
+    {
+        std::scoped_lock _(m_impl->groupsMutex);
+        for (const auto &group : m_impl->groups) {
+            xmppJoinRoom(group.second->localGroup->id());
+        }
+    }
+
+    m_impl->xmppMucSubManager->retrieveSubscribedRooms(groupChatsDomain());
+}
+
+void Self::xmppOnJoinRoom(const GroupId &groupId)
+{
+    Q_ASSERT(m_impl->xmppGroupChatManager);
+
+    //
+    //  Join to XMPP group.
+    //
+    auto roomJid = groupIdToJid(groupId);
+    auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
+    room->setNickName(currentUser()->id());
+
+    connectXmppRoomSignals(room);
+
+    if (isOnline()) {
+        room->join();
+    }
 }
 
 void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &inviter, const QString &reason)
@@ -2567,6 +2694,15 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
         auto senderId = userIdFromJid(inviter);
 
         //
+        //  Create a local invitation message.
+        //
+        auto message = std::make_shared<IncomingMessage>();
+        message->setId(MessageId::generate());
+        message->setSenderId(senderId);
+        message->setRecipientId(recipientId);
+        message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
+
+        //
         //  Decode from Base64.
         //
         auto maybeEncryptedInvitationMessage = QByteArray::fromBase64Encoding(reason.toLatin1());
@@ -2575,53 +2711,36 @@ void Self::xmppOnMucInvitationReceived(const QString &roomJid, const QString &in
             return;
         }
 
-        auto encryptedInvitationMessage = std::move(*maybeEncryptedInvitationMessage);
+        auto messageCiphertext = std::move(*maybeEncryptedInvitationMessage);
 
         //
-        //  Add inviter as group owner.
+        //  Decrypt message.
         //
-        {
-            std::scoped_lock<std::mutex> _(m_impl->groupMutex);
-            m_impl->groupOwners[groupId] = senderId;
-        }
-
-        //
-        //  Decrypt.
-        //
-        auto invitationMessage = std::make_shared<IncomingMessage>();
-        invitationMessage->setId(MessageId::generate());
-        invitationMessage->setSenderId(senderId);
-        invitationMessage->setRecipientId(recipientId);
-        invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
-
-        auto decryptedInvitationMessageResult = decryptGroupMessage(groupId, senderId, encryptedInvitationMessage);
-
-        if (auto status = std::get_if<Self::Result>(&decryptedInvitationMessageResult)) {
-            qCDebug(lcCoreMessenger) << "Invitation can not be decrypted, group:" << groupId
-                                     << ", inviter:" << senderId;
-
-            invitationMessage->setContent(MessageContentEncrypted(std::move(encryptedInvitationMessage)));
-
-            emit messageReceived(invitationMessage);
-
+        auto messageDataResult = decryptPersonalMessage(message->senderId(), messageCiphertext);
+        if (auto status = std::get_if<CoreMessengerStatus>(&messageDataResult)) {
+            if (*status == Self::Result::Success) {
+                qCWarning(lcCoreMessenger) << "Can not decrypt message for now, try it later.";
+                message->setContent(MessageContentEncrypted(std::move(messageCiphertext)));
+                emit messageReceived(message);
+            }
             return;
         }
 
-        invitationMessage->setStage(IncomingMessageStage::Decrypted);
-
-        qCDebug(lcCoreMessenger) << "Invitation was decrypted, group:" << groupId << ", inviter:" << senderId;
+        auto messageData = std::move(*std::get_if<QByteArray>(&messageDataResult));
 
         //
-        //  Unpack.
+        //  Unpack message.
         //
-        auto invitationMessageData = std::move(*std::get_if<1>(&decryptedInvitationMessageResult));
-
-        if (auto status = unpackMessage(invitationMessageData, *invitationMessage); status != Self::Result::Success) {
-            qCDebug(lcCoreMessenger) << "Failed to unpack invitation message";
+        if (auto result = unpackMessage(messageData, *message); result != Self::Result::Success) {
             return;
         }
 
-        emit messageReceived(invitationMessage);
+        //
+        //  Tell the world we got a message.
+        //
+        message->setStage(IncomingMessageStage::Decrypted);
+
+        emit messageReceived(std::move(message));
     });
 }
 
@@ -2659,8 +2778,16 @@ void Self::xmppOnRoomParticipantReceived(const QString &roomJid, const QString &
         }
     };
 
-    emit updateGroup(
-            GroupMemberAffiliationUpdate { groupIdFromJid(roomJid), userIdFromJid(jid), mapAffiliation(affiliation) });
+    const auto groupId = groupIdFromJid(roomJid);
+    const auto userId = userIdFromJid(jid);
+    const auto userAffiliation = mapAffiliation(affiliation);
+
+    if (isGroupCached(groupId)) {
+        emit updateGroup(GroupMemberAffiliationUpdate { groupId, userId, userAffiliation });
+
+    } else if (userAffiliation == GroupAffiliation::Owner) {
+        tryLoadGroupInBackground(groupId, userId);
+    }
 }
 
 void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname) { }
@@ -2668,11 +2795,26 @@ void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &sub
 void Self::xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                            const std::list<XmppMucSubEvent> &events)
 {
+    const auto roomId = groupIdFromJid(roomJid);
+    if (auto _ = std::scoped_lock(m_impl->groupsMutex); m_impl->groups.find(roomId) != m_impl->groups.end()) {
+        //
+        //  This group is already loaded.
+        //
+        return;
+    }
+
+    //
+    //  Group is not loaded yet, so try to find it's owner and then load CommKit group.
+    //
+    m_impl->xmppMucSubManager->retrieveRoomSubscribers(roomJid);
 }
 
 void Self::xmppOnMucRoomSubscriberReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
-                                           const std::list<XmppMucSubEvent> &events) {
+                                           const std::list<XmppMucSubEvent> &events)
+{
+    std::scoped_lock _(m_impl->groupsMutex);
 
+    m_impl->xmppRoomParticipantsManager->requestAll(roomJid);
 };
 
 void Self::xmppOnMucSubscribedRoomsProcessed(const QString &id) { }
@@ -2710,7 +2852,7 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
                         XmppMucSubEvent::Subscribers,
                         XmppMucSubEvent::Presence,
                 },
-                currentUserJid(), room->jid(), currentUser()->id());
+                room->jid(), currentUser()->id());
     });
 
     //
@@ -2753,43 +2895,17 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
             [room](const QString &subject) { qCDebug(lcCoreMessenger) << "---> subjectChanged:" << subject; });
 }
 
-std::variant<CoreMessengerStatus, Self::GroupImplHandler> Self::findGroup(const GroupId &groupId) const
+CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superOwnerId)
 {
-    qCDebug(lcCoreMessenger) << "Trying to find group with id:" << groupId;
-
-    std::scoped_lock<std::mutex> _(m_impl->groupMutex);
-
-    //
-    //  Check cache first.
-    //
-    auto groupIt = m_impl->messengerGroups.find(groupId);
-    if (groupIt != m_impl->messengerGroups.end()) {
-        qCDebug(lcCoreMessenger) << "Group found in the cache";
-        return groupIt->second;
-    }
-
-    //
-    //  Search on-line.
-    //
-    if (!isOnline()) {
-        return Self::Result::Error_Offline;
-    }
+    qCDebug(lcCoreMessenger) << "Loading group with id:" << groupId << "and owner:" << superOwnerId;
 
     //
     //  Find group owner.
     //
-    const auto groupOwnerIt = m_impl->groupOwners.find(groupId);
-    if (groupOwnerIt == m_impl->groupOwners.end()) {
-        qCCritical(lcCoreMessenger) << "Group owner is undefined when loading group:" << groupId;
-        return Self::Result::Error_GroupOwnerNotFound;
-    }
-
-    const auto &groupOwnerId = groupOwnerIt->second;
-
-    auto groupOwner = findUserById(groupOwnerId);
+    auto groupOwner = findUserById(superOwnerId);
     if (!groupOwner) {
-        qCDebug(lcCoreMessenger) << "Group owner is not found for group:" << groupId;
-        return Self::Result::Error_GroupOwnerNotFound;
+        qCDebug(lcCoreMessenger) << "Group owner:" << superOwnerId << "is not found for group:" << groupId;
+        return CoreMessengerStatus::Error_UserNotFound;
     }
 
     //
@@ -2800,49 +2916,90 @@ std::variant<CoreMessengerStatus, Self::GroupImplHandler> Self::findGroup(const 
 
     auto groupIdStdStr = QString(groupId).toStdString();
 
-    auto group = vssq_messenger_group_wrap_ptr(vssq_messenger_load_group(
+    auto groupC = vssq_messenger_group_wrap_ptr(vssq_messenger_load_group(
             m_impl->messenger.get(), vsc_str_from(groupIdStdStr), groupOwner->impl()->user.get(), &error));
 
     if (vssq_error_has_error(&error)) {
-        qCDebug(lcCoreMessenger) << "Group not found:" << groupId;
+        qCDebug(lcCoreMessenger) << "Group not loaded:" << groupId;
         qCWarning(lcCoreMessenger) << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
-        return Self::Result::Error_GroupNotFound;
+        return CoreMessengerStatus::Error_GroupNotFound;
     }
 
-    qCDebug(lcCoreMessenger) << "Group found in the cloud:" << groupId;
+    qCDebug(lcCoreMessenger) << "Group" << groupId << "loaded from the cloud";
 
     //
-    //  Cache and return.
+    //  Store it locally.
     //
-    auto groupImpl = std::make_shared<GroupImpl>(std::move(group));
+    auto groupSessionCacheJson = vssc_json_object_wrap_ptr(vssq_messenger_group_to_json(groupC.get()));
+    auto groupSessionCache = vsc_str_to_qstring(vssc_json_object_as_str(groupSessionCacheJson.get()));
 
-    m_impl->messengerGroups[groupId] = groupImpl;
+    const auto group = std::make_shared<Group>(groupId, superOwnerId, "Temp Room Name", GroupInvitationStatus::Accepted,
+                                               std::move(groupSessionCache));
 
-    return groupImpl;
+    {
+        std::scoped_lock _(m_impl->groupsMutex);
+        m_impl->groups[groupId] = std::make_shared<GroupImpl>(group, std::move(groupC));
+        emit newGroupChatLoaded(group);
+    }
+
+    emit xmppJoinRoom(groupId);
+
+    return Self::Result::Success;
+}
+
+void Self::tryLoadGroupInBackground(const GroupId &groupId, const UserId &superOwnerId)
+{
+    QtConcurrent::run([this, groupId, superOwnerId]() {
+        const auto status = loadGroup(groupId, superOwnerId);
+        Q_UNUSED(status);
+    });
+}
+
+bool Self::isGroupCached(const GroupId &groupId) const
+{
+    return findGroupInCache(groupId).get() != nullptr;
+}
+
+void Self::updateGroupCache(const GroupImplHandler &group) const
+{
+    auto groupSessionCacheJson = vssc_json_object_wrap_ptr(vssq_messenger_group_to_json(group->commKitGroup.get()));
+    auto groupSessionCache = vsc_str_to_qstring(vssc_json_object_as_str(groupSessionCacheJson.get()));
+
+    emit updateGroup(GroupCacheUpdate { group->localGroup->id(), groupSessionCache });
+}
+
+const Self::GroupImplHandler Self::findGroupInCache(const GroupId &groupId) const
+{
+    std::scoped_lock _(m_impl->groupsMutex);
+
+    const auto groupIt = m_impl->groups.find(groupId);
+
+    if (groupIt != m_impl->groups.cend()) {
+        return groupIt->second;
+    }
+
+    return nullptr;
 }
 
 std::variant<CoreMessengerStatus, QByteArray> Self::encryptGroupMessage(const GroupId &groupId,
                                                                         const QByteArray &messageData)
 {
-
     //
-    //  Find and Load group.
+    //  Find group.
     //
-    auto groupResult = findGroup(groupId);
-    if (auto status = std::get_if<0>(&groupResult)) {
-        return *status;
+    auto group = findGroupInCache(groupId);
+    if (!group || !group->commKitGroup) {
+        return Self::Result::Error_GroupNotLoaded;
     }
-
-    auto group = std::move(*std::get_if<1>(&groupResult));
 
     //
     //  Encrypt message.
     //
-    const auto outLen = vssq_messenger_group_encrypted_message_len(group->ctx.get(), messageData.size());
+    const auto outLen = vssq_messenger_group_encrypted_message_len(group->commKitGroup.get(), messageData.size());
     auto [out, outBuf] = makeMappedBuffer(outLen);
 
-    const auto status =
-            vssq_messenger_group_encrypt_binary_message(group->ctx.get(), vsc_data_from(messageData), outBuf.get());
+    const auto status = vssq_messenger_group_encrypt_binary_message(group->commKitGroup.get(),
+                                                                    vsc_data_from(messageData), outBuf.get());
 
     if (status == vssq_status_SUCCESS) {
         adjustMappedBuffer(outBuf, out);
@@ -2857,16 +3014,13 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(const Gr
 {
 
     //
-    //  Find and Load group.
+    //  Find group.
     //
-    auto groupResult = findGroup(groupId);
-    if (auto status = std::get_if<0>(&groupResult)) {
-        return *status;
+    auto group = findGroupInCache(groupId);
+    if (!group || !group->commKitGroup) {
+        return Self::Result::Error_GroupNotLoaded;
     }
 
-    auto group = *std::get_if<1>(&groupResult);
-
-    //
     //  Find sender.
     //
     auto sender = findUserById(senderId);
@@ -2877,11 +3031,12 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(const Gr
     //
     //  Decrypt message.
     //
-    const auto outLen = vssq_messenger_group_decrypted_message_len(group->ctx.get(), encryptedMessageData.size());
+    const auto outLen =
+            vssq_messenger_group_decrypted_message_len(group->commKitGroup.get(), encryptedMessageData.size());
     auto [out, outBuf] = makeMappedBuffer(outLen);
 
     const auto status = vssq_messenger_group_decrypt_binary_message(
-            group->ctx.get(), vsc_data_from(encryptedMessageData), sender->impl()->user.get(), outBuf.get());
+            group->commKitGroup.get(), vsc_data_from(encryptedMessageData), sender->impl()->user.get(), outBuf.get());
 
     if (status == vssq_status_SUCCESS) {
         adjustMappedBuffer(outBuf, out);

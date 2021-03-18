@@ -112,6 +112,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     connect(m_coreMessenger, &CoreMessenger::groupChatCreateFailed, [this](const auto &groupId, const auto &status) {
         emit groupChatCreateFailed(groupId, "Chat was not created on the services");
     });
+    connect(m_coreMessenger, &CoreMessenger::newGroupChatLoaded, this, &Self::newGroupChatLoaded);
 
     //
     // Push notifications
@@ -333,16 +334,16 @@ void Self::setCurrentRecipient(const UserId &recipientId)
     m_coreMessenger->setCurrentRecipient(recipientId);
 }
 
-void Self::createGroupChat(const GroupHandler &group)
+void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
 {
 
-    m_coreMessenger->createGroupChat(group);
+    m_coreMessenger->createGroupChat(groupName, contacts);
 }
 
-void Self::joinGroupChats(const GroupMembers &groupsWithMe)
+void Self::loadGroupChats(const Groups &groups)
 {
 
-    m_coreMessenger->joinGroupChats(groupsWithMe);
+    m_coreMessenger->loadGroupChats(groups);
 }
 
 void Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)

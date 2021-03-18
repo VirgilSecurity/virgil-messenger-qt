@@ -37,10 +37,8 @@
 using namespace vm;
 using Self = GroupMember;
 
-Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName,
-                  GroupAffiliation memberAffiliation)
+Self::GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation)
     : m_groupId(std::move(groupId)),
-      m_groupOwnerId(std::move(groupOwnerId)),
       m_memberId(std::move(memberId)),
       m_memberNickName(std::move(memberNickName)),
       m_memberAffiliation(memberAffiliation)
@@ -50,11 +48,6 @@ Self::GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString
 GroupId Self::groupId() const
 {
     return m_groupId;
-}
-
-UserId Self::groupOwnerId() const
-{
-    return m_groupOwnerId;
 }
 
 UserId Self::memberId() const
@@ -85,12 +78,12 @@ Contacts vm::GroupMembersToContacts(const GroupMembers &groupMembers)
     return contacts;
 }
 
-GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const UserId &groupOwnerId, const Contacts &contacts)
+GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts)
 {
     GroupMembers members;
     for (auto &contact : contacts) {
-        const auto member = std::make_shared<GroupMember>(groupId, groupOwnerId, contact->userId(), contact->name(),
-                                                          GroupAffiliation::Member);
+        const auto member =
+                std::make_shared<GroupMember>(groupId, contact->userId(), contact->name(), GroupAffiliation::Member);
         members.push_back(std::move(member));
     }
     return members;

@@ -37,6 +37,7 @@
 #include "database/patches/version1/PatchContacts.h"
 #include "database/patches/version2/PatchCloudFiles.h"
 #include "database/patches/version3/PatchChats.h"
+#include "database/patches/version3/PatchGroups.h"
 
 using namespace vm;
 
@@ -46,4 +47,5 @@ UserDatabaseMigration::UserDatabaseMigration() : Migration()
     addPatch(std::make_unique<version1::PatchContacts>());
     addPatch(std::make_unique<version2::PatchCloudFiles>());
     addPatch(std::make_unique<version3::PatchChats>());
+    addPatch(std::make_unique<version3::PatchGroups>());
 }

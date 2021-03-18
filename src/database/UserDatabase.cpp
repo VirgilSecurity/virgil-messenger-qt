@@ -255,27 +255,24 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     //
     if (chat->type() == ChatType::Group) {
 
-        groupsTable()->addGroupForChat(chat);
-
         //
         //  Expect invitation message here.
-        //  Add Group Owner and myself with affiliation "none" that equals to "invitation is not accepted yet".
         //
         const auto message = chat->lastMessage();
 
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            groupMembersTable()->updateGroup(
-                    GroupMemberAffiliationUpdate { GroupId(chat->id()), message->senderId(), GroupAffiliation::Owner });
+        if (const auto content = std::get_if<MessageContentGroupInvitation>(&message->content())) {
 
-            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->recipientId(),
-                                                                            GroupAffiliation::None });
+            const auto groupId = GroupId(chat->id());
 
-        } else {
-            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->senderId(),
-                                                                            GroupAffiliation::Member });
+            auto group = std::make_shared<Group>(groupId, content->superOwnerId(), content->title(),
+                                                 GroupInvitationStatus::Invited);
 
-            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->recipientId(),
-                                                                            GroupAffiliation::Member });
+            groupsTable()->add(group);
+
+            if (rowsChangedCount() > 0) {
+                groupMembersTable()->updateGroup(
+                        GroupMemberAffiliationUpdate { groupId, content->superOwnerId(), GroupAffiliation::Owner });
+            }
         }
     }
 

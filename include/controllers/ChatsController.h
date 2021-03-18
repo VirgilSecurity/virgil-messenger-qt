@@ -92,9 +92,7 @@ signals:
     void chatClosed();
 
     void createChatWithUser(const UserHandler &user, QPrivateSignal);
-    void createChatWithGroup(const GroupHandler &group, QPrivateSignal);
 
-    void groupInvitationAccepted();
     void groupInvitationRejected();
 
 private:
@@ -103,13 +101,13 @@ private:
 
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
-    void onCreateChatWithGroup(const GroupHandler &group);
-    void onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMembers &groupMembers);
-    void onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMembers);
+    void onGroupsFetched(const Groups &groups);
+    void onGroupMembersFetched(const GroupId &groupId, const GroupMembers &groupMembers);
 
-    void onGroupChatCreated(const GroupId &groupId);
+    void onGroupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers);
     void onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText);
     void onUpdateGroup(const GroupUpdate &groupUpdate);
+    void onNewGroupChatLoaded(const GroupHandler &group);
 
     void onMessageAdded(const MessageHandler &message);
     void onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);

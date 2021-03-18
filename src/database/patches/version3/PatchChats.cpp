@@ -47,7 +47,7 @@ bool Self::apply(Database *database)
 {
     const QLatin1String versionPath("patches/version3/");
 
-    if (!DatabaseUtils::readExecQueries(database, versionPath + "dropUnreadMessageCountColumn")) {
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "migrateChats")) {
         return false;
     }
 

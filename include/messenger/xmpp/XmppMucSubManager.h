@@ -61,23 +61,29 @@ public:
     //  Subscribe to given events.
     //  Return operation id.
     //
-    QString subscribe(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
-                      const QString &nickName);
+    QString subscribe(const std::list<XmppMucSubEvent> &events, const QString &roomJid, const QString &nickName);
 
     //
-    //  Subscribe another user (jid) to given events.
+    //  Subscribe another user to given events.
     //  Only a room moderator can subscribe another user.
     //  Return operation id.
     //
-    QString subscribeOther(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
-                           const QString &jid, const QString &nickName);
+    QString subscribeOther(const std::list<XmppMucSubEvent> &events, const QString &roomJid,
+                           const QString &otherUserJid, const QString &nickName);
 
     //
     //  Unsubscribe from a MUC Room.
     //  A room moderator can unsubscribe another room user from MUC Room events by providing the user JID.
     //  Return operation id.
     //
-    QString unsubscribe(const QString &jid = {});
+    QString unsubscribe(const QString &roomJid);
+
+    //
+    //  Unsubscribe another user from a MUC Room.
+    //  Note, only room moderators are allowed for this action.
+    //  Return operation id.
+    //
+    QString unsubscribeOther(const QString &roomJid, const QString &otherUserJid);
 
     //
     //  Get list of the subscribed rooms.
@@ -85,7 +91,7 @@ public:
     //  Signal subscribedRoomsProcessed() is emitted when all rooms were processed.
     //  Return operation id.
     //
-    QString retreiveSubscribedRooms(const QString &from);
+    QString retrieveSubscribedRooms(const QString &roomDomain);
 
     //
     //  Get list of the subscribed rooms.
@@ -93,7 +99,7 @@ public:
     //  Signal roomSubscribersProcessed() is emitted when all room subscribers were processed.
     //  Return operation id.
     //
-    QString retreiveRoomSubscribers(const QString &from, const QString &to);
+    QString retrieveRoomSubscribers(const QString &roomJid);
 
     //
     //  Handle IQs with subscription events.

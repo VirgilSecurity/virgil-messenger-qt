@@ -32,50 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUPS_TABLE_H
-#define VM_GROUPS_TABLE_H
+#include "patches/version3/PatchGroups.h"
 
-#include "core/DatabaseTable.h"
-#include "GroupUpdate.h"
-#include "Chat.h"
-#include "Group.h"
+#include "core/DatabaseUtils.h"
 
-#include <QString>
+using namespace vm;
+using namespace version3;
 
-namespace vm {
-class GroupsTable : public DatabaseTable
+using Self = PatchGroups;
+
+Self::PatchGroups() : Patch(3) { }
+
+bool Self::apply(Database *database)
 {
-    Q_OBJECT
+    const QLatin1String versionPath("patches/version3/");
 
-public:
-    explicit GroupsTable(Database *database);
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "migrateGroups")) {
+        return false;
+    }
 
-signals:
-    //
-    //  Control signals.
-    //
-    void add(const GroupHandler &group);
-    void fetch();
-    void updateGroup(const GroupUpdate &groupUpdate);
-    void deleteGroup(const GroupId &groupId);
-
-    //
-    //  Notification signals.
-    //
-    void fetched(const Groups &groups);
-    void errorOccurred(const QString &errorText);
-
-private:
-    void onAdd(const GroupHandler &group);
-    void onFetch();
-    void onUpdateGroup(const GroupUpdate &groupUpdate);
-    void onDeleteGroup(const GroupId &groupId);
-
-    void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
-    void updateGroupCache(const GroupId &groupId, const QString &cache);
-
-    bool create() override;
-};
-} // namespace vm
-
-#endif // VM_GROUPS_TABLE_H
+    return true;
+}

@@ -535,6 +535,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version1/PatchContacts.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchChats.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchGroups.h
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -743,6 +744,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version1/PatchContacts.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchChats.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchGroups.cpp
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp

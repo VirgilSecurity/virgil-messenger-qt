@@ -115,13 +115,14 @@ public:
     //  Create a new group chats.
     //  If success - signal 'groupChatCreated' is emitted.
     //  If fail - signal 'groupChatCreateFailed' is emitted.
+    //  Note, this function is running concurrently.
     //
-    void createGroupChat(const GroupHandler &group);
+    void createGroupChat(const QString &groupName, const Contacts &contacts);
 
     //
-    //  Join existent group chat when online to be able receive messages.
+    //  Load existing group chats to be able send messages and if online then run groups synchronization.
     //
-    void joinGroupChats(const GroupMembers &groupsWithMe);
+    void loadGroupChats(const Groups &groups);
 
     //
     //  Group invitations
@@ -195,9 +196,10 @@ signals:
     //--
     //  Group chats.
     //
-    void groupChatCreated(const GroupId &chatId);
+    void groupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers);
     void groupChatCreateFailed(const GroupId &chatId, const QString &errorText);
     void updateGroup(const GroupUpdate &groupUpdate);
+    void newGroupChatLoaded(const GroupHandler &group);
     //--
 
     //--

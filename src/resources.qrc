@@ -230,9 +230,10 @@
         <file>resources/database/updateMessageStage.sql</file>
         <file>resources/database/updateMessageStage.sql</file>
         <file>resources/database/insertGroup.sql</file>
+        <file>resources/database/selectGroups.sql</file>
+        <file>resources/database/updateGroupCache.sql</file>
         <file>resources/database/insertGroupMember.sql</file>
-        <file>resources/database/selectGroupMembersByGroupId.sql</file>
-        <file>resources/database/selectGroupMembersByMemberId.sql</file>
+        <file>resources/database/selectGroupMembers.sql</file>
         <file>resources/database/updateGroupMemberAffiliation.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/insertContact.sql</file>
@@ -251,6 +252,7 @@
         <file>resources/database/patches/version1/insertContactsFromChats.sql</file>
         <file>resources/database/patches/version1/migrateMessagesToVersion1.sql</file>
         <file>resources/database/patches/version2/addSharedGroupIdColumn.sql</file>
-        <file>resources/database/patches/version3/dropUnreadMessageCountColumn.sql</file>
+        <file>resources/database/patches/version3/migrateChats.sql</file>
+        <file>resources/database/patches/version3/migrateGroups.sql</file>
     </qresource>
 </RCC>

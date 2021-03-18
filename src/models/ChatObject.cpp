@@ -109,6 +109,7 @@ GroupMembers Self::selectedGroupMembers() const
 
 UserId Self::groupOwnerId() const
 {
+    // FIXME: Use group.superOwnerId() instead.
     return FindGroupOwner(m_groupMembersModel->groupMembers())->memberId();
 }
 

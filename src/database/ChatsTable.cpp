@@ -97,6 +97,8 @@ void ChatsTable::onFetch()
 
 void ChatsTable::onAddChat(const ChatHandler &chat)
 {
+    qCDebug(lcDatabase) << "Trying to insert chat:" << chat->id();
+
     ScopedConnection connection(*database());
     const auto lastMessageId = chat->lastMessage() ? chat->lastMessage()->id() : QString();
     const DatabaseUtils::BindValues values { { ":id", QString(chat->id()) },

@@ -57,23 +57,22 @@ signals:
     //
     //  Control signals.
     //
-    void updateGroup(const GroupUpdate &groupUpdate);
-    void fetchByMemberId(const UserId &memberId);
-    void fetchByGroupId(const GroupId &groupId);
+    void add(const GroupMembers &groupMembers);
+    void fetch(const GroupId &groupId);
     void deleteGroupMembers(const GroupId &groupId);
+    void updateGroup(const GroupUpdate &groupUpdate);
 
     //
     //  Notification signals.
     //
     void errorOccurred(const QString &errorText);
-    void fetchedByMemberId(const UserId &memberId, const GroupMembers &groupMember);
-    void fetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMember);
+    void fetched(const GroupId &groupId, const GroupMembers &groupMembers);
 
 private:
-    void onUpdateGroup(const GroupUpdate &groupUpdate);
-    void onFetchByMemberId(const UserId &memberId);
-    void onFetchByGroupId(const GroupId &groupId);
+    void onAdd(const GroupMembers &groupMembers);
+    void onFetch(const GroupId &groupId);
     void onDeleteGroupMembers(const GroupId &groupId);
+    void onUpdateGroup(const GroupUpdate &groupUpdate);
 
     bool create() override;
 

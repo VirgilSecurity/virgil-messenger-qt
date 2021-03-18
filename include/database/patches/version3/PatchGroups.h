@@ -32,50 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUPS_TABLE_H
-#define VM_GROUPS_TABLE_H
+#ifndef VM_VERSION3_PATCH_GROUPS_H
+#define VM_VERSION3_PATCH_GROUPS_H
 
-#include "core/DatabaseTable.h"
-#include "GroupUpdate.h"
-#include "Chat.h"
-#include "Group.h"
-
-#include <QString>
+#include "core/Patch.h"
 
 namespace vm {
-class GroupsTable : public DatabaseTable
+namespace version3 {
+
+class PatchGroups : public Patch
 {
-    Q_OBJECT
-
 public:
-    explicit GroupsTable(Database *database);
+    PatchGroups();
 
-signals:
-    //
-    //  Control signals.
-    //
-    void add(const GroupHandler &group);
-    void fetch();
-    void updateGroup(const GroupUpdate &groupUpdate);
-    void deleteGroup(const GroupId &groupId);
-
-    //
-    //  Notification signals.
-    //
-    void fetched(const Groups &groups);
-    void errorOccurred(const QString &errorText);
-
-private:
-    void onAdd(const GroupHandler &group);
-    void onFetch();
-    void onUpdateGroup(const GroupUpdate &groupUpdate);
-    void onDeleteGroup(const GroupId &groupId);
-
-    void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
-    void updateGroupCache(const GroupId &groupId, const QString &cache);
-
-    bool create() override;
+    bool apply(Database *database) override;
 };
+
+} // namespace version3
 } // namespace vm
 
-#endif // VM_GROUPS_TABLE_H
+#endif // VM_VERSION3_PATCH_GROUPS_H
