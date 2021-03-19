@@ -9,7 +9,7 @@ pushd ${PROJECT_FOLDER}
   mkdir -p build 
 
   pushd build
-   cmake -DVS_PLATFORM="windows" -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw64.cmake ..
+   cmake -DVS_PLATFORM="windows" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw64.cmake ..
    make -j10
    make deploy
   popd

@@ -914,8 +914,6 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>
 
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>
-
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${QT_RELATIVE_PATH}/../Tools/OpenSSL-windows/Win_x64/include>>
         )
 
 target_compile_definitions(${VS_TARGET_NAME}
@@ -947,6 +945,7 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 
         $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG>>
         )
 
 target_compile_options(${VS_TARGET_NAME}
