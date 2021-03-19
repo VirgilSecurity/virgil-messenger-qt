@@ -831,6 +831,8 @@ target_link_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${VS_ANDROID_SSL_DIR}>>
+
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${QT_RELATIVE_PATH}/../Tools/OpenSSL-windows/Win_x64/lib>>
         )
 
 target_link_libraries(${VS_TARGET_NAME}
@@ -876,6 +878,11 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","linux">:curl>
 
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:curl>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:ssl>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:crypto>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:wsock32>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:ws2_32>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:wldap32>
         )
 
 #
@@ -905,7 +912,10 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>
+
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>
+
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${QT_RELATIVE_PATH}/../Tools/OpenSSL-windows/Win_x64/include>>
         )
 
 target_compile_definitions(${VS_TARGET_NAME}
