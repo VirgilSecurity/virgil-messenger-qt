@@ -40,7 +40,10 @@ using namespace vm;
 
 GroupId vm::GroupUpdateGetId(const GroupUpdate &update)
 {
-    if (auto base = std::get_if<GroupCacheUpdate>(&update)) {
+    if (auto base = std::get_if<GroupNameUpdate>(&update)) {
+        return base->groupId;
+
+    } else if (auto base = std::get_if<GroupCacheUpdate>(&update)) {
         return base->groupId;
 
     } else if (auto base = std::get_if<GroupInvitationUpdate>(&update)) {

@@ -72,6 +72,7 @@ private:
     void onDeleteGroup(const GroupId &groupId);
 
     void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
+    void updateGroupName(const GroupId &groupId, const QString &name);
     void updateGroupCache(const GroupId &groupId, const QString &cache);
 
     bool create() override;

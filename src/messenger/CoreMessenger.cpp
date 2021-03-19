@@ -319,7 +319,6 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::deactivate, this, &Self::onDeactivate);
     connect(this, &Self::suspend, this, &Self::onSuspend);
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
-    connect(this, &Self::loadGroupChats, this, &Self::loadGroupChats);
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
     connect(this, &Self::requestMessageHistory, this, &Self::onRequestMessageHistory);
@@ -332,7 +331,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::registerPushNotifications, this, &Self::onRegisterPushNotifications);
     connect(this, &Self::deregisterPushNotifications, this, &Self::onDeregisterPushNotifications);
     connect(this, &Self::xmppCreateGroupChat, this, &Self::xmppOnCreateGroupChat);
-    connect(this, &Self::xmppLoadGroupChats, this, &Self::xmppOnLoadGroupChats);
+    connect(this, &Self::xmppFetchRoomsFromServer, this, &Self::xmppOnFetchRoomsFromServer);
     connect(this, &Self::xmppJoinRoom, this, &Self::xmppOnJoinRoom);
     connect(this, &Self::xmppMessageDelivered, this, &Self::xmppOnMessageDelivered);
 
@@ -1984,6 +1983,8 @@ void Self::xmppOnConnected()
     m_impl->xmpp->setClientPresence(presenceOnline);
 
     registerPushNotifications();
+
+    syncLocalAndRemoteGroups();
 }
 
 void Self::xmppOnDisconnected()
@@ -2465,29 +2466,15 @@ void Self::loadGroupChats(const Groups &groups)
                         m_impl->messenger.get(), vsc_str_from(groupSessionCache), &error));
             }
 
-            //
-            //  Load CommKit group from the service if online and if the cache loading failed.
-            //
-            if (!groupImpl->commKitGroup && isOnline()) {
-                auto groupOwner = findUserById(group->superOwnerId());
-                if (groupOwner) {
-                    const auto groupId = QString(group->id()).toStdString();
-                    groupImpl->commKitGroup = vssq_messenger_group_wrap_ptr(vssq_messenger_load_group(
-                            m_impl->messenger.get(), vsc_str_from(groupId), groupOwner->impl()->user.get(), &error));
-
-                    if (groupImpl->commKitGroup) {
-                        updateGroupCache(groupImpl);
-                    }
-                }
+            {
+                std::scoped_lock _(m_impl->groupsMutex);
+                m_impl->groups[group->id()] = std::move(groupImpl);
             }
 
-            std::scoped_lock _(m_impl->groupsMutex);
-            m_impl->groups[group->id()] = std::move(groupImpl);
+            xmppJoinRoom(group->id());
         }
 
-        if (isOnline()) {
-            xmppLoadGroupChats();
-        }
+        syncLocalAndRemoteGroups();
     });
 }
 
@@ -2544,121 +2531,144 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
     room->setNickName(group->superOwnerId());
     room->setSubject(group->name());
 
-    connect(room, &QXmppMucRoom::joined, [this, group, room, members]() {
+    connect(room, &QXmppMucRoom::joined, [this, group, room]() {
         qCDebug(lcCoreMessenger) << "Joined to the new XMPP room:" << room->jid();
 
         //
-        //  Accept an Instant Room Configuration
+        //  Request Room Configuration to Create Reserved Room.
+        //  This is required to set a room name.
         //
-        QXmppMucOwnerIq acceptIq;
-        acceptIq.setFrom(currentUserJid());
-        acceptIq.setTo(room->jid());
-        acceptIq.setType(QXmppIq::Type::Set);
+        QXmppMucOwnerIq requestConfigurationIq;
+        requestConfigurationIq.setFrom(currentUserJid());
+        requestConfigurationIq.setTo(room->jid());
+        requestConfigurationIq.setType(QXmppIq::Type::Get);
 
-        QXmppDataForm acceptForm;
-        acceptForm.setType(QXmppDataForm::Type::Submit);
-
-        acceptIq.setForm(acceptForm);
-
-        if (!m_impl->xmpp->sendPacket(acceptIq)) {
+        if (!m_impl->xmpp->sendPacket(requestConfigurationIq)) {
             emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
-            return;
-        }
-
-        //
-        //  Now we can be sure that the group chat was created.
-        //
-        emit groupChatCreated(group, members);
-
-        //
-        //  Add group members to the room.
-        //
-        for (const auto &member : members) {
-            const auto memberId = member->memberId();
-
-            if (memberId == currentUser()->id()) {
-                //  Do not add myself.
-                continue;
-            }
-
-            //
-            //  Add to the room.
-            //
-            QXmppMucItem addMemberItem;
-            addMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
-            addMemberItem.setJid(userIdToJid(memberId));
-
-            QXmppMucAdminIq requestAddMember;
-            requestAddMember.setFrom(currentUserJid());
-            requestAddMember.setTo(room->jid());
-            requestAddMember.setItems({ addMemberItem });
-            requestAddMember.setType(QXmppIq::Type::Set);
-
-            if (m_impl->xmpp->sendPacket(requestAddMember)) {
-                qCDebug(lcCoreMessenger) << "Requested to add user:" << memberId << "the XMPP room:" << group->id();
-                emit updateGroup(GroupMemberAffiliationUpdate { group->id(), memberId, GroupAffiliation::Member });
-
-            } else {
-                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
-                continue;
-            }
-
-            //
-            //  Send invitation.
-            //
-            auto invitationMessage = std::make_shared<OutgoingMessage>();
-            invitationMessage->setId(MessageId::generate());
-            invitationMessage->setSenderId(currentUser()->id());
-            invitationMessage->setSenderUsername(currentUser()->username());
-            invitationMessage->setRecipientId(memberId);
-            invitationMessage->setContent(
-                    MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
-            invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
-            invitationMessage->setCreatedNow();
-
-            auto invitationMessageData = packMessage(invitationMessage);
-
-            auto encryptedInvitationMessageResult = encryptPersonalMessage(memberId, invitationMessageData);
-
-            if (auto status = std::get_if<Self::Result>(&encryptedInvitationMessageResult)) {
-                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
-                continue;
-            }
-
-            auto encryptedInvitationMessage = std::get_if<QByteArray>(&encryptedInvitationMessageResult)->toBase64();
-
-            if (room->sendInvitation(userIdToJid(memberId), encryptedInvitationMessage)) {
-                qCDebug(lcCoreMessenger) << "User was invited:" << memberId;
-                invitationMessage->setStage(OutgoingMessageStage::Sent);
-
-            } else {
-                qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
-            }
-
-            emit messageReceived(invitationMessage);
         }
     });
 
-    connectXmppRoomSignals(room);
+    connect(room, &QXmppMucRoom::configurationReceived,
+            [this, group, room, members](const QXmppDataForm &configuration) {
+                qCDebug(lcCoreMessenger) << "Configure the new XMPP room:" << room->jid();
+                qCDebug(lcCoreMessengerXMPP).noquote()
+                        << "Got an initial room configuration:" << toXmlString(configuration);
+
+                QXmppMucOwnerIq acceptIq;
+                acceptIq.setFrom(currentUserJid());
+                acceptIq.setTo(room->jid());
+                acceptIq.setType(QXmppIq::Type::Set);
+
+                QXmppDataForm submitForm;
+                submitForm.setType(QXmppDataForm::Type::Submit);
+
+                using Field = QXmppDataForm::Field::Type;
+
+                QList<QXmppDataForm::Field> configFields {
+                    { Field::HiddenField, "FORM_TYPE", "http://jabber.org/protocol/muc#roomconfig" },
+                    { Field::TextSingleField, "muc#roomconfig_roomname", group->name() },
+                };
+
+                submitForm.setFields(configFields);
+
+                acceptIq.setForm(submitForm);
+
+                if (!m_impl->xmpp->sendPacket(acceptIq)) {
+                    emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
+                    return;
+                }
+
+                //
+                //  Now we assume that the group chat was created.
+                //  Note, errors are not handled.
+                //
+                emit groupChatCreated(group, members);
+
+                //
+                //  Add group members to the room.
+                //
+                for (const auto &member : members) {
+                    const auto memberId = member->memberId();
+
+                    if (memberId == currentUser()->id()) {
+                        //  Do not add myself.
+                        continue;
+                    }
+
+                    //
+                    //  Add to the room.
+                    //
+                    QXmppMucItem addMemberItem;
+                    addMemberItem.setAffiliation(QXmppMucItem::MemberAffiliation);
+                    addMemberItem.setJid(userIdToJid(memberId));
+
+                    QXmppMucAdminIq requestAddMember;
+                    requestAddMember.setFrom(currentUserJid());
+                    requestAddMember.setTo(room->jid());
+                    requestAddMember.setItems({ addMemberItem });
+                    requestAddMember.setType(QXmppIq::Type::Set);
+
+                    if (m_impl->xmpp->sendPacket(requestAddMember)) {
+                        qCDebug(lcCoreMessenger)
+                                << "Requested to add user:" << memberId << "the XMPP room:" << group->id();
+                        emit updateGroup(
+                                GroupMemberAffiliationUpdate { group->id(), memberId, GroupAffiliation::Member });
+
+                    } else {
+                        qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
+                        continue;
+                    }
+
+                    //
+                    //  Send invitation.
+                    //
+                    auto invitationMessage = std::make_shared<OutgoingMessage>();
+                    invitationMessage->setId(MessageId::generate());
+                    invitationMessage->setSenderId(currentUser()->id());
+                    invitationMessage->setSenderUsername(currentUser()->username());
+                    invitationMessage->setRecipientId(memberId);
+                    invitationMessage->setContent(
+                            MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
+                    invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
+                    invitationMessage->setCreatedNow();
+
+                    auto invitationMessageData = packMessage(invitationMessage);
+
+                    auto encryptedInvitationMessageResult = encryptPersonalMessage(memberId, invitationMessageData);
+
+                    if (auto status = std::get_if<Self::Result>(&encryptedInvitationMessageResult)) {
+                        qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
+                        continue;
+                    }
+
+                    auto encryptedInvitationMessage =
+                            std::get_if<QByteArray>(&encryptedInvitationMessageResult)->toBase64();
+
+                    if (room->sendInvitation(userIdToJid(memberId), encryptedInvitationMessage)) {
+                        qCDebug(lcCoreMessenger) << "User was invited:" << memberId;
+                        invitationMessage->setStage(OutgoingMessageStage::Sent);
+
+                    } else {
+                        qCDebug(lcCoreMessenger) << "User invitation was postponed:" << memberId;
+                    }
+
+                    emit messageReceived(invitationMessage);
+                }
+            });
+
+    connect(room, &QXmppMucRoom::error, [this, room, group](const QXmppStanza::Error &error) {
+        qCWarning(lcCoreMessenger) << "Got room:" << room->jid() << ", error:" << toXmlString(error);
+        emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
+    });
 
     if (!room->join()) {
         emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppFailed);
     }
 }
 
-void Self::xmppOnLoadGroupChats()
+void Self::xmppOnFetchRoomsFromServer()
 {
-    qCDebug(lcCoreMessenger) << "Start loading group chats from an XMPP server...";
-
-    //
-    //  Join XMPP rooms first.
-    //
-    {
-        std::scoped_lock _(m_impl->groupsMutex);
-        for (const auto &group : m_impl->groups) {
-            xmppJoinRoom(group.second->localGroup->id());
-        }
-    }
+    qCDebug(lcCoreMessenger) << "Start fetching group chats from an XMPP server...";
 
     m_impl->xmppMucSubManager->retrieveSubscribedRooms(groupChatsDomain());
 }
@@ -2676,8 +2686,10 @@ void Self::xmppOnJoinRoom(const GroupId &groupId)
 
     connectXmppRoomSignals(room);
 
-    if (isOnline()) {
-        room->join();
+    if (isOnline() && room->join()) {
+        qCDebug(lcCoreMessenger) << "Joined to XMPP room:" << roomJid;
+    } else {
+        qCDebug(lcCoreMessenger) << "Failed to join to XMPP room:" << roomJid;
     }
 }
 
@@ -2795,8 +2807,8 @@ void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &sub
 void Self::xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                            const std::list<XmppMucSubEvent> &events)
 {
-    const auto roomId = groupIdFromJid(roomJid);
-    if (auto _ = std::scoped_lock(m_impl->groupsMutex); m_impl->groups.find(roomId) != m_impl->groups.end()) {
+    const auto groupId = groupIdFromJid(roomJid);
+    if (isGroupCached(groupId)) {
         //
         //  This group is already loaded.
         //
@@ -2855,6 +2867,13 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
                 room->jid(), currentUser()->id());
     });
 
+    connect(room, &QXmppMucRoom::nameChanged, [this, room](const QString &name) {
+        qCDebug(lcCoreMessenger) << "Room name changed:" << room->jid() << name;
+        const auto groupId = groupIdFromJid(room->jid());
+
+        emit updateGroup(GroupNameUpdate { groupId, name });
+    });
+
     //
     //  TODO: Replace this events with MUC/Sub events.
     //
@@ -2865,9 +2884,6 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
             [room]() { qCDebug(lcCoreMessenger) << "---> isJoinedChanged:" << room->isJoined(); });
 
     connect(room, &QXmppMucRoom::left, [room]() { qCDebug(lcCoreMessenger) << "---> left:"; });
-
-    connect(room, &QXmppMucRoom::nameChanged,
-            [room](const QString &name) { qCDebug(lcCoreMessenger) << "---> nameChanged:" << name; });
 
     connect(room, &QXmppMucRoom::nickNameChanged,
             [room](const QString &nickName) { qCDebug(lcCoreMessenger) << "---> nickNameChanged:" << nickName; });
@@ -2933,14 +2949,15 @@ CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superO
     auto groupSessionCacheJson = vssc_json_object_wrap_ptr(vssq_messenger_group_to_json(groupC.get()));
     auto groupSessionCache = vsc_str_to_qstring(vssc_json_object_as_str(groupSessionCacheJson.get()));
 
-    const auto group = std::make_shared<Group>(groupId, superOwnerId, "Temp Room Name", GroupInvitationStatus::Accepted,
+    const auto group = std::make_shared<Group>(groupId, superOwnerId, "Group", GroupInvitationStatus::Accepted,
                                                std::move(groupSessionCache));
 
     {
         std::scoped_lock _(m_impl->groupsMutex);
         m_impl->groups[groupId] = std::make_shared<GroupImpl>(group, std::move(groupC));
-        emit newGroupChatLoaded(group);
     }
+
+    emit newGroupChatLoaded(group);
 
     emit xmppJoinRoom(groupId);
 
@@ -2958,6 +2975,44 @@ void Self::tryLoadGroupInBackground(const GroupId &groupId, const UserId &superO
 bool Self::isGroupCached(const GroupId &groupId) const
 {
     return findGroupInCache(groupId).get() != nullptr;
+}
+
+void Self::syncLocalAndRemoteGroups()
+{
+    if (!isOnline()) {
+        return;
+    }
+
+    QtConcurrent::run([this]() {
+        //
+        //  Load CommKit group from the service if online and if the cache loading failed.
+        //
+        for (auto &groupImplIt : m_impl->groups) {
+            auto &groupImpl = groupImplIt.second;
+
+            if (!groupImpl->commKitGroup) {
+                auto groupOwner = findUserById(groupImpl->localGroup->superOwnerId());
+                if (groupOwner) {
+                    vssq_error_t error;
+                    vssq_error_reset(&error);
+
+                    const auto groupId = QString(groupImpl->localGroup->id()).toStdString();
+
+                    groupImpl->commKitGroup = vssq_messenger_group_wrap_ptr(vssq_messenger_load_group(
+                            m_impl->messenger.get(), vsc_str_from(groupId), groupOwner->impl()->user.get(), &error));
+
+                    if (groupImpl->commKitGroup) {
+                        updateGroupCache(groupImpl);
+                    }
+                }
+            }
+        }
+
+        //
+        //  Then fetch XMPP rooms from the remote server.
+        //
+        xmppFetchRoomsFromServer();
+    });
 }
 
 void Self::updateGroupCache(const GroupImplHandler &group) const

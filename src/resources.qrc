@@ -232,6 +232,7 @@
         <file>resources/database/insertGroup.sql</file>
         <file>resources/database/selectGroups.sql</file>
         <file>resources/database/updateGroupCache.sql</file>
+        <file>resources/database/updateGroupName.sql</file>
         <file>resources/database/insertGroupMember.sql</file>
         <file>resources/database/selectGroupMembers.sql</file>
         <file>resources/database/updateGroupMemberAffiliation.sql</file>

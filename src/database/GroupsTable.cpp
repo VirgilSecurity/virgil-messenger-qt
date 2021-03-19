@@ -83,6 +83,7 @@ void Self::onAdd(const GroupHandler &group)
 
     const DatabaseUtils::BindValues bindValues { { ":id", QString(group->id()) },
                                                  { ":superOwnerId", QString(group->superOwnerId()) },
+                                                 { ":name", QString(group->name()) },
                                                  { ":invitationStatus",
                                                    GroupInvitationStatusToString(group->invitationStatus()) },
                                                  { ":cache", group->cache() } };
@@ -118,7 +119,10 @@ void Self::onFetch()
 
 void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
 {
-    if (auto update = std::get_if<GroupCacheUpdate>(&groupUpdate)) {
+    if (auto update = std::get_if<GroupNameUpdate>(&groupUpdate)) {
+        updateGroupName(update->groupId, update->name);
+
+    } else if (auto update = std::get_if<GroupCacheUpdate>(&groupUpdate)) {
         updateGroupCache(update->groupId, update->cache);
     }
 }
@@ -136,11 +140,24 @@ void Self::onDeleteGroup(const GroupId &groupId)
     }
 }
 
+void Self::updateGroupName(const GroupId &groupId, const QString &name)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues bindValues { { ":id", QString(groupId) }, { ":name", name } };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateGroupName"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Group name was updated: " << bindValues.front().second;
+    } else {
+        qCCritical(lcDatabase) << "GroupsTable::updateGroupName error";
+        emit errorOccurred(tr("Failed to update groups table"));
+    }
+}
+
 void Self::updateGroupCache(const GroupId &groupId, const QString &cache)
 {
     ScopedConnection connection(*database());
     const DatabaseUtils::BindValues bindValues { { ":id", QString(groupId) }, { ":cache", cache } };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroup"), bindValues);
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateGroupCache"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Group cache was updated: " << bindValues.front().second;
     } else {

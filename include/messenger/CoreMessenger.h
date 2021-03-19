@@ -156,7 +156,7 @@ signals:
     void deregisterPushNotifications();
     void xmppCreateGroupChat(const GroupHandler &group, const GroupMembers &members);
     void xmppMessageDelivered(const QString &jid, const QString &messageId);
-    void xmppLoadGroupChats();
+    void xmppFetchRoomsFromServer();
     void xmppJoinRoom(const GroupId &groupId);
 
 public:
@@ -301,6 +301,8 @@ private:
 
     bool isGroupCached(const GroupId &groupId) const;
 
+    void syncLocalAndRemoteGroups();
+
     void updateGroupCache(const GroupImplHandler &group) const;
 
     const GroupImplHandler findGroupInCache(const GroupId &groupId) const;
@@ -351,7 +353,7 @@ private slots:
     void xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &groupMembers);
     void xmppOnRoomParticipantReceived(const QString &roomJid, const QString &jid,
                                        QXmppMucItem::Affiliation affiliation);
-    void xmppOnLoadGroupChats();
+    void xmppOnFetchRoomsFromServer();
     void xmppOnJoinRoom(const GroupId &groupId);
 
     void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);

@@ -1,2 +1,2 @@
-INSERT INTO groups (id, superOwnerId, invitationStatus, cache)
-VALUES (:id, :superOwnerId, :invitationStatus, :cache)
+INSERT INTO groups (id, name, superOwnerId, invitationStatus, cache)
+VALUES (:id, :name, :superOwnerId, :invitationStatus, :cache)

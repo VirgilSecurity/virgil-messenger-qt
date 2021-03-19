@@ -160,9 +160,18 @@ void ChatsModel::toggleById(const QString &chatId)
 
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
-    //
-    //  TODO: Add group chat title update.
-    //
+
+    auto chatId = ChatId(GroupUpdateGetId(groupUpdate));
+    auto chat = findChat(chatId);
+
+    if (!chat) {
+        qCWarning(lcModel) << "Could not find chat to update group:" << chatId;
+        return;
+    }
+
+    if (auto nameUpdate = std::get_if<GroupNameUpdate>(&groupUpdate)) {
+        chat->setTitle(nameUpdate->name);
+    }
 }
 
 ChatHandler Self::findChat(const ChatId &chatId) const

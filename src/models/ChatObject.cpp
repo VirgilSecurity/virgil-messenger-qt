@@ -116,6 +116,12 @@ UserId Self::groupOwnerId() const
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     m_groupMembersModel->updateGroup(groupUpdate);
+
+    if (auto nameUpdate = std::get_if<GroupNameUpdate>(&groupUpdate); nameUpdate && m_chat) {
+        if (nameUpdate->groupId == m_chat->id()) {
+            emit titleChanged(nameUpdate->name);
+        }
+    }
 }
 
 void Self::setLastActivityText(const QString &text)
