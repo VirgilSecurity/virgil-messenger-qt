@@ -145,7 +145,7 @@ QString Settings::settingsFileName()
     QString ext;
 #if VS_MACOS || VS_IOS
     ext = QLatin1String(".plist");
-#elif VS_LINUX
+#elif VS_LINUX || VS_WINDOWS
     ext = QLatin1String(".ini");
 #endif
     return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
