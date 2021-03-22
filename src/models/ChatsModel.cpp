@@ -50,7 +50,7 @@ Self::ChatsModel(QObject *parent) : ListModel(parent)
 
     proxy()->setSortRole(LastEventTimestampRole);
     proxy()->sort(0, Qt::DescendingOrder);
-    proxy()->setFilterRole(ContactIdRole);
+    proxy()->setFilterRole(TitleRole);
 }
 
 Self::~ChatsModel() { }
@@ -160,18 +160,20 @@ void ChatsModel::toggleById(const QString &chatId)
 
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
+    const auto nameUpdate = std::get_if<GroupNameUpdate>(&groupUpdate);
+    if (!nameUpdate) {
+        return;
+    }
 
-    auto chatId = ChatId(GroupUpdateGetId(groupUpdate));
-    auto chat = findChat(chatId);
-
-    if (!chat) {
+    const auto chatId = ChatId(GroupUpdateGetId(groupUpdate));
+    const auto row = findRowById(chatId);
+    if (!row) {
         qCWarning(lcModel) << "Could not find chat to update group:" << chatId;
         return;
     }
 
-    if (auto nameUpdate = std::get_if<GroupNameUpdate>(&groupUpdate)) {
-        chat->setTitle(nameUpdate->name);
-    }
+    m_chats[*row]->setTitle(nameUpdate->name);
+    emit dataChanged(index(*row), index(*row), { TitleRole });
 }
 
 ChatHandler Self::findChat(const ChatId &chatId) const
@@ -203,8 +205,8 @@ QVariant Self::data(const QModelIndex &index, int role) const
     case IdRole:
         return QString(chat->id());
 
-    case ContactIdRole:
-        return chat->title(); // TODO: maybe we need change the role
+    case TitleRole:
+        return chat->title();
 
     case LastEventTimeRole:
         return (chat->lastMessage() ? qMax(chat->lastMessage()->createdAt(), chat->createdAt()) : chat->createdAt())
@@ -233,7 +235,7 @@ QHash<int, QByteArray> Self::roleNames() const
 {
     return unitedRoleNames(ListModel::roleNames(),
                            { { IdRole, "id" },
-                             { ContactIdRole, "contactId" },
+                             { TitleRole, "title" },
                              { LastMessageBodyRole, "lastMessageBody" },
                              { LastEventTimeRole, "lastEventTime" },
                              { UnreadMessagesCountRole, "unreadMessageCount" } });
