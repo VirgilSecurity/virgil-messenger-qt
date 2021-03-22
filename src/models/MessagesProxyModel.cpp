@@ -35,10 +35,12 @@
 #include "MessagesProxyModel.h"
 
 #include "MessagesModel.h"
+#include "Messenger.h"
 
 using namespace vm;
 
-MessagesProxyModel::MessagesProxyModel(MessagesModel *model) : ListProxyModel(model), m_model(model)
+MessagesProxyModel::MessagesProxyModel(Messenger *messenger, MessagesModel *model)
+    : ListProxyModel(model), m_messenger(messenger), m_model(model)
 {
     setSortRole(MessagesModel::SortRole);
     sort(0, Qt::DescendingOrder);
@@ -46,9 +48,10 @@ MessagesProxyModel::MessagesProxyModel(MessagesModel *model) : ListProxyModel(mo
 
 bool MessagesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    const auto message = m_model->getMessage(sourceRow);
-    if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-        return false;
+    const auto message = m_model->getMessage(0);
+    if (auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
+        return invitation->superOwnerId() == m_messenger->currentUser()->id()
+                || invitation->invitationStatus() == GroupInvitationStatus::Accepted;
     }
     return ListProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }
