@@ -241,9 +241,7 @@ void Self::onGroupChatCreated(const GroupHandler &group, const GroupMembers &gro
     newChat->setType(Chat::Type::Group);
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
-    m_userDatabase->chatsTable()->addChat(newChat);
-    m_userDatabase->groupsTable()->add(group);
-    m_userDatabase->groupMembersTable()->add(groupMembers);
+    m_userDatabase->writeGroupChat(newChat, group, groupMembers);
     openChat(newChat);
 
     emit chatCreated(newChat);
@@ -277,8 +275,7 @@ void Self::onNewGroupChatLoaded(const GroupHandler &group)
     newChat->setType(Chat::Type::Group);
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
-    m_userDatabase->chatsTable()->addChat(newChat);
-    m_userDatabase->groupsTable()->add(group);
+    m_userDatabase->writeGroupChat(newChat, group, {});
 }
 
 void Self::onGroupsFetched(const Groups &groups)
