@@ -62,6 +62,7 @@ public:
 
     CloudFilesModel *model();
     void switchToRootFolder();
+    void clearFiles();
 
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);

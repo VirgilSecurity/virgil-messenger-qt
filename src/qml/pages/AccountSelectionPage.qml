@@ -1,9 +1,9 @@
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Layouts 1.15
 
 import "../components"
 
-SignInPage {
+OperationPage {
     appState: app.stateManager.accountSelectionState
 
     header: Header {
@@ -22,7 +22,7 @@ SignInPage {
         AccountSelection {
             id: accountSelection
             visible: settings.usersList.length
-            onUserSelected: appState.signIn(userName)
+            onUserSelected: appState.requestSignIn(userName)
         }
 
         FormPrimaryButton {

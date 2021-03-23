@@ -35,19 +35,29 @@
 #ifndef VM_ACCOUNTSELECTIONSTATE_H
 #define VM_ACCOUNTSELECTIONSTATE_H
 
-#include "SignInState.h"
+#include "OperationState.h"
 
 namespace vm {
-class AccountSelectionState : public SignInState
+class UsersController;
+
+class AccountSelectionState : public OperationState
 {
     Q_OBJECT
 
 public:
-    AccountSelectionState(UsersController *usersController, Validator *validator, QState *parent);
+    AccountSelectionState(UsersController *controller, QState *parent);
 
 signals:
+    void requestSignIn(const QString &username);
     void requestSignInUsername();
     void requestSignUp();
+
+    void chatListRequested();
+
+private:
+    void onRequestSignIn(const QString &username);
+
+    UsersController *m_controller;
 };
 } // namespace vm
 

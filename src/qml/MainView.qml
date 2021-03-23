@@ -60,19 +60,15 @@ Control {
             }
         }
 
-        function openSplashScreenPage() {
-            stackView.push(page("SplashScreen"), StackView.Immediate)
-        }
-
         function openAccountSelectionPage() {
-            if ([manager.signUpState, manager.signInState].includes(manager.previousState)) {
+            if (manager.signUpState === manager.previousState) {
                 return
             }
             stackView.push(page("AccountSelection"), StackView.Immediate)
         }
 
         function openMainPage() {
-            if ([manager.splashScreenState, manager.accountSelectionState,
+            if ([manager.startState, manager.accountSelectionState,
                  manager.signUpState, manager.downloadKeyState, manager.cloudFileListState].includes(manager.previousState)) {
                 stackView.clear()
                 stackView.push(page("Main"))
@@ -190,7 +186,6 @@ Control {
 
     Component.onCompleted: {
         manager.goBack.connect(d.goBack)
-        manager.splashScreenState.entered.connect(d.openSplashScreenPage)
         manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
         manager.chatListState.entered.connect(d.openMainPage)
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)

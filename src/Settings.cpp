@@ -45,6 +45,7 @@
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
 static const QString kCredenitalsGroup = "Credentials";
+static const QString kUsersInfoGroup = "UsersInfo";
 
 static const QString kDeviceId = "DeviceId";
 
@@ -61,7 +62,7 @@ bool Settings::m_logsDirInitialized = false;
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 Settings::Settings(QObject *parent)
-    : QSettings(settingsFileName(), QSettings::NativeFormat, parent), m_sessionId(Utils::createUuid())
+    : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
 {
 
     qCDebug(lcSettings) << "Settings are written to: " << fileName();
@@ -145,20 +146,40 @@ QString Settings::settingsFileName()
     QString ext;
 #if VS_MACOS || VS_IOS
     ext = QLatin1String(".plist");
-#elif VS_LINUX
+#elif VS_LINUX || VS_WINDOWS
     ext = QLatin1String(".ini");
 #endif
     return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
 }
 
-QString Settings::userCredential(const QString &user) const
+QSettings::Format Settings::settingsFormat()
 {
-    return groupValue(kCredenitalsGroup, user).toString();
+#if VS_WINDOWS
+    return Format::IniFormat;
+#else
+    return Format::NativeFormat;
+#endif
 }
 
-void Settings::setUserCredential(const QString &user, const QString &credential)
+QString Settings::userCredential(const QString &username) const
 {
-    setGroupValue(kCredenitalsGroup, user, credential);
+    return groupValue(kCredenitalsGroup, username).toString();
+}
+
+void Settings::setUserCredential(const QString &username, const QString &credential)
+{
+    setGroupValue(kCredenitalsGroup, username, credential);
+    sync();
+}
+
+QString Settings::userInfo(const QString &username) const
+{
+    return groupValue(kUsersInfoGroup, username).toString();
+}
+
+void Settings::setUserInfo(const QString &username, const QString &userInfo)
+{
+    setGroupValue(kUsersInfoGroup, username, userInfo);
     sync();
 }
 

@@ -34,9 +34,20 @@
 
 #include "states/AccountSelectionState.h"
 
-using namespace vm;
+#include "Settings.h"
+#include "UsersController.h"
 
-AccountSelectionState::AccountSelectionState(UsersController *usersController, Validator *validator, QState *parent)
-    : SignInState(usersController, validator, parent)
+using namespace vm;
+using Self = AccountSelectionState;
+
+Self::AccountSelectionState(UsersController *controller, QState *parent)
+    : OperationState(parent), m_controller(controller)
 {
+    connect(this, &Self::requestSignIn, this, &Self::onRequestSignIn);
+}
+
+void Self::onRequestSignIn(const QString &username)
+{
+    m_controller->signIn(username);
+    emit chatListRequested();
 }

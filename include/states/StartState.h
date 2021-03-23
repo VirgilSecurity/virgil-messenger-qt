@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -37,13 +37,31 @@
 
 #include <QState>
 
+class Settings;
+
 namespace vm {
+class UsersController;
+
 class StartState : public QState
 {
     Q_OBJECT
 
 public:
-    using QState::QState;
+    StartState(UsersController *controller, Settings *settings, QState *parent);
+
+signals:
+    void requestUi();
+
+    void chatListRequested();
+    void accountSelectionRequested();
+
+private:
+    void hideNativeSplashScreen();
+
+    void onRequestUi();
+
+    UsersController *m_controller;
+    Settings *m_settings;
 };
 } // namespace vm
 

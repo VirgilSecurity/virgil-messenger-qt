@@ -41,7 +41,6 @@
 #include <QSize>
 
 #include "AttachmentId.h"
-#include "UserId.h"
 
 class Settings : public QSettings
 {
@@ -65,8 +64,11 @@ public:
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
 
-    QString userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QString &userCredential);
+    QString userCredential(const QString &username) const;
+    void setUserCredential(const QString &username, const QString &userCredential);
+
+    QString userInfo(const QString &username) const;
+    void setUserInfo(const QString &username, const QString &userInfo);
 
     // Device id, run flags
     QString deviceId() const;
@@ -114,6 +116,7 @@ private:
     void createDeviceId();
     void addUserToList(const QString &user);
     static QString settingsFileName();
+    static Format settingsFormat();
 
     QString m_sessionId;
     static QDir m_logsDir;
