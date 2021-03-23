@@ -48,8 +48,8 @@ using Self = MessagesModel;
 Self::MessagesModel(Messenger *messenger, QObject *parent) : ListModel(parent, false), m_messenger(messenger)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
-
-    setProxy(new MessagesProxyModel(messenger, this));
+    m_proxy = new MessagesProxyModel(messenger, this);
+    setProxy(m_proxy);
 }
 
 ChatHandler Self::chat() const
@@ -111,25 +111,22 @@ void Self::clearChat()
 
 bool Self::updateMessage(const MessageUpdate &messageUpdate)
 {
-    const auto messageId = MessageUpdateGetMessageId(messageUpdate);
-
-    const auto messageRow = findRowById(messageId);
-    if (!messageRow) {
+    const auto messageIndex = findIndexById(MessageUpdateGetMessageId(messageUpdate));
+    if (!messageIndex.isValid()) {
         return false;
     }
 
-    const auto row = *messageRow;
-    m_messages[row]->applyUpdate(messageUpdate);
+    m_messages[messageIndex.row()]->applyUpdate(messageUpdate);
 
     const auto roles = rolesFromMessageUpdate(messageUpdate);
-    invalidateRow(row, roles);
+    invalidateRow(messageIndex.row(), roles);
     return true;
 }
 
 void Self::acceptGroupInvitation()
 {
     if (findIncomingInvitation()) {
-        deleteMessage(0); // Invitation is always first
+        deleteMessage(m_proxy->getFirstIndex().row()); // Invitation is always first
     }
 }
 
@@ -137,17 +134,16 @@ ModifiableMessageHandler Self::findById(const MessageId &messageId) const
 {
     const auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages),
                                         [&messageId](auto message) { return message->id() == messageId; });
-
     if (messageIt != std::rend(m_messages)) {
         return *messageIt;
     }
-
     return nullptr;
 }
 
 QString MessagesModel::lastMessageSenderId() const
 {
-    return m_messages.empty() ? QString() : m_messages.back()->senderId();
+    const auto messageIndex = m_proxy->getLastIndex();
+    return messageIndex.isValid() ? getMessage(messageIndex.row())->senderId() : QString();
 }
 
 int Self::rowCount(const QModelIndex &parent) const
@@ -304,27 +300,18 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case FirstInRowRole: {
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            return false;
-        }
-        const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
+        const auto prevMessage = getNeighbourMessage(row, -1);
         return !prevMessage || prevMessage->senderId() != message->senderId()
                 || prevMessage->createdAt().addSecs(5 * 60) <= message->createdAt();
     }
 
     case InRowRole: {
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            return false;
-        }
-        const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
+        const auto nextMessage = getNeighbourMessage(row, 1);
         return nextMessage && message->senderId() == nextMessage->senderId();
     }
 
     case FirstInSectionRole: {
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            return false;
-        }
-        const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
+        const auto prevMessage = getNeighbourMessage(row, -1);
         return !prevMessage || prevMessage->createdAt().date() != message->createdAt().date();
     }
 
@@ -365,16 +352,22 @@ QHash<int, QByteArray> Self::roleNames() const
              { FirstInSectionRole, "firstInSection" } };
 }
 
-std::optional<int> Self::findRowById(const MessageId &messageId) const
+QModelIndex Self::findIndexById(const MessageId &messageId) const
 {
     auto it = std::find_if(std::rbegin(m_messages), std::rend(m_messages),
                            [&messageId](auto message) { return message->id() == messageId; });
-
     if (it != std::rend(m_messages)) {
-        return std::distance(std::begin(m_messages), it.base()) - 1;
+        return index(std::distance(std::begin(m_messages), it.base()) - 1);
     }
+    return QModelIndex();
+}
 
-    return std::nullopt;
+MessageHandler Self::getNeighbourMessage(int row, int offset) const
+{
+    if (const auto index = m_proxy->getNeighbourIndex(row, offset); index.isValid()) {
+        return getMessage(index.row());
+    }
+    return MessageHandler();
 }
 
 void Self::invalidateRow(const int row, const QVector<int> &roles)
@@ -384,11 +377,11 @@ void Self::invalidateRow(const int row, const QVector<int> &roles)
 
     // Invalidate neighbour rows
     if (roles.isEmpty() || roles.contains(StatusIconRole)) {
-        if (row > 0) {
-            invalidateModel(index(row - 1), { StatusIconRole, IsBrokenRole, InRowRole });
+        if (const auto prevIndex = m_proxy->getNeighbourIndex(row, -1); prevIndex.isValid()) {
+            invalidateModel(prevIndex, { StatusIconRole, IsBrokenRole, InRowRole });
         }
-        if (row < rowCount() - 1) {
-            invalidateModel(index(row + 1), { FirstInRowRole });
+        if (const auto nextIndex = m_proxy->getNeighbourIndex(row, 1); nextIndex.isValid()) {
+            invalidateModel(nextIndex, { FirstInRowRole });
         }
     }
 }
@@ -400,10 +393,11 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 
 const MessageContentGroupInvitation *Self::findIncomingInvitation() const
 {
-    if (m_messages.empty()) {
+    const auto messageIndex = m_proxy->getFirstIndex();
+    if (!messageIndex.isValid()) {
         return nullptr;
     }
-    const auto message = m_messages.front();
+    const auto message = getMessage(messageIndex.row());
     if (!message->isIncoming()) {
         return nullptr;
     }
@@ -412,7 +406,6 @@ const MessageContentGroupInvitation *Self::findIncomingInvitation() const
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)
 {
-
     if (std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)
         || std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole, StatusIconRole, IsBrokenRole, InRowRole };

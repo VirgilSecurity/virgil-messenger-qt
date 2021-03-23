@@ -40,9 +40,8 @@
 #include "Chat.h"
 #include "Message.h"
 
-#include <optional>
-
 namespace vm {
+class MessagesProxyModel;
 class Messenger;
 
 class MessagesModel : public ListModel
@@ -139,6 +138,8 @@ public:
 
     Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
 
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
     void messageAdding(); // TODO(fpohtmeh): remove
@@ -148,11 +149,11 @@ private:
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate &messageUpdate);
     static QString statusIconPath(MessageHandler message);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowById(const MessageId &messageId) const;
+    QModelIndex findIndexById(const MessageId &messageId) const;
+    MessageHandler getNeighbourMessage(int row, int offset) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
@@ -160,6 +161,7 @@ private:
 
 private:
     QPointer<Messenger> m_messenger;
+    QPointer<MessagesProxyModel> m_proxy;
     ModifiableMessages m_messages;
     ChatHandler m_currentChat;
 };

@@ -82,28 +82,27 @@ void Self::addChat(ModifiableChatHandler chat)
 
 void Self::deleteChat(const ChatId &chatId)
 {
-    const auto chatRow = findRowById(chatId);
-    if (!chatRow) {
+    const auto chatIndex = findByChatId(chatId);
+    if (!chatIndex.isValid()) {
         qCWarning(lcModel) << "Chat not found! Id" << chatId;
         return;
     }
-    beginRemoveRows(QModelIndex(), *chatRow, *chatRow);
-    m_chats.erase(m_chats.begin() + *chatRow);
+    beginRemoveRows(QModelIndex(), chatIndex.row(), chatIndex.row());
+    m_chats.erase(m_chats.begin() + chatIndex.row());
     endRemoveRows();
 }
 
 void Self::resetUnreadCount(const ChatId &chatId, qsizetype unreadMessageCount)
 {
-    const auto chatRow = findRowById(chatId);
-    if (!chatRow) {
+    const auto chatIndex = findByChatId(chatId);
+    if (!chatIndex.isValid()) {
         qCWarning(lcModel) << "Chat not found! Id" << chatId;
         return;
     }
-    auto &chat = m_chats[*chatRow];
+    auto &chat = m_chats[chatIndex.row()];
     if (chat->unreadMessageCount() != unreadMessageCount) {
         qCDebug(lcModel) << "Unread message count was reset to" << unreadMessageCount << "for chat" << chatId;
         chat->setUnreadMessageCount(unreadMessageCount);
-        const auto chatIndex = index(*chatRow);
         emit dataChanged(chatIndex, chatIndex, { UnreadMessagesCountRole });
         emit chatUpdated(chat);
     }
@@ -111,13 +110,13 @@ void Self::resetUnreadCount(const ChatId &chatId, qsizetype unreadMessageCount)
 
 void Self::updateLastMessage(const MessageHandler &message)
 {
-    const auto chatRow = findRowById(message->chatId());
-    if (!chatRow) {
+    const auto chatIndex = findByChatId(message->chatId());
+    if (!chatIndex.isValid()) {
         qCWarning(lcModel) << "Chat not found! Id" << message->chatId();
         return;
     }
 
-    auto &chat = m_chats[*chatRow];
+    auto &chat = m_chats[chatIndex.row()];
     if (!chat->lastMessage() || chat->lastMessage()->id() != message->id()) {
         qCDebug(lcModel) << "Last message was set to" << message->id();
     }
@@ -126,7 +125,6 @@ void Self::updateLastMessage(const MessageHandler &message)
         chat->setLastMessage(message);
 
         QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
-        const auto chatIndex = index(*chatRow);
         emit dataChanged(chatIndex, chatIndex, roles);
         emit chatUpdated(chat);
     }
@@ -134,27 +132,26 @@ void Self::updateLastMessage(const MessageHandler &message)
 
 void ChatsModel::resetLastMessage(const ChatId &chatId)
 {
-    const auto chatRow = findRowById(chatId);
-    if (!chatRow) {
+    const auto chatIndex = findByChatId(chatId);
+    if (!chatIndex.isValid()) {
         qCWarning(lcModel) << "Chat not found! Id" << chatId;
         return;
     }
 
-    auto &chat = m_chats[*chatRow];
+    auto &chat = m_chats[chatIndex.row()];
     if (chat->lastMessage()) {
         qCDebug(lcModel) << "Last message was reset";
     }
     chat->setLastMessage(MessageHandler());
     QVector<int> roles { LastMessageBodyRole, LastEventTimeRole };
-    const auto chatIndex = index(*chatRow);
     emit dataChanged(chatIndex, chatIndex, roles);
     emit chatUpdated(chat);
 }
 
 void ChatsModel::toggleById(const QString &chatId)
 {
-    if (const auto row = findRowById(ChatId(chatId))) {
-        selection()->toggle(index(*row));
+    if (const auto chatIndex = findByChatId(ChatId(chatId)); chatIndex.isValid()) {
+        selection()->toggle(chatIndex);
     }
 }
 
@@ -166,28 +163,28 @@ void Self::updateGroup(const GroupUpdate &groupUpdate)
     }
 
     const auto chatId = ChatId(GroupUpdateGetId(groupUpdate));
-    const auto row = findRowById(chatId);
-    if (!row) {
+    const auto chatIndex = findByChatId(chatId);
+    if (!chatIndex.isValid()) {
         qCWarning(lcModel) << "Could not find chat to update group:" << chatId;
         return;
     }
 
-    m_chats[*row]->setTitle(nameUpdate->name);
-    emit dataChanged(index(*row), index(*row), { TitleRole });
+    m_chats[chatIndex.row()]->setTitle(nameUpdate->name);
+    emit dataChanged(chatIndex, chatIndex, { TitleRole });
 }
 
 ChatHandler Self::findChat(const ChatId &chatId) const
 {
-    if (const auto row = findRowById(chatId)) {
-        return m_chats[*row];
+    if (const auto index = findByChatId(chatId); index.isValid()) {
+        return m_chats[index.row()];
     }
     return nullptr;
 }
 
 ModifiableChatHandler Self::findChat(const ChatId &chatId)
 {
-    if (const auto row = findRowById(chatId)) {
-        return m_chats[*row];
+    if (const auto chatIndex = findByChatId(chatId); chatIndex.isValid()) {
+        return m_chats[chatIndex.row()];
     }
     return nullptr;
 }
@@ -241,12 +238,11 @@ QHash<int, QByteArray> Self::roleNames() const
                              { UnreadMessagesCountRole, "unreadMessageCount" } });
 }
 
-std::optional<int> Self::findRowById(const ChatId &chatId) const
+QModelIndex Self::findByChatId(const ChatId &chatId) const
 {
-    for (int i = 0, s = m_chats.size(); i < s; ++i) {
-        if (m_chats[i]->id() == chatId) {
-            return i;
-        }
+    const auto it = std::find_if(m_chats.begin(), m_chats.end(), [&chatId](auto chat) { return chat->id() == chatId; });
+    if (it != m_chats.end()) {
+        return index(std::distance(m_chats.begin(), it));
     }
-    return {};
+    return QModelIndex();
 }

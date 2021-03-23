@@ -39,8 +39,6 @@
 #include "Chat.h"
 #include "GroupUpdate.h"
 
-#include <optional>
-
 namespace vm {
 class ChatsModel : public ListModel
 {
@@ -87,7 +85,7 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowById(const ChatId &chatId) const;
+    QModelIndex findByChatId(const ChatId &chatId) const;
 
     ModifiableChats m_chats;
 };
