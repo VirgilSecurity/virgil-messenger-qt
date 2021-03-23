@@ -3190,6 +3190,13 @@ void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResu
 
 void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
 {
+    Q_ASSERT(message->isIncoming());
+
+    if (message->stageString() == IncomingMessageStageToString(IncomingMessageStage::Read)) {
+        // Status already sent.
+        return;
+    }
+
     QXmppMessage mark;
 
     switch (message->chatType()) {
@@ -3209,7 +3216,7 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
     mark.setMarker(QXmppMessage::Marker::Displayed);
 
     // FIXME: This line brakes connection
-    // if (m_impl->xmpp->sendPacket(mark)) {
-    //     qCDebug(lcCoreMessenger) << "Sent 'displayed' marker for message:" << message->id();
-    // }
+    if (m_impl->xmpp->sendPacket(mark)) {
+        qCDebug(lcCoreMessenger) << "Sent 'displayed' marker for message:" << message->id();
+    }
 }

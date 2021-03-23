@@ -51,6 +51,8 @@ MessagesTable::MessagesTable(Database *database) : DatabaseTable(QLatin1String("
     connect(this, &MessagesTable::deleteChatMessages, this, &MessagesTable::onDeleteChatMessages);
     connect(this, &MessagesTable::deleteGroupInvitationMessage, this, &MessagesTable::onDeleteGroupInvitationMessage);
     connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
+    connect(this, &MessagesTable::markIncomingMessagesAsReadBeforeMessage, this,
+            &MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage);
 }
 
 bool MessagesTable::create()
@@ -171,6 +173,10 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
         bindValues.push_back({ ":id", QString(update->messageId) });
         bindValues.push_back({ ":stage", IncomingMessageStageToString(update->stage) });
 
+        if (update->stage == IncomingMessageStage::Read) {
+            markIncomingMessagesAsReadBeforeMessage(update->messageId);
+        }
+
     } else if (auto update = std::get_if<OutgoingMessageStageUpdate>(&messageUpdate)) {
         bindValues.push_back({ ":id", QString(update->messageId) });
         bindValues.push_back({ ":stage", OutgoingMessageStageToString(update->stage) });
@@ -180,12 +186,43 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
         return;
     }
 
-    ScopedConnection connection(*database());
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Message was updated" << bindValues.front().second << bindValues.back();
     } else {
         qCCritical(lcDatabase) << "MessagesTable::onUpdateMessage error";
         emit errorOccurred(tr("Failed to update message stage"));
+    }
+}
+
+void MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &messageId)
+{
+    ScopedConnection connection(*database());
+
+    //
+    //  Find the message chat.
+    //
+    const DatabaseUtils::BindValues readMessageValues { { ":id", QString(messageId) } };
+    auto readMessageQuery =
+            DatabaseUtils::readExecQuery(database(), QLatin1String("selectChatMessage"), readMessageValues);
+    if (!readMessageQuery || !readMessageQuery->next()) {
+        return;
+    }
+
+    const auto chatId = ChatId(readMessageQuery->value("chatId").toString());
+    const auto createdAt = readMessageQuery->value("createdAt").toULongLong();
+    if (!chatId.isValid()) {
+        return;
+    }
+
+    //
+    //  Update messages
+    //
+    const DatabaseUtils::BindValues values { { ":chatId", QString(chatId) }, { ":beforeDate", createdAt } };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCountBeforeDate"), values);
+    if (query) {
+        emit chatUnreadMessageCountChanged(chatId);
+    } else {
+        qCWarning(lcDatabase) << "Self::onMarkIncomingMessagesAsReadBeforeMessage error";
     }
 }

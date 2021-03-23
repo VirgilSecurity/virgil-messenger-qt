@@ -60,7 +60,7 @@ signals:
     void deleteGroupInvitationMessage(const ChatId &chatId);
 
     void updateMessage(const MessageUpdate &messageUpdate);
-    void markAllAsRead(const Chat &chat);
+    void markIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
 
     //
     //  Notification signals.
@@ -69,6 +69,7 @@ signals:
     void chatMessagesFetched(ModifiableMessages messages);
     void notSentMessagesFetched(ModifiableMessages messages);
     void messageAdded(const MessageHandler &message);
+    void chatUnreadMessageCountChanged(const ChatId &chatId);
 
 private:
     bool create() override;
@@ -80,7 +81,7 @@ private:
     void onDeleteGroupInvitationMessage(const ChatId &chatId);
 
     void onUpdateMessage(const MessageUpdate &messageUpdate);
-    void onMarkAllAsRead(const Chat &chat);
+    void onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
 };
 } // namespace vm
 

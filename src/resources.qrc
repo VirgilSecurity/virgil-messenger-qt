@@ -211,6 +211,8 @@
         <file>resources/database/insertCloudFile.sql</file>
         <file>resources/database/insertMessage.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
+        <file>resources/database/resetUnreadCountBeforeDate.sql</file>
+        <file>resources/database/selectChatMessage.sql</file>
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectChats.sql</file>
         <file>resources/database/selectUnreadMessageCount.sql</file>

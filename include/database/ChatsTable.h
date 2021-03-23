@@ -38,6 +38,8 @@
 #include "core/DatabaseTable.h"
 #include "Chat.h"
 
+#include <QDateTime>
+
 namespace vm {
 class ChatsTable : public DatabaseTable
 {
@@ -82,6 +84,7 @@ private:
     void onResetLastMessage(const ChatId &chatId);
     void onRequestChatUnreadMessageCount(const ChatId &chatId);
     void onMarkMessagesAsRead(const ChatHandler &chat);
+    void onMarkMessagesAsReadBeforeDate(const ChatHandler &chat, const QDateTime &beforeDate);
 };
 } // namespace vm
 

@@ -182,7 +182,9 @@ void Self::openChat(const ChatHandler &chat)
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
     if (chat->unreadMessageCount() > 0) {
         m_userDatabase->resetUnreadCount(chat);
-        m_messenger->sendMessageStatusDisplayed(chat->lastMessage());
+        if (chat->lastMessage()->isIncoming()) {
+            m_messenger->sendMessageStatusDisplayed(chat->lastMessage());
+        }
     }
     m_chatObject->setChat(chat);
     emit chatOpened(chat);

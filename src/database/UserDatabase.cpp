@@ -185,6 +185,9 @@ bool Self::create()
         return false;
     }
 
+    connect(messagesTable(), &MessagesTable::chatUnreadMessageCountChanged, chatsTable(),
+            &ChatsTable::requestChatUnreadMessageCount);
+
     return true;
 }
 
@@ -236,10 +239,12 @@ void UserDatabase::onUpdateMessage(const MessageUpdate &messageUpdate)
         return;
     }
 
-    ScopedConnection connection(*this);
-    ScopedTransaction transaction(*this);
-    messagesTable()->updateMessage(messageUpdate);
-    attachmentsTable()->updateAttachment(messageUpdate);
+    {
+        ScopedConnection connection(*this);
+        ScopedTransaction transaction(*this);
+        messagesTable()->updateMessage(messageUpdate);
+        attachmentsTable()->updateAttachment(messageUpdate);
+    }
 }
 
 void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
