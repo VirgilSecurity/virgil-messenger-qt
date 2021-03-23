@@ -116,6 +116,7 @@ private:
     void createDeviceId();
     void addUserToList(const QString &user);
     static QString settingsFileName();
+    static Format settingsFormat();
 
     QString m_sessionId;
     static QDir m_logsDir;
