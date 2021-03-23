@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,29 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/SignInState.h"
+#include "StartState.h"
 
-#include "Validator.h"
-#include "controllers/UsersController.h"
+#include "android/VSQAndroid.h"
+#include "Settings.h"
+#include "UsersController.h"
 
 using namespace vm;
+using Self = StartState;
 
-SignInState::SignInState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent), m_usersController(usersController), m_validator(validator)
+Self::StartState(UsersController *controller, Settings *settings, QState *parent)
+    : QState(parent), m_controller(controller), m_settings(settings)
 {
-    connect(usersController, &UsersController::signedIn, this, &SignInState::operationFinished);
-    connect(usersController, &UsersController::signInErrorOccured, this, &SignInState::operationErrorOccurred);
-
-    connect(usersController, &UsersController::databaseErrorOccurred, [this](const auto &errorText) {
-        m_usersController->signOut();
-        emit operationErrorOccurred(errorText);
-    });
-
-    connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
+    connect(this, &Self::requestUi, this, &Self::onRequestUi, Qt::QueuedConnection);
 }
 
-void SignInState::processSignIn(const QString &username)
+void Self::hideNativeSplashScreen()
 {
-    emit operationStarted();
-    m_usersController->signIn(username);
+#if VS_ANDROID
+    VSQAndroid::hideSplashScreen();
+#endif
+}
+
+void Self::onRequestUi()
+{
+    hideNativeSplashScreen();
+
+    const auto username = m_settings->lastSignedInUser();
+    if (username.isEmpty()) {
+        emit accountSelectionRequested();
+    } else {
+        m_controller->signIn(username);
+        emit chatListRequested();
+    }
 }

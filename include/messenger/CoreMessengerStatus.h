@@ -50,6 +50,8 @@ enum class CoreMessengerStatus {
     Error_UserAlreadyExists,
     Error_ExportCredentials,
     Error_ImportCredentials,
+    Error_ExportUser,
+    Error_ImportUser,
     Error_InvalidCarbonMessage,
     Error_InvalidMessageFormat,
     Error_InvalidMessageVersion,

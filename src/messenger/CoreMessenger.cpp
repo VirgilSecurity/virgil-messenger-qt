@@ -106,27 +106,27 @@ static QString toXmlString(const T &obj)
 // --------------------------------------------------------------------------
 using vscf_ctr_drbg_ptr_t = vsc_unique_ptr<vscf_ctr_drbg_t>;
 
-using vssc_json_object_unique_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
-using vssq_messenger_creds_unique_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
+using vssc_json_object_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
+using vssq_messenger_creds_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
 using vssq_messenger_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
 using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_cipher_t>;
+using vssq_messenger_user_ptr_t = vsc_unique_ptr<const vssq_messenger_user_t>;
 using vssq_messenger_user_list_ptr_t = vsc_unique_ptr<vssq_messenger_user_list_t>;
 using vssq_messenger_group_ptr_t = vsc_unique_ptr<vssq_messenger_group_t>;
-using vssq_messenger_group_shared_ptr_t = std::shared_ptr<vssq_messenger_group_t>;
 
 static vscf_ctr_drbg_ptr_t vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_t *ptr)
 {
     return vscf_ctr_drbg_ptr_t { ptr, vscf_ctr_drbg_delete };
 }
 
-static vssc_json_object_unique_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr)
+static vssc_json_object_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr)
 {
-    return vssc_json_object_unique_ptr_t { ptr, vssc_json_object_delete };
+    return vssc_json_object_ptr_t { ptr, vssc_json_object_delete };
 }
 
-static vssq_messenger_creds_unique_ptr_t vssq_messenger_creds_wrap_ptr(vssq_messenger_creds_t *ptr)
+static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(vssq_messenger_creds_t *ptr)
 {
-    return vssq_messenger_creds_unique_ptr_t { ptr, vssq_messenger_creds_delete };
+    return vssq_messenger_creds_ptr_t { ptr, vssq_messenger_creds_delete };
 }
 
 static vssq_messenger_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr)
@@ -137,6 +137,21 @@ static vssq_messenger_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr)
 static vssq_messenger_file_cipher_ptr_t vssq_messenger_file_cipher_wrap(vssq_messenger_file_cipher_t *ptr)
 {
     return vssq_messenger_file_cipher_ptr_t { ptr, vssq_messenger_file_cipher_delete };
+}
+
+static vssq_messenger_user_ptr_t vssq_messenger_user_wrap_ptr(vssq_messenger_user_t *ptr)
+{
+    return vssq_messenger_user_ptr_t { ptr, vssq_messenger_user_delete };
+}
+
+static vssq_messenger_user_ptr_t vssq_messenger_user_wrap_ptr(const vssq_messenger_user_t *ptr)
+{
+    return vssq_messenger_user_ptr_t { vssq_messenger_user_shallow_copy_const(ptr), vssq_messenger_user_delete };
+}
+
+static vssq_messenger_user_ptr_t vssq_messenger_user_nullptr()
+{
+    return vssq_messenger_user_ptr_t { nullptr, vssq_messenger_user_delete };
 }
 
 static vssq_messenger_user_list_ptr_t vssq_messenger_user_list_wrap_ptr(vssq_messenger_user_list_t *ptr)
@@ -212,6 +227,9 @@ public:
     vscf_impl_ptr_t random = vscf_impl_ptr_t(nullptr, vscf_impl_delete);
 
     vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
+    vssq_messenger_creds_ptr_t creds = vssq_messenger_creds_wrap_ptr(nullptr);
+    UserHandler currentUser = nullptr;
+    std::mutex authMutex;
 
     std::map<GroupId, GroupImplHandler> messengerGroups;
     std::map<GroupId, UserId> groupOwners;
@@ -293,6 +311,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
 
+    connect(this, &Self::resetXmppConfiguration, this, &Self::onResetXmppConfiguration);
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
     connect(this, &Self::disconnectXmppServer, this, &Self::onDisconnectXmppServer);
     connect(this, &Self::cleanupXmppMucRooms, this, &Self::onCleanupXmppMucRooms);
@@ -367,7 +386,7 @@ Self::Result Self::resetCommKitConfiguration()
     return Self::Result::Success;
 }
 
-void Self::resetXmppConfiguration()
+void Self::onResetXmppConfiguration()
 {
 
     qCDebug(lcCoreMessenger) << "Reset XMPP configuration";
@@ -471,10 +490,15 @@ void Self::resetXmppConfiguration()
 // --------------------------------------------------------------------------
 bool Self::isOnline() const noexcept
 {
-    return isSignedIn() && isNetworkOnline() && isXmppConnected();
+    return isAuthenticated() && isNetworkOnline() && isXmppConnected();
 }
 
 bool Self::isSignedIn() const noexcept
+{
+    return m_impl->messenger && m_impl->creds;
+}
+
+bool CoreMessenger::isAuthenticated() const noexcept
 {
     return m_impl->messenger && vssq_messenger_is_authenticated(m_impl->messenger.get());
 }
@@ -565,6 +589,50 @@ void Self::onSuspend()
 }
 
 // --------------------------------------------------------------------------
+// Persistent storage helpers.
+// --------------------------------------------------------------------------
+Self::Result Self::saveCurrentUserInfo()
+{
+    vssq_error_t error;
+    vssq_error_reset(&error);
+
+    const auto user = vssq_messenger_user(m_impl->messenger.get());
+    Q_ASSERT(user != nullptr);
+
+    //
+    //  Save credentials.
+    //
+    qCInfo(lcCoreMessenger) << "Save user credentials";
+    auto creds = vssq_messenger_creds(m_impl->messenger.get());
+    auto credsJson = vssc_json_object_wrap_ptr(vssq_messenger_creds_to_json(creds, &error));
+
+    if (vssq_error_has_error(&error)) {
+        qCWarning(lcCoreMessenger) << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+        return Self::Result::Error_ExportCredentials;
+    }
+
+    const auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
+    const auto username = vsc_str_to_qstring(vssq_messenger_user_username(user));
+    m_settings->setUserCredential(username, credentials);
+
+    //
+    //  Save info.
+    //
+    qCInfo(lcCoreMessenger) << "Save user info";
+    const auto userJson = vssc_json_object_wrap_ptr(vssq_messenger_user_to_json(user, &error));
+
+    if (vssq_error_has_error(&error)) {
+        qCWarning(lcCoreMessenger) << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+        return Self::Result::Error_ExportUser;
+    }
+
+    const auto userInfo = vsc_str_to_qstring(vssc_json_object_as_str(userJson.get()));
+    m_settings->setUserInfo(username, userInfo);
+
+    return Self::Result::Success;
+}
+
+// --------------------------------------------------------------------------
 // User authorization.
 // --------------------------------------------------------------------------
 QFuture<Self::Result> Self::signIn(const QString &username)
@@ -574,7 +642,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
 
         auto result = resetCommKitConfiguration();
         if (result != Self::Result::Success) {
-            qCCritical(lcCoreMessenger) << "Can initialize C CommKit module";
+            qCCritical(lcCoreMessenger) << "Can not initialize C CommKit module";
             return result;
         }
 
@@ -588,7 +656,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
         qCInfo(lcCoreMessenger) << "Parse user credentials";
         vssq_error_t error;
         vssq_error_reset(&error);
-        auto creds = vssq_messenger_creds_wrap_ptr(
+        m_impl->creds = vssq_messenger_creds_wrap_ptr(
                 vssq_messenger_creds_from_json_str(vsc_str_from(credentialsString), &error));
 
         if (vssq_error_has_error(&error)) {
@@ -597,8 +665,44 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_ImportCredentials;
         }
 
-        qCInfo(lcCoreMessenger) << "Sign in user";
-        error.status = vssq_messenger_authenticate(m_impl->messenger.get(), creds.get());
+        const auto userInfo = m_settings->userInfo(username);
+        if (!userInfo.isEmpty()) {
+            //
+            //  Fast sign-in.
+            //
+            qCInfo(lcCoreMessenger) << "Trying a fast sign-in";
+            const auto userInfoStd = userInfo.toStdString();
+            auto userC = vssq_messenger_user_from_json_str(vsc_str_from(userInfoStd), m_impl->random.get(), &error);
+            if (!vssq_error_has_error(&error)) {
+                qCInfo(lcCoreMessenger) << "Fast sign-in - success";
+                m_impl->currentUser = std::make_shared<User>(std::make_unique<UserImpl>(userC));
+
+                resetXmppConfiguration();
+
+                if (isNetworkOnline()) {
+                    authenticate();
+                }
+
+                return Self::Result::Success;
+            } else {
+                qCWarning(lcCoreMessenger)
+                        << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+            }
+
+            // Go to a full sign-in.
+        }
+
+        //
+        //  Full sign-in.
+        //
+        if (!isNetworkOnline()) {
+            return Self::Result::Error_Offline;
+        }
+
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
+        qCInfo(lcCoreMessenger) << "Authenticate user";
+        error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
 
         if (vssq_error_has_error(&error)) {
             qCWarning(lcCoreMessenger) << "Got error status:"
@@ -606,15 +710,15 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_Signin;
         }
 
-        emit reconnectXmppServerIfNeeded();
-
-        return Self::Result::Success;
+        return finishSignIn();
     });
 }
 
 QFuture<Self::Result> Self::signUp(const QString &username)
 {
     return QtConcurrent::run([this, username = username.toStdString()]() -> Result {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Trying to sign up";
 
         auto result = resetCommKitConfiguration();
@@ -635,22 +739,7 @@ QFuture<Self::Result> Self::signUp(const QString &username)
 
         qCInfo(lcCoreMessenger) << "User has been successfully signed up";
 
-        qCInfo(lcCoreMessenger) << "Save user credentials";
-        auto creds = vssq_messenger_creds(m_impl->messenger.get());
-        auto credsJson = vssc_json_object_wrap_ptr(vssq_messenger_creds_to_json(creds, &error));
-
-        if (vssq_error_has_error(&error)) {
-            qCWarning(lcCoreMessenger) << "Got error status:"
-                                       << vsc_str_to_qstring(vssq_error_message_from_error(&error));
-            return Self::Result::Error_ExportCredentials;
-        }
-
-        auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
-        m_settings->setUserCredential(QString::fromStdString(username), credentials);
-
-        emit reconnectXmppServerIfNeeded();
-
-        return Self::Result::Success;
+        return finishSignIn();
     });
 }
 
@@ -673,6 +762,8 @@ QFuture<Self::Result> Self::backupKey(const QString &password)
 QFuture<Self::Result> Self::signInWithBackupKey(const QString &username, const QString &password)
 {
     return QtConcurrent::run([this, username = username.toStdString(), password = password.toStdString()]() -> Result {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Load user key from the cloud";
 
         auto result = resetCommKitConfiguration();
@@ -690,25 +781,9 @@ QFuture<Self::Result> Self::signInWithBackupKey(const QString &username, const Q
             return Self::Result::Error_RestoreKeyBackup;
         }
 
-        qCInfo(lcCoreMessenger) << "Save user credentials";
-        vssq_error_t error;
-        vssq_error_reset(&error);
+        qCInfo(lcCoreMessenger) << "User has been successfully signed in with a backup key";
 
-        auto creds = vssq_messenger_creds(m_impl->messenger.get());
-        auto credsJson = vssc_json_object_wrap_ptr(vssq_messenger_creds_to_json(creds, &error));
-
-        if (vssq_error_has_error(&error)) {
-            qCWarning(lcCoreMessenger) << "Got error status:"
-                                       << vsc_str_to_qstring(vssq_error_message_from_error(&error));
-            return Self::Result::Error_ExportCredentials;
-        }
-
-        auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
-        m_settings->setUserCredential(QString::fromStdString(username), credentials);
-
-        emit reconnectXmppServerIfNeeded();
-
-        return Self::Result::Success;
+        return finishSignIn();
     });
 }
 
@@ -848,6 +923,47 @@ void Self::changeConnectionState(ConnectionState state)
     }
 }
 
+CoreMessenger::Result Self::finishSignIn()
+{
+    auto userC = vssq_messenger_user(m_impl->messenger.get());
+    m_impl->currentUser = std::make_shared<User>(std::make_unique<UserImpl>(userC));
+
+    const auto saveResult = saveCurrentUserInfo();
+
+    if (saveResult == Self::Result::Success) {
+        emit reconnectXmppServerIfNeeded();
+    }
+
+    return saveResult;
+}
+
+void Self::authenticate()
+{
+    Q_ASSERT(isSignedIn());
+
+    QtConcurrent::run([this] {
+        vssq_error_t error;
+        vssq_error_reset(&error);
+
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
+        qCInfo(lcCoreMessenger) << "Authenticate user";
+        error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
+
+        if (vssq_error_has_error(&error)) {
+            qCWarning(lcCoreMessenger) << "Got error status:"
+                                       << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+            return;
+        }
+
+        const auto result = finishSignIn();
+
+        if (result == Self::Result::Success) {
+            emit reconnectXmppServerIfNeeded();
+        }
+    });
+}
+
 void Self::connectXmppServer()
 {
     vssq_error_t error;
@@ -887,18 +1003,31 @@ void Self::connectXmppServer()
 
 void Self::onReconnectXmppServerIfNeeded()
 {
-    if (isSignedIn() && isNetworkOnline() && isXmppDisconnected() && !m_impl->suspended) {
+    if (!isSignedIn() || !isNetworkOnline() || m_impl->suspended) {
+        return;
+    }
+
+    if (!isAuthenticated()) {
+        authenticate();
+
+    } else if (isXmppDisconnected()) {
         connectXmppServer();
     }
 }
 
 void Self::onDisconnectXmppServer()
 {
-    m_impl->xmpp->disconnectFromServer();
+    if (m_impl->xmpp != nullptr) {
+        m_impl->xmpp->disconnectFromServer();
+    }
 }
 
 void Self::onCleanupXmppMucRooms()
 {
+    if (!m_impl->xmppGroupChatManager) {
+        return;
+    }
+
     for (auto xmppRoom : m_impl->xmppGroupChatManager->rooms()) {
         xmppRoom->leave("Signed out");
         disconnect(xmppRoom);
@@ -909,6 +1038,8 @@ void Self::onCleanupXmppMucRooms()
 void Self::onCleanupCommKitMessenger()
 {
     m_impl->messenger = nullptr;
+    m_impl->creds = nullptr;
+    m_impl->currentUser = nullptr;
 }
 
 // --------------------------------------------------------------------------
@@ -1022,17 +1153,7 @@ std::shared_ptr<User> Self::findUserById(const UserId &userId) const
 
 std::shared_ptr<User> Self::currentUser() const
 {
-    if (!isSignedIn()) {
-        return nullptr;
-    }
-
-    auto user = vssq_messenger_user(m_impl->messenger.get());
-
-    auto commKitUserImpl = std::make_unique<UserImpl>(user);
-
-    auto commKitUser = std::make_shared<User>(std::move(commKitUserImpl));
-
-    return commKitUser;
+    return m_impl->currentUser;
 }
 
 // --------------------------------------------------------------------------
@@ -1964,8 +2085,10 @@ void Self::xmppOnMessageDelivered(const QString &jid, const QString &messageId)
 void Self::onProcessNetworkState(bool isOnline)
 {
     if (isOnline) {
+        qCDebug(lcCoreMessenger) << "Network go online.";
         emit reconnectXmppServerIfNeeded();
     } else {
+        qCDebug(lcCoreMessenger) << "Network go offline.";
         emit disconnectXmppServer();
     }
 }
@@ -2397,7 +2520,7 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &members
     room->setNickName(currentUser()->id());
     room->setSubject(group->name());
 
-    connect(room, &QXmppMucRoom::joined, [this, group, currentUser = currentUser(), room, membersToBeInvited]() {
+    connect(room, &QXmppMucRoom::joined, [this, group, room, membersToBeInvited]() {
         qCDebug(lcCoreMessenger) << "Joined to the new XMPP room:" << room->jid();
 
         //
@@ -2421,7 +2544,7 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &members
         emit groupChatCreated(group->id());
 
         for (const auto &user : membersToBeInvited) {
-            if (user->id() == currentUser->id()) {
+            if (user->id() == currentUser()->id()) {
                 //  Do not add myself.
                 continue;
             }
@@ -2431,8 +2554,8 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const Users &members
             //
             auto invitationMessage = std::make_shared<OutgoingMessage>();
             invitationMessage->setId(MessageId::generate());
-            invitationMessage->setSenderId(currentUser->id());
-            invitationMessage->setSenderUsername(currentUser->username());
+            invitationMessage->setSenderId(currentUser()->id());
+            invitationMessage->setSenderUsername(currentUser()->username());
             invitationMessage->setRecipientId(user->id());
             invitationMessage->setRecipientUsername(user->username());
             invitationMessage->setContent(MessageContentGroupInvitation { group->name(), "Hello!" });

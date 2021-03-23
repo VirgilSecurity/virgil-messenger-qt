@@ -57,7 +57,6 @@
 #include "SignInAsState.h"
 #include "SignInUsernameState.h"
 #include "SignUpState.h"
-#include "SplashScreenState.h"
 #include "StartState.h"
 #include "Validator.h"
 #include "VerifyProfileState.h"
@@ -90,7 +89,6 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(SignInAsState *signInAsState MEMBER m_signInAsState CONSTANT)
     Q_PROPERTY(SignInUsernameState *signInUsernameState MEMBER m_signInUsernameState CONSTANT)
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
-    Q_PROPERTY(SplashScreenState *splashScreenState MEMBER m_splashScreenState CONSTANT)
     Q_PROPERTY(StartState *startState MEMBER m_startState CONSTANT)
     Q_PROPERTY(QState *currentState MEMBER m_currentState NOTIFY currentStateChanged)
     Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
@@ -101,7 +99,6 @@ public:
     ~ApplicationStateManager() override;
 
 signals:
-    void setUiState();
     void goBack();
     void openChatList();
     void openCloudFileList();
@@ -109,7 +106,6 @@ signals:
     void currentStateChanged(QState *);
     void previousStateChanged(QState *);
 
-    void splashScreenRequested(QPrivateSignal);
     void chatListRequested(QPrivateSignal);
     void cloudFileListRequested(QPrivateSignal);
 
@@ -155,7 +151,6 @@ private:
     SignInAsState *m_signInAsState;
     SignInUsernameState *m_signInUsernameState;
     SignUpState *m_signUpState;
-    SplashScreenState *m_splashScreenState;
     StartState *m_startState;
 
     QState *m_currentState = nullptr;

@@ -119,7 +119,12 @@ Self::Messenger(Settings *settings, Validator *validator)
 #endif // VS_PUSHNOTIFICATIONS
 }
 
-bool Messenger::isOnline() const noexcept
+bool Self::isNetworkOnline() const noexcept
+{
+    return m_coreMessenger->isNetworkOnline();
+}
+
+bool Self::isOnline() const noexcept
 {
     return m_coreMessenger->isOnline();
 }
@@ -127,9 +132,10 @@ bool Messenger::isOnline() const noexcept
 void Self::signIn(const QString &username)
 {
     FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
+        m_settings->setLastSignedInUser((result == CoreMessengerStatus::Success) ? username : QString());
+
         switch (result) {
         case CoreMessengerStatus::Success:
-            m_settings->setLastSignedInUser(username);
             emit signedIn(username);
             break;
 
@@ -143,6 +149,10 @@ void Self::signIn(const QString &username)
 
         case CoreMessengerStatus::Error_Signin:
             emit signInErrorOccured(tr("Cannot sign-in user"));
+            break;
+
+        case CoreMessengerStatus::Error_Offline:
+            emit signInErrorOccured(tr("No internet"));
             break;
 
         default:

@@ -64,6 +64,12 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
     connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::databaseErrorOccurred);
 
+    auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
+    connect(this, &Self::signInErrorOccured, notifyAboutError);
+    connect(this, &Self::signUpErrorOccured, notifyAboutError);
+    connect(this, &Self::downloadKeyFailed, notifyAboutError);
+    connect(this, &Self::databaseErrorOccurred, notifyAboutError);
+
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 }
 
@@ -131,11 +137,7 @@ void Self::onFinishSignIn()
 {
     const auto user = m_messenger->currentUser();
 
-    Contact contact;
-    contact.setUserId(user->id());
-    contact.setUsername(user->username());
-
-    m_userDatabase->contactsTable()->addContact(contact);
+    onUpdateContactsWithUser(user);
 
     // TODO: Do we really need to duplicate signals?
     emit signedIn(user->username());
@@ -158,7 +160,6 @@ void Self::onChatAdded(const ChatHandler &chat)
 
 void Self::onUpdateContactsWithUser(const UserHandler &user)
 {
-
     Contact contact;
     contact.setUserId(user->id());
     contact.setUsername(user->username());

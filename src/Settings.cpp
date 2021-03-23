@@ -45,6 +45,7 @@
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
 static const QString kCredenitalsGroup = "Credentials";
+static const QString kUsersInfoGroup = "UsersInfo";
 
 static const QString kDeviceId = "DeviceId";
 
@@ -160,14 +161,25 @@ QSettings::Format Settings::settingsFormat()
 #endif
 }
 
-QString Settings::userCredential(const QString &user) const
+QString Settings::userCredential(const QString &username) const
 {
-    return groupValue(kCredenitalsGroup, user).toString();
+    return groupValue(kCredenitalsGroup, username).toString();
 }
 
-void Settings::setUserCredential(const QString &user, const QString &credential)
+void Settings::setUserCredential(const QString &username, const QString &credential)
 {
-    setGroupValue(kCredenitalsGroup, user, credential);
+    setGroupValue(kCredenitalsGroup, username, credential);
+    sync();
+}
+
+QString Settings::userInfo(const QString &username) const
+{
+    return groupValue(kUsersInfoGroup, username).toString();
+}
+
+void Settings::setUserInfo(const QString &username, const QString &userInfo)
+{
+    setGroupValue(kUsersInfoGroup, username, userInfo);
     sync();
 }
 

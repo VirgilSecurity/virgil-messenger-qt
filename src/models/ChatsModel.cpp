@@ -68,7 +68,7 @@ void Self::clearChats()
     beginResetModel();
     m_chats.clear();
     endResetModel();
-    qCDebug(lcModel) << "Chats removed";
+    qCDebug(lcModel) << "Chats cleared";
 }
 
 void Self::addChat(ModifiableChatHandler chat)

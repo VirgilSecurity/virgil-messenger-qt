@@ -509,10 +509,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NameGroupChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignUpState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/SplashScreenState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/StartState.h
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/include/database/core/Database.h
@@ -716,10 +714,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/SplashScreenState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/StartState.cpp
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/Database.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/DatabaseTable.cpp

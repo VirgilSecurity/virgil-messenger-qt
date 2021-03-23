@@ -77,7 +77,9 @@ signals:
     void signInErrorOccured(const QString &errorText);
     void signUpErrorOccured(const QString &errorText);
     void downloadKeyFailed(const QString &errorText);
+
     void databaseErrorOccurred(const QString &errorText);
+    void notificationCreated(const QString &notification, const bool error) const;
 
     void accountSettingsRequested(const QString &username);
 
