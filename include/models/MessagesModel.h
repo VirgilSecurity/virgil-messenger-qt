@@ -43,6 +43,8 @@
 #include <optional>
 
 namespace vm {
+class Messenger;
+
 class MessagesModel : public ListModel
 {
     Q_OBJECT
@@ -82,7 +84,7 @@ public:
         SortRole
     };
 
-    explicit MessagesModel(QObject *parent);
+    MessagesModel(Messenger *messenger, QObject *parent);
     ~MessagesModel() override = default;
 
     //
@@ -157,6 +159,7 @@ private:
     const MessageContentGroupInvitation *findIncomingInvitation() const;
 
 private:
+    QPointer<Messenger> m_messenger;
     ModifiableMessages m_messages;
     ChatHandler m_currentChat;
 };

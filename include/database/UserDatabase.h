@@ -38,6 +38,8 @@
 #include "core/Database.h"
 #include "Message.h"
 #include "Chat.h"
+#include "Group.h"
+#include "GroupMember.h"
 #include "GroupUpdate.h"
 
 #include <QDir>
@@ -90,6 +92,7 @@ signals:
     void updateMessage(const MessageUpdate &messageUpdate);
     void writeChatAndLastMessage(const ChatHandler &chat);
     void resetUnreadCount(const ChatHandler &chat);
+    void writeGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers);
     void deleteNewGroupChat(const ChatId &chatId);
     void deleteGroupChatInvitation(const ChatId &chatId);
 
@@ -109,6 +112,7 @@ private:
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onResetUnreadCount(const ChatHandler &chat);
+    void onWriteGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers);
     void onDeleteNewGroupChat(const ChatId &chatId);
     void onDeleteGroupChatInvitation(const ChatId &chatId);
 

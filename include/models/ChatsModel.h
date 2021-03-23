@@ -76,7 +76,7 @@ signals:
 private:
     enum Roles {
         IdRole = Qt::UserRole,
-        ContactIdRole,
+        TitleRole,
         LastEventTimeRole,
         LastEventTimestampRole,
         LastMessageBodyRole,
@@ -89,7 +89,6 @@ private:
 
     std::optional<int> findRowById(const ChatId &chatId) const;
 
-private:
     ModifiableChats m_chats;
 };
 } // namespace vm

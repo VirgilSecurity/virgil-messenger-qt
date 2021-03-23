@@ -36,6 +36,7 @@
 
 #include "FileUtils.h"
 #include "MessagesProxyModel.h"
+#include "Messenger.h"
 #include "Model.h"
 #include "Utils.h"
 
@@ -44,11 +45,11 @@
 using namespace vm;
 using Self = MessagesModel;
 
-Self::MessagesModel(QObject *parent) : ListModel(parent, false)
+Self::MessagesModel(Messenger *messenger, QObject *parent) : ListModel(parent, false), m_messenger(messenger)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
 
-    setProxy(new MessagesProxyModel(this));
+    setProxy(new MessagesProxyModel(messenger, this));
 }
 
 ChatHandler Self::chat() const
@@ -184,14 +185,17 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return message->status() == Message::Status::Broken;
 
     case BodyRole: {
+        QString text;
         if (auto textContent = std::get_if<MessageContentText>(&message->content())) {
-            return textContent->text().split('\n').join("<br/>");
+            text = textContent->text();
+        } else if (auto groupInvitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
+            if (groupInvitation->superOwnerId() == m_messenger->currentUser()->id()) {
+                text = tr("Invitation for %1").arg(message->recipientUsername());
+            } else {
+                text = tr("Invitation from %1").arg(message->senderUsername());
+            }
         }
-
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            throw std::logic_error("Group invitation must be filtered");
-        }
-        return QString();
+        return text.split('\n').join("<br/>");
     }
 
     case AttachmentIdRole: {
@@ -300,17 +304,26 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case FirstInRowRole: {
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            return false;
+        }
         const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
         return !prevMessage || prevMessage->senderId() != message->senderId()
                 || prevMessage->createdAt().addSecs(5 * 60) <= message->createdAt();
     }
 
     case InRowRole: {
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            return false;
+        }
         const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
         return nextMessage && message->senderId() == nextMessage->senderId();
     }
 
     case FirstInSectionRole: {
+        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
+            return false;
+        }
         const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
         return !prevMessage || prevMessage->createdAt().date() != message->createdAt().date();
     }
