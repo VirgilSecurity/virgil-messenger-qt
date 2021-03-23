@@ -211,7 +211,6 @@ signals:
     //
     //  Message history control.
     // --
-    void requestMessageHistory(const MessageRequest &request);
     void sendMessageStatusDisplayed(const MessageHandler &message);
     // --
 

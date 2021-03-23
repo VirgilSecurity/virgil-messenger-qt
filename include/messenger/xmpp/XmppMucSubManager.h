@@ -87,6 +87,7 @@ public:
 
     //
     //  Get list of the subscribed rooms.
+    //  Signal subscribedRoomsCountReceived() in the beginning.
     //  Signal subscribedRoomReceived() is emitted for each room.
     //  Signal subscribedRoomsProcessed() is emitted when all rooms were processed.
     //  Return operation id.
@@ -111,6 +112,8 @@ Q_SIGNALS:
     void messageReceived(const QXmppMessage &message);
     void subscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname);
     void unsubscribeReceived();
+
+    void subscribedRoomsCountReceived(const QString &id, qsizetype totalRoomsCount);
 
     void subscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                 const std::list<XmppMucSubEvent> &events);

@@ -84,7 +84,6 @@ Self::Messenger(Settings *settings, Validator *validator)
     connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
     connect(m_coreMessenger, &CoreMessenger::userWasFound, this, &Self::userWasFound);
 
-    connect(this, &Self::requestMessageHistory, m_coreMessenger, &CoreMessenger::requestMessageHistory);
     connect(this, &Self::sendMessageStatusDisplayed, m_coreMessenger, &CoreMessenger::sendMessageStatusDisplayed);
 
     //

@@ -49,11 +49,11 @@
 #include "GroupUpdate.h"
 #include "Contact.h"
 #include "XmppMucSubIq.h"
-#include "MessageRequest.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>
 #include <qxmpp/QXmppMucManager.h>
+#include <qxmpp/QXmppResultSet.h>
 
 #include <QObject>
 #include <QFuture>
@@ -141,7 +141,6 @@ signals:
     //
     //  Message history control.
     // --
-    void requestMessageHistory(const MessageRequest &request);
     void sendMessageStatusDisplayed(const MessageHandler &message);
     // --
 
@@ -158,6 +157,7 @@ signals:
     void xmppMessageDelivered(const QString &jid, const QString &messageId);
     void xmppFetchRoomsFromServer();
     void xmppJoinRoom(const GroupId &groupId);
+    void xmppSyncChatsHistoryIfGroupsWhereSynced();
 
 public:
     //
@@ -355,13 +355,17 @@ private slots:
                                        QXmppMucItem::Affiliation affiliation);
     void xmppOnFetchRoomsFromServer();
     void xmppOnJoinRoom(const GroupId &groupId);
+    void xmppOnSyncChatsHistoryIfGroupsWhereSynced();
 
     void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);
-
+    void xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResultSetReply &resultSetReply,
+                                       bool complete);
     //
     //  MUC/Sub slots.
     //--
     void xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname);
+
+    void xmppOnMucSubscribedRoomsCountReceived(const QString &id, qsizetype totalRoomsCount);
 
     void xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                          const std::list<XmppMucSubEvent> &events);
@@ -387,7 +391,6 @@ private slots:
     void onProcessNetworkState(bool online);
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
-    void onRequestMessageHistory(const MessageRequest &request);
     void onSendMessageStatusDisplayed(const MessageHandler &message);
 
 private:
@@ -426,7 +429,6 @@ Q_DECLARE_METATYPE(vm::GroupMember);
 Q_DECLARE_METATYPE(vm::GroupMembers);
 Q_DECLARE_METATYPE(vm::Contact);
 Q_DECLARE_METATYPE(vm::Contacts);
-Q_DECLARE_METATYPE(vm::MessageRequest);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);

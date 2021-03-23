@@ -71,6 +71,7 @@ using namespace notifications::xmpp;
 #include <qxmpp/QXmppPubSubIq.h>
 #include <qxmpp/QXmppMamManager.h>
 #include <qxmpp/QXmppUtils.h>
+#include <qxmpp/QXmppMamIq.h>
 
 #include <QCryptographicHash>
 #include <QMap>
@@ -82,6 +83,7 @@ using namespace notifications::xmpp;
 
 #include <memory>
 #include <mutex>
+#include <optional>
 
 using namespace vm;
 using Self = vm::CoreMessenger;
@@ -230,6 +232,7 @@ public:
     vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
 
     std::map<GroupId, GroupImplHandler> groups;
+    std::optional<qsizetype> expectedGroupsCount;
     std::mutex groupsMutex;
 
     VSQNetworkAnalyzer *networkAnalyzer;
@@ -292,7 +295,6 @@ struct RegisterMetaTypesOnce
         qRegisterMetaType<vm::GroupMembers>("GroupMembers");
         qRegisterMetaType<vm::Contact>("Contact");
         qRegisterMetaType<vm::Contacts>("Contacts");
-        qRegisterMetaType<vm::MessageRequest>("MessageRequest");
 
         qRegisterMetaType<vm::ChatId>("ChatId");
         qRegisterMetaType<vm::GroupId>("GroupId");
@@ -321,7 +323,6 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
-    connect(this, &Self::requestMessageHistory, this, &Self::onRequestMessageHistory);
     connect(this, &Self::sendMessageStatusDisplayed, this, &Self::onSendMessageStatusDisplayed);
 
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
@@ -334,6 +335,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::xmppFetchRoomsFromServer, this, &Self::xmppOnFetchRoomsFromServer);
     connect(this, &Self::xmppJoinRoom, this, &Self::xmppOnJoinRoom);
     connect(this, &Self::xmppMessageDelivered, this, &Self::xmppOnMessageDelivered);
+    connect(this, &Self::xmppSyncChatsHistoryIfGroupsWhereSynced, this,
+            &Self::xmppOnSyncChatsHistoryIfGroupsWhereSynced);
 
     //
     //  Configure Network Analyzer.
@@ -397,6 +400,7 @@ Self::Result Self::resetCommKitConfiguration()
     //
     std::scoped_lock _(m_impl->groupsMutex);
     m_impl->groups.clear();
+    m_impl->expectedGroupsCount = std::nullopt;
 
     return Self::Result::Success;
 }
@@ -452,6 +456,9 @@ void Self::resetXmppConfiguration()
 
     connect(m_impl->xmppMucSubManager, &XmppMucSubManager::subscribeReceived, this, &Self::xmppOnMucSubscribeReceived);
 
+    connect(m_impl->xmppMucSubManager, &XmppMucSubManager::subscribedRoomsCountReceived, this,
+            &Self::xmppOnMucSubscribedRoomsCountReceived);
+
     connect(m_impl->xmppMucSubManager, &XmppMucSubManager::subscribedRoomReceived, this,
             &Self::xmppOnMucSubscribedRoomReceived);
 
@@ -468,6 +475,8 @@ void Self::resetXmppConfiguration()
 
     connect(m_impl->xmppMamManager, &QXmppMamManager::archivedMessageReceived, this,
             &Self::xmppOnArchivedMessageReceived);
+
+    connect(m_impl->xmppMamManager, &QXmppMamManager::resultsRecieved, this, &Self::xmppOnArchivedResultsRecieved);
 
     connect(m_impl->xmpp.get(), &QXmppClient::connected, this, &Self::xmppOnConnected);
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
@@ -1399,6 +1408,9 @@ Self::Result Self::processGroupChatReceivedXmppMessage(const QXmppMessage &xmppM
     message->setCreatedAt(xmppMessage.stamp());
     message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
 
+    qCDebug(lcCoreMessenger) << "Received group message:" << message->id() << ", from user:" << message->senderId()
+                             << ", to group:" << groupId;
+
     if (message->recipientId() != currentUser()->id()) {
         qCWarning(lcCoreMessenger) << "Got message sent to an another account:" << message->recipientId();
 
@@ -1414,9 +1426,6 @@ Self::Result Self::processGroupChatReceivedXmppMessage(const QXmppMessage &xmppM
     }
 
     auto ciphertext = std::move(*std::get_if<QByteArray>(&ciphertextResult));
-
-    qCDebug(lcCoreMessenger) << "Received group message:" << message->id() << ", from user:" << message->senderId()
-                             << ", to group:" << groupId;
 
     //
     //  Decrypt message.
@@ -1596,6 +1605,9 @@ Self::Result Self::processGroupChatReceivedXmppCarbonMessage(const QXmppMessage 
     message->setStage(OutgoingMessageStage::Sent);
     message->markAsOutgoingCopyFromOtherDevice();
 
+    qCDebug(lcCoreMessenger) << "Received carbon group message:" << message->id()
+                             << ", from user:" << message->senderId() << ", to group:" << groupId;
+
     if (message->recipientId() != currentUser()->id()) {
         qCWarning(lcCoreMessenger) << "Got message sent to an another account:" << message->recipientId();
 
@@ -1611,9 +1623,6 @@ Self::Result Self::processGroupChatReceivedXmppCarbonMessage(const QXmppMessage 
     }
 
     auto ciphertext = std::move(*std::get_if<QByteArray>(&ciphertextResult));
-
-    qCDebug(lcCoreMessenger) << "Received group message:" << message->id() << ", from user:" << message->senderId()
-                             << ", to group:" << groupId;
 
     //
     //  Decrypt message.
@@ -2802,32 +2811,51 @@ void Self::xmppOnRoomParticipantReceived(const QString &roomJid, const QString &
     }
 }
 
-void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname) { }
+void Self::xmppOnMucSubscribeReceived(const QString &roomJid, const QString &subscriberJid, const QString &nickname)
+{
+    qCDebug(lcCoreMessenger) << "New subscriber:" << subscriberJid << "nickname" << nickname
+                             << "to the room:" << roomJid;
+}
+
+void Self::xmppOnMucSubscribedRoomsCountReceived(const QString &id, qsizetype totalRoomsCount)
+{
+    qCDebug(lcCoreMessenger) << "Got total rooms count:" << totalRoomsCount;
+
+    {
+        std::scoped_lock _(m_impl->groupsMutex);
+        m_impl->expectedGroupsCount = totalRoomsCount;
+    }
+
+    if (0 == totalRoomsCount) {
+        //
+        //  No group chats where found so chats history can be loaded now.
+        //
+        xmppSyncChatsHistoryIfGroupsWhereSynced();
+    }
+}
 
 void Self::xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                            const std::list<XmppMucSubEvent> &events)
 {
+    qCDebug(lcCoreMessenger) << "Got subscribed room:" << roomJid;
+
     const auto groupId = groupIdFromJid(roomJid);
     if (isGroupCached(groupId)) {
         //
         //  This group is already loaded.
         //
+        xmppSyncChatsHistoryIfGroupsWhereSynced();
         return;
     }
 
     //
     //  Group is not loaded yet, so try to find it's owner and then load CommKit group.
     //
-    m_impl->xmppMucSubManager->retrieveRoomSubscribers(roomJid);
+    m_impl->xmppRoomParticipantsManager->requestOwners(roomJid);
 }
 
 void Self::xmppOnMucRoomSubscriberReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
-                                           const std::list<XmppMucSubEvent> &events)
-{
-    std::scoped_lock _(m_impl->groupsMutex);
-
-    m_impl->xmppRoomParticipantsManager->requestAll(roomJid);
-};
+                                           const std::list<XmppMucSubEvent> &events) {};
 
 void Self::xmppOnMucSubscribedRoomsProcessed(const QString &id) { }
 
@@ -2865,6 +2893,10 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
                         XmppMucSubEvent::Presence,
                 },
                 room->jid(), currentUser()->id());
+
+        auto user = vssq_messenger_user(m_impl->messenger.get());
+        vsc_str_t userIdentity = vssq_messenger_user_identity(user);
+        auto a = vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain();
     });
 
     connect(room, &QXmppMucRoom::nameChanged, [this, room](const QString &name) {
@@ -2959,7 +2991,9 @@ CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superO
 
     emit newGroupChatLoaded(group);
 
-    emit xmppJoinRoom(groupId);
+    xmppJoinRoom(groupId);
+
+    xmppSyncChatsHistoryIfGroupsWhereSynced();
 
     return Self::Result::Success;
 }
@@ -3107,10 +3141,22 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(const Gr
 // --------------------------------------------------------------------------
 //  Message History (MAM).
 // --------------------------------------------------------------------------
-void Self::onRequestMessageHistory(const MessageRequest &request)
+void Self::xmppOnSyncChatsHistoryIfGroupsWhereSynced()
 {
+    {
+        std::scoped_lock _(m_impl->groupsMutex);
+        if (!m_impl->expectedGroupsCount) {
+            return;
+        }
+
+        if (m_impl->groups.size() < *m_impl->expectedGroupsCount) {
+            return;
+        }
+    }
+
+    qCInfo(lcCoreMessenger) << "Start loading chats history";
     //
-    //  Request archived messages.
+    //  FIXME: Read last sync date from settings.
     //
     m_impl->xmppMamManager->retrieveArchivedMessages();
 }
@@ -3123,6 +3169,22 @@ void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMess
         processReceivedXmppCarbonMessage(message);
     } else {
         processReceivedXmppMessage(message);
+    }
+}
+
+void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResultSetReply &resultSetReply,
+                                         bool complete)
+{
+
+    qCDebug(lcCoreMessengerXMPP).noquote() << "Got archived messages result (1):" << toXmlString(resultSetReply);
+    qCDebug(lcCoreMessengerXMPP).noquote() << "Got archived messages result complete?:" << complete;
+
+    if (!complete) {
+        QXmppResultSetQuery resultSetQuery;
+        resultSetQuery.setAfter(resultSetReply.last());
+        m_impl->xmppMamManager->retrieveArchivedMessages({}, {}, {}, {}, {}, resultSetQuery);
+    } else {
+        // TODO: Write the "last sync archive datetime" to settings.
     }
 }
 
@@ -3145,9 +3207,9 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
     mark.setMarkerId(message->id());
     mark.addHint(QXmppMessage::Store);
     mark.setMarker(QXmppMessage::Marker::Displayed);
-    m_impl->xmpp->sendPacket(mark);
 
-    if (m_impl->xmpp->sendPacket(mark)) {
-        qCDebug(lcCoreMessenger) << "Sent 'displayed' marker for message:" << message->id();
-    }
+    // FIXME: This line brakes connection
+    // if (m_impl->xmpp->sendPacket(mark)) {
+    //     qCDebug(lcCoreMessenger) << "Sent 'displayed' marker for message:" << message->id();
+    // }
 }

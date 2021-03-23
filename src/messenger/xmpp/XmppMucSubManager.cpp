@@ -84,7 +84,7 @@ QString Self::subscribe(const std::list<XmppMucSubEvent> &events, const QString 
     iq.setItem(subscribeItem);
 
     if (m_impl->client->sendPacket(iq)) {
-        qCDebug(lsXmppMucSubManager) << "User:" << roomJid << "nickname:" << nickName
+        qCDebug(lsXmppMucSubManager) << "User:" << fromJid << "nickname:" << nickName
                                      << "subscribed to the room:" << roomJid;
     }
 
@@ -186,6 +186,8 @@ bool Self::handleStanza(const QDomElement &element)
             iq.parse(element);
 
             if (iq.isMySubscriptions()) {
+                emit subscribedRoomsCountReceived(iq.id(), iq.items().size());
+
                 for (const auto &subscribedRoom : iq.items()) {
                     emit subscribedRoomReceived(iq.id(), subscribedRoom.jid(), iq.to(), subscribedRoom.events());
                 }
