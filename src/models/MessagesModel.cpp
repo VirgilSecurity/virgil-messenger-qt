@@ -88,13 +88,6 @@ void Self::addMessage(ModifiableMessageHandler message)
     }
 }
 
-void Self::deleteMessage(const int row)
-{
-    beginRemoveRows(QModelIndex(), row, row);
-    m_messages.erase(m_messages.begin() + row);
-    endRemoveRows();
-}
-
 MessageHandler Self::getMessage(const int row) const
 {
     return m_messages[row];
@@ -123,10 +116,14 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate)
     return true;
 }
 
-void Self::acceptGroupInvitation()
+void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
-    if (findIncomingInvitation()) {
-        deleteMessage(m_proxy->getFirstIndex().row()); // Invitation is always first
+    if (const auto upd = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
+        if (auto invitation = findIncomingInvitation()) {
+            auto newInvitation = invitation->newInvitationStatus(upd->invitationStatus);
+            m_messages[0]->setContent(newInvitation);
+            m_proxy->invalidate();
+        }
     }
 }
 
@@ -186,9 +183,11 @@ QVariant Self::data(const QModelIndex &index, int role) const
             text = textContent->text();
         } else if (auto groupInvitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
             if (groupInvitation->superOwnerId() == m_messenger->currentUser()->id()) {
-                text = tr("Invitation for %1").arg(message->recipientUsername());
+                text = tr("Invitation for %1")
+                               .arg(Utils::displayUsername(message->recipientUsername(), message->recipientId()));
             } else {
-                text = tr("Invitation from %1").arg(message->senderUsername());
+                text = tr("Invitated by %1")
+                               .arg(Utils::displayUsername(message->senderUsername(), message->senderId()));
             }
         }
         return text.split('\n').join("<br/>");
@@ -393,15 +392,15 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
 
 const MessageContentGroupInvitation *Self::findIncomingInvitation() const
 {
-    const auto messageIndex = m_proxy->getFirstIndex();
-    if (!messageIndex.isValid()) {
+    if (m_messages.empty()) {
         return nullptr;
     }
-    const auto message = getMessage(messageIndex.row());
+    const auto message = getMessage(0);
     if (!message->isIncoming()) {
         return nullptr;
     }
-    return std::get_if<MessageContentGroupInvitation>(&message->content());
+    const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content());
+    return (invitation->invitationStatus() == GroupInvitationStatus::Invited) ? invitation : nullptr;
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)

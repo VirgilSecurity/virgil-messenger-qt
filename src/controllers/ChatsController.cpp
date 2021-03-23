@@ -262,6 +262,7 @@ void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
     //
     m_chatObject->updateGroup(groupUpdate);
     m_models->chats()->updateGroup(groupUpdate);
+    m_models->messages()->updateGroup(groupUpdate);
 
     //
     //  Update DB.

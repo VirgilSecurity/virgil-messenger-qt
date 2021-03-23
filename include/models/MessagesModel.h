@@ -35,9 +35,10 @@
 #ifndef VM_MESSAGESMODEL_H
 #define VM_MESSAGESMODEL_H
 
-#include "ListModel.h"
 #include "AttachmentId.h"
 #include "Chat.h"
+#include "GroupUpdate.h"
+#include "ListModel.h"
 #include "Message.h"
 
 namespace vm {
@@ -107,11 +108,6 @@ public:
     void addMessage(ModifiableMessageHandler message);
 
     //
-    // Delete message by row
-    //
-    void deleteMessage(int row);
-
-    //
     //  Get message by row.
     //
     MessageHandler getMessage(int row) const;
@@ -127,18 +123,17 @@ public:
     bool updateMessage(const MessageUpdate &messageUpdate);
 
     //
-    //  Accept group invitation.
+    // Update group
     //
-    void acceptGroupInvitation();
+    void updateGroup(const GroupUpdate &groupUpdate);
 
     //
     //  Return message if found, nullptr otherwise.
     //
     ModifiableMessageHandler findById(const MessageId &messageId) const;
 
-    Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
-
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
 
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;

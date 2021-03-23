@@ -2612,6 +2612,7 @@ void Self::loadGroupChats(const Groups &groups)
 
 void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
 {
+    Q_UNUSED(groupOwnerId)
 
     auto roomJid = groupIdToJid(groupId);
     auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
@@ -2619,7 +2620,10 @@ void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOw
 
     connectXmppRoomSignals(room);
 
-    emit updateGroup(GroupInvitationUpdate { groupId, GroupInvitationStatus::Accepted });
+    GroupInvitationUpdate update;
+    update.groupId = groupId;
+    update.invitationStatus = GroupInvitationStatus::Accepted;
+    emit updateGroup(update);
 
     if (isOnline()) {
         room->join();
@@ -2628,6 +2632,10 @@ void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOw
 
 void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
 {
+    GroupInvitationUpdate update;
+    update.groupId = groupId;
+    update.invitationStatus = GroupInvitationStatus::Rejected;
+    emit updateGroup(update);
 
     if (isOnline()) {
         QXmppElement xElement;
