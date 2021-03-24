@@ -181,10 +181,7 @@ void Self::openChat(const ChatHandler &chat)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
     if (chat->unreadMessageCount() > 0) {
-        m_userDatabase->resetUnreadCount(chat);
-        if (chat->lastMessage()->isIncoming()) {
-            m_messenger->sendMessageStatusDisplayed(chat->lastMessage());
-        }
+        m_userDatabase->chatsTable()->markMessagesAsRead(chat);
     }
     m_chatObject->setChat(chat);
     emit chatOpened(chat);
@@ -209,6 +206,8 @@ void Self::setupTableConnections()
     connect(m_userDatabase->messagesTable(), &MessagesTable::messageAdded, this, &Self::onMessageAdded);
     connect(m_userDatabase->chatsTable(), &ChatsTable::chatUnreadMessageCountUpdated, this,
             &Self::onChatUnreadMessageCountUpdated);
+    connect(m_userDatabase->chatsTable(), &ChatsTable::lastUnreadMessageBeforeItWasRead, this,
+            &Self::onLastUnreadMessageBeforeItWasRead);
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::fetched, this, &Self::onGroupsFetched);
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
@@ -304,4 +303,9 @@ void Self::onMessageAdded(const MessageHandler &message)
 void Self::onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount)
 {
     m_models->chats()->resetUnreadCount(chatId, unreadMessageCount);
+}
+
+void Self::onLastUnreadMessageBeforeItWasRead(const MessageHandler &message)
+{
+    m_messenger->sendMessageStatusDisplayed(message);
 }

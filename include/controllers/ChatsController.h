@@ -111,6 +111,7 @@ private:
 
     void onMessageAdded(const MessageHandler &message);
     void onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);
+    void onLastUnreadMessageBeforeItWasRead(const MessageHandler &message);
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;

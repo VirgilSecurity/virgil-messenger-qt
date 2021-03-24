@@ -65,6 +65,7 @@ signals:
     void errorOccurred(const QString &errorText);
     void fetched(ModifiableChats chats);
     void chatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);
+    void lastUnreadMessageBeforeItWasRead(const MessageHandler &message);
     //--
 
     //

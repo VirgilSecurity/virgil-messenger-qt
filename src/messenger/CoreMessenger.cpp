@@ -865,7 +865,11 @@ UserId Self::userIdFromJid(const QString &jid) const
 
 QString Self::userIdToJid(const UserId &userId) const
 {
-    return userId + "@" + CustomerEnv::xmppServiceDomain();
+    if (userId == currentUser()->id()) {
+        return userId + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
+    } else {
+        return userId + "@" + CustomerEnv::xmppServiceDomain();
+    }
 }
 
 QString Self::groupChatsDomain() const
@@ -2123,7 +2127,7 @@ void Self::xmppOnConnected()
 
     syncLocalAndRemoteGroups();
 
-    syncPrivateChatsHistory();
+    // syncPrivateChatsHistory();
 }
 
 void Self::xmppOnDisconnected()
@@ -3321,22 +3325,26 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
 
     switch (message->chatType()) {
     case ChatType::Personal:
+        mark.setType(QXmppMessage::Chat);
         mark.setTo(userIdToJid(message->senderId()));
         break;
 
     case ChatType::Group:
+        mark.setType(QXmppMessage::GroupChat);
         mark.setTo(groupIdToJid(message->groupChatInfo()->groupId()));
         break;
     }
 
+    mark.setFrom(currentUserJid());
     mark.setId(QXmppUtils::generateStanzaUuid());
-    mark.setFrom(userIdToJid(message->recipientId()));
     mark.setMarkerId(message->id());
     mark.addHint(QXmppMessage::Store);
     mark.setMarker(QXmppMessage::Marker::Displayed);
 
     if (m_impl->xmpp->sendPacket(mark)) {
         qCDebug(lcCoreMessenger) << "Sent 'displayed' marker for message:" << message->id();
+    } else {
+        qCDebug(lcCoreMessenger) << "Marker 'displayed' was not sent for message:" << message->id();
     }
 }
 

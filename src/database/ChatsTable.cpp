@@ -175,11 +175,34 @@ void ChatsTable::onRequestChatUnreadMessageCount(const ChatId &chatId)
 void ChatsTable::onMarkMessagesAsRead(const ChatHandler &chat)
 {
     ScopedConnection connection(*database());
+
+    //
+    //  Find the last incoming "unread" message.
+    //
+    const DatabaseUtils::BindValues readMessageValues { { ":chatId", QString(chat->id()) } };
+    auto readMessageQuery =
+            DatabaseUtils::readExecQuery(database(), QLatin1String("selectLastUnreadMessage"), readMessageValues);
+
+    ModifiableMessageHandler lastUnreadMessage = nullptr;
+    if (readMessageQuery && readMessageQuery->next()) {
+        lastUnreadMessage = DatabaseUtils::readMessage(*readMessageQuery);
+    }
+
+    //
+    //  Mark all incoming messages as read.
+    //
     const DatabaseUtils::BindValues values { { ":id", QString(chat->id()) } };
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCount"), values);
     if (query) {
         qCDebug(lcDatabase) << "Chat unread count was reset, id:" << chat->id();
         emit chatUnreadMessageCountUpdated(chat->id(), 0);
+        //
+        //  Notify about the last message that was set to "read".
+        //  This signal can be used to send "read" status to a sender.
+        //
+        if (lastUnreadMessage) {
+            emit lastUnreadMessageBeforeItWasRead(lastUnreadMessage);
+        }
     } else {
         qCCritical(lcDatabase) << "ChatsTable::onResetUnreadCount error";
         emit errorOccurred(tr("Failed to reset unread count"));
