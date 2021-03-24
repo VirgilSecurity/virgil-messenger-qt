@@ -95,6 +95,8 @@ void Self::rejectGroupInvitation()
 {
     const auto chatId(currentChat()->id());
     m_messenger->rejectGroupInvitation(GroupId(chatId), m_chatObject->groupInvitationOwnerId());
+    m_models->chats()->deleteChat(chatId);
+    m_userDatabase->deleteNewGroupChat(chatId);
     emit groupInvitationRejected();
 }
 

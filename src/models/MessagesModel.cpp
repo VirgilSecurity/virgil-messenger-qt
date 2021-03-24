@@ -191,8 +191,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
                 text = tr("Invitation for %1")
                                .arg(Utils::displayUsername(message->recipientUsername(), message->recipientId()));
             } else {
-                text = tr("Invitated by %1")
-                               .arg(Utils::displayUsername(message->senderUsername(), message->senderId()));
+                text = tr("Invited by %1").arg(Utils::displayUsername(message->senderUsername(), message->senderId()));
             }
         }
         return text.split('\n').join("<br/>");
@@ -405,7 +404,7 @@ const MessageContentGroupInvitation *Self::findIncomingInvitation() const
         return nullptr;
     }
     const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content());
-    return (invitation->invitationStatus() == GroupInvitationStatus::Invited) ? invitation : nullptr;
+    return (invitation->invitationStatus() == GroupInvitationStatus::None) ? invitation : nullptr;
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)

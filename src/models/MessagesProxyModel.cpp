@@ -69,7 +69,7 @@ bool MessagesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sour
     const auto message = m_model->getMessage(sourceRow);
     if (const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
         return invitation->superOwnerId() == m_messenger->currentUser()->id()
-                || invitation->invitationStatus() != GroupInvitationStatus::Invited;
+                || invitation->invitationStatus() != GroupInvitationStatus::None;
     }
     return ListProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }
