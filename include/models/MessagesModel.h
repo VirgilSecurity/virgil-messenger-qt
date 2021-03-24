@@ -98,9 +98,9 @@ public:
     void setChat(ChatHandler chat);
 
     //
-    //  Set messages for the current chat.
+    //  Add messages to the current chat.
     //
-    void setMessages(ModifiableMessages messages);
+    void addMessages(ModifiableMessages messages);
 
     //
     //  Add message to the current chat if ids match, otherwise - ignore.

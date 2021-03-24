@@ -63,12 +63,17 @@ void Self::setChat(ChatHandler chat)
     m_currentChat = std::move(chat);
 }
 
-void Self::setMessages(ModifiableMessages messages)
+void Self::addMessages(ModifiableMessages messages)
 {
-    qCDebug(lcModel) << "Set messages to the messages model";
-    beginResetModel();
-    m_messages = std::move(messages);
-    endResetModel();
+    qCDebug(lcModel) << "Add messages to the messages model. Count" << messages.size();
+    if (messages.empty()) {
+        return;
+    }
+
+    const auto count = rowCount();
+    beginInsertRows(QModelIndex(), count, count + messages.size() - 1);
+    m_messages.insert(m_messages.end(), messages.begin(), messages.end());
+    endInsertRows();
 
     if (auto invitation = findIncomingInvitation()) {
         const auto &message = m_messages.front();
