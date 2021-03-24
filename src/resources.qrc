@@ -199,7 +199,6 @@
         <file>resources/database/deleteCloudFilesByIds.sql</file>
         <file>resources/database/deleteCloudFilesByParentIds.sql</file>
         <file>resources/database/deleteGroupById.sql</file>
-        <file>resources/database/deleteGroupInvitationMessageByChatId.sql</file>
         <file>resources/database/deleteGroupMembersByGroupId.sql</file>
         <file>resources/database/deleteMessagesByChatId.sql</file>
         <file>resources/database/createGroups.sql</file>

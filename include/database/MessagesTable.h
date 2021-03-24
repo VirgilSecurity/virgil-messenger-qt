@@ -57,7 +57,6 @@ signals:
     void fetchNotSentMessages();
     void addMessage(const MessageHandler &message);
     void deleteChatMessages(const ChatId &chatId);
-    void deleteGroupInvitationMessage(const ChatId &chatId);
 
     void updateMessage(const MessageUpdate &messageUpdate);
     void markIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
@@ -78,7 +77,6 @@ private:
     void onFetchNotSentMessages();
     void onAddMessage(const MessageHandler &message);
     void onDeleteChatMessages(const ChatId &chatId);
-    void onDeleteGroupInvitationMessage(const ChatId &chatId);
 
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);

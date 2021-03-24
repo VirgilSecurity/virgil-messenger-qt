@@ -93,7 +93,6 @@ signals:
     void writeChatAndLastMessage(const ChatHandler &chat);
     void writeGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers);
     void deleteNewGroupChat(const ChatId &chatId);
-    void deleteGroupChatInvitation(const ChatId &chatId);
 
     void updateGroup(const GroupUpdate &groupUpdate);
 
@@ -112,7 +111,6 @@ private:
     void onWriteChatAndLastMessage(const ChatHandler &chat);
     void onWriteGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers);
     void onDeleteNewGroupChat(const ChatId &chatId);
-    void onDeleteGroupChatInvitation(const ChatId &chatId);
 
     void onUpdateGroup(const GroupUpdate &groupUpdate);
 
