@@ -50,7 +50,6 @@ void Self::setChat(const ChatHandler &chat)
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
     m_chat = chat;
-    m_groupInvitationOwnerId = UserId();
     m_groupMembersModel->setGroupMembers({});
     if (oldTitle != title()) {
         emit titleChanged(title());
@@ -75,16 +74,6 @@ bool Self::isGroup() const
     return m_chat && m_chat->type() == ChatType::Group;
 }
 
-void Self::setGroupInvitationOwnerId(const UserId &ownerId)
-{
-    m_groupInvitationOwnerId = ownerId;
-}
-
-UserId Self::groupInvitationOwnerId() const
-{
-    return m_groupInvitationOwnerId;
-}
-
 void Self::setGroupMembers(const GroupMembers &groupMembers)
 {
     m_groupMembersModel->setGroupMembers(groupMembers);
@@ -105,12 +94,6 @@ void Self::setGroupMembers(const GroupMembers &groupMembers)
 GroupMembers Self::selectedGroupMembers() const
 {
     return m_groupMembersModel->selectedGroupMembers();
-}
-
-UserId Self::groupOwnerId() const
-{
-    // FIXME: Use group.superOwnerId() instead.
-    return FindGroupOwner(m_groupMembersModel->groupMembers())->memberId();
 }
 
 void Self::updateGroup(const GroupUpdate &groupUpdate)

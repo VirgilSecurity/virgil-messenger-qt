@@ -248,6 +248,7 @@
         <file>resources/database/updateContactPhone.sql</file>
         <file>resources/database/updateContactPlatformId.sql</file>
         <file>resources/database/updateContactUsername.sql</file>
+        <file>resources/database/updateMessageBody.sql</file>
         <!-- Database patches -->
         <file>resources/database/patches/version1/dropContacts.sql</file>
         <file>resources/database/patches/version1/insertContactsFromChats.sql</file>

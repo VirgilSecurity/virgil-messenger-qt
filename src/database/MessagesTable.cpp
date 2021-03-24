@@ -52,6 +52,7 @@ MessagesTable::MessagesTable(Database *database) : DatabaseTable(QLatin1String("
     connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
     connect(this, &MessagesTable::markIncomingMessagesAsReadBeforeMessage, this,
             &MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage);
+    connect(this, &MessagesTable::updateMessageBody, this, &MessagesTable::onUpdateMessageBody);
 }
 
 bool MessagesTable::create()
@@ -207,6 +208,20 @@ void MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &m
     if (query) {
         emit chatUnreadMessageCountChanged(chatId);
     } else {
-        qCWarning(lcDatabase) << "Self::onMarkIncomingMessagesAsReadBeforeMessage error";
+        qCWarning(lcDatabase) << "MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage error";
+    }
+}
+
+void MessagesTable::onUpdateMessageBody(const MessageId &messageId, const QString &body)
+{
+    ScopedConnection connection(*database());
+
+    DatabaseUtils::BindValues bindValues { { ":id", QString(messageId) }, { ":body", body } };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageBody"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Message body was updated" << messageId;
+    } else {
+        qCCritical(lcDatabase) << "MessagesTable::onUpdateMessageBody error";
+        emit errorOccurred(tr("Failed to update message body"));
     }
 }

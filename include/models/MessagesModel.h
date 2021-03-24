@@ -138,7 +138,7 @@ public:
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
     void messageAdding(); // TODO(fpohtmeh): remove
-    void groupInvitationReceived(const UserId &ownerId, const QString &ownerUsername, const QString &helloText);
+    void groupInvitationReceived(const QString &ownerUsername, const MessageHandler &message);
 
 private:
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate &messageUpdate);

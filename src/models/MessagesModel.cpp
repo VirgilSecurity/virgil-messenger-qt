@@ -75,9 +75,10 @@ void Self::addMessages(ModifiableMessages messages)
     m_messages.insert(m_messages.end(), messages.begin(), messages.end());
     endInsertRows();
 
-    if (auto invitation = findIncomingInvitation()) {
+    if (findIncomingInvitation()) {
         const auto &message = m_messages.front();
-        emit groupInvitationReceived(message->senderId(), message->senderUsername(), invitation->helloText());
+        const auto displayUsername = Utils::displayUsername(message->senderUsername(), message->senderId());
+        emit groupInvitationReceived(displayUsername, message);
     }
 }
 

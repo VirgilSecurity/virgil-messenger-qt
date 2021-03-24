@@ -76,8 +76,8 @@ public:
     ChatHandler currentChat() const;
 
     void loadGroupMembers();
-    Q_INVOKABLE void acceptGroupInvitation();
-    Q_INVOKABLE void rejectGroupInvitation();
+    Q_INVOKABLE void acceptGroupInvitation(const MessageHandler &invitationMessage);
+    Q_INVOKABLE void rejectGroupInvitation(const MessageHandler &invitationMessage);
     void addMembers(const Contacts &contacts);
     Q_INVOKABLE void removeSelectedMembers();
     Q_INVOKABLE void leaveGroup();
