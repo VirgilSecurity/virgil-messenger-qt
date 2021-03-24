@@ -158,7 +158,9 @@ signals:
     void xmppMessageDelivered(const QString &jid, const QString &messageId);
     void xmppFetchRoomsFromServer();
     void xmppJoinRoom(const GroupId &groupId);
-    void xmppSyncChatsHistoryIfGroupsWhereSynced();
+
+    void syncPrivateChatsHistory();
+    void syncGroupChatHistory(const GroupId &groupId);
 
 public:
     //
@@ -376,7 +378,6 @@ private slots:
                                        QXmppMucItem::Affiliation affiliation);
     void xmppOnFetchRoomsFromServer();
     void xmppOnJoinRoom(const GroupId &groupId);
-    void xmppOnSyncChatsHistoryIfGroupsWhereSynced();
 
     void xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMessage &message);
     void xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResultSetReply &resultSetReply,
@@ -414,6 +415,9 @@ private slots:
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
 
     void onSendMessageStatusDisplayed(const MessageHandler &message);
+
+    void onSyncPrivateChatsHistory();
+    void onSyncGroupChatHistory(const GroupId &groupId);
 
 private:
     friend class CoreMessengerCloudFs;

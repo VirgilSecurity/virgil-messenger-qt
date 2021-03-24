@@ -214,6 +214,7 @@
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectChats.sql</file>
         <file>resources/database/selectUnreadMessageCount.sql</file>
+        <file>resources/database/selectLastUnreadMessage.sql</file>
         <file>resources/database/selectCloudFolderFiles.sql</file>
         <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/updateAttachmentDownloadStage.sql</file>

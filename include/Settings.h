@@ -101,6 +101,10 @@ public:
     // Short interval for elapsed seconds that means now
     std::chrono::seconds nowInterval() const;
 
+    // Chats history sync info
+    QDateTime chatHistoryLastSyncDate(const QString &chatId = {}) const;
+    void setChatHistoryLastSyncDate(const QString &chatId = {});
+
 signals:
     void lastSignedInUserChanged(const QString &username);
     void usersListChanged(const QStringList &);
