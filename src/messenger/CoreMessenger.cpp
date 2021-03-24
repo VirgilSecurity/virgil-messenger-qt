@@ -2127,7 +2127,7 @@ void Self::xmppOnConnected()
 
     syncLocalAndRemoteGroups();
 
-    // syncPrivateChatsHistory();
+    syncPrivateChatsHistory();
 }
 
 void Self::xmppOnDisconnected()
