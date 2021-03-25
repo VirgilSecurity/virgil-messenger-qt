@@ -3283,11 +3283,18 @@ void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMess
         }
     }();
 
-    if (senderId == currentUser()->id()) {
-        processReceivedXmppCarbonMessage(message);
-    } else {
-        processReceivedXmppMessage(message);
-    }
+    auto future = [this, &message, &senderId]() {
+        if (senderId == currentUser()->id()) {
+            return processReceivedXmppCarbonMessage(message);
+        } else {
+            return processReceivedXmppMessage(message);
+        }
+    }();
+
+    //
+    //  Archived messages should be processed sequentially to grantee correct order of messages and it's marks.
+    //
+    future.waitForFinished();
 }
 
 void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResultSetReply &resultSetReply,
