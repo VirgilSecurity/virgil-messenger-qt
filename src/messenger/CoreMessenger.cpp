@@ -2600,6 +2600,10 @@ void Self::loadGroupChats(const Groups &groups)
 
     QtConcurrent::run([this, groups]() {
         for (const auto &group : groups) {
+            if (group->invitationStatus() != GroupInvitationStatus::Accepted) {
+                continue;
+            }
+
             vssq_error_t error;
             vssq_error_reset(&error);
 
