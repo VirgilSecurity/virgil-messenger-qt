@@ -1115,9 +1115,9 @@ std::shared_ptr<User> Self::findUserByUsername(const QString &username) const
     //
     auto userIt = m_impl->usernameToUser.find(username);
     if (userIt != m_impl->usernameToUser.end()) {
-        auto publicKeyId = vsc_str_to_qstring(
-                vsc_str_from_data(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get())));
-        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId;
+        const auto publicKeyId =
+                vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get()));
+        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId.toHex();
         emit userWasFound(userIt->second);
         return userIt->second;
     }
@@ -1143,7 +1143,7 @@ std::shared_ptr<User> Self::findUserByUsername(const QString &username) const
         return nullptr;
     }
 
-    auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
+    const auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
     qCDebug(lcCoreMessenger) << "User found in the cloud with public key id:" << publicKeyId.toHex();
 
     //
@@ -1171,9 +1171,9 @@ std::shared_ptr<User> Self::findUserById(const UserId &userId) const
     //
     auto userIt = m_impl->identityToUser.find(userId);
     if (userIt != m_impl->identityToUser.end()) {
-        auto publicKeyId = vsc_str_to_qstring(
-                vsc_str_from_data(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get())));
-        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId;
+        const auto publicKeyId =
+                vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get()));
+        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId.toHex();
         emit userWasFound(userIt->second);
         return userIt->second;
     }
@@ -1198,7 +1198,7 @@ std::shared_ptr<User> Self::findUserById(const UserId &userId) const
         return nullptr;
     }
 
-    auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
+    const auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
     qCDebug(lcCoreMessenger) << "User found in the cloud with public key id:" << publicKeyId.toHex();
 
     //
