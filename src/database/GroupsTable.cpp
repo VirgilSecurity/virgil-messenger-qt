@@ -81,16 +81,18 @@ void Self::onAdd(const GroupHandler &group)
 {
     ScopedConnection connection(*database());
 
+    const QVariant groupCache = !group->cache().isEmpty() ? group->cache() : QVariant("");
+
     const DatabaseUtils::BindValues bindValues { { ":id", QString(group->id()) },
                                                  { ":superOwnerId", QString(group->superOwnerId()) },
                                                  { ":name", QString(group->name()) },
                                                  { ":invitationStatus",
                                                    GroupInvitationStatusToString(group->invitationStatus()) },
-                                                 { ":cache", group->cache() } };
+                                                 { ":cache", groupCache } };
 
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroup"), bindValues);
     if (query) {
-        qCDebug(lcDatabase) << "Group was updated: " << bindValues.front().second;
+        qCDebug(lcDatabase) << "Group was added: " << bindValues.front().second;
     } else {
         qCCritical(lcDatabase) << "GroupsTable::insertGroup error";
         emit errorOccurred(tr("Failed to update groups table"));

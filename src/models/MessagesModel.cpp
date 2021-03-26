@@ -405,7 +405,11 @@ const MessageContentGroupInvitation *Self::findIncomingInvitation() const
         return nullptr;
     }
     const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content());
-    return (invitation->invitationStatus() == GroupInvitationStatus::None) ? invitation : nullptr;
+    if (invitation && invitation->invitationStatus() == GroupInvitationStatus::Invited) {
+        return invitation;
+    } else {
+        return nullptr;
+    }
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)
