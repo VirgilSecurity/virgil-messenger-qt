@@ -609,6 +609,8 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
 
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/include/windows/VSQWindows.h>
+
         #
         #  Sources
         #
@@ -805,6 +807,7 @@ target_sources(${VS_TARGET_NAME}
         # Windows
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/windows/VSQWindows.cpp>
         # MACOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
@@ -828,6 +831,7 @@ target_link_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${VS_ANDROID_SSL_DIR}>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/x64/Release>>
         )
 
 target_link_libraries(${VS_TARGET_NAME}
@@ -842,6 +846,7 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:WinSparkle>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         Qt5::Sql
@@ -903,6 +908,7 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/include>>
         )
 
 target_compile_definitions(${VS_TARGET_NAME}
