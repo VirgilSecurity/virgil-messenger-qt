@@ -35,14 +35,14 @@
 #ifndef VM_MESSAGESMODEL_H
 #define VM_MESSAGESMODEL_H
 
-#include "ListModel.h"
 #include "AttachmentId.h"
 #include "Chat.h"
+#include "GroupUpdate.h"
+#include "ListModel.h"
 #include "Message.h"
 
-#include <optional>
-
 namespace vm {
+class MessagesProxyModel;
 class Messenger;
 
 class MessagesModel : public ListModel
@@ -98,19 +98,14 @@ public:
     void setChat(ChatHandler chat);
 
     //
-    //  Set messages for the current chat.
+    //  Add messages to the current chat.
     //
-    void setMessages(ModifiableMessages messages);
+    void addMessages(ModifiableMessages messages);
 
     //
     //  Add message to the current chat if ids match, otherwise - ignore.
     //
     void addMessage(ModifiableMessageHandler message);
-
-    //
-    // Delete message by row
-    //
-    void deleteMessage(int row);
 
     //
     //  Get message by row.
@@ -128,31 +123,32 @@ public:
     bool updateMessage(const MessageUpdate &messageUpdate);
 
     //
-    //  Accept group invitation.
+    // Update group
     //
-    void acceptGroupInvitation();
+    void updateGroup(const GroupUpdate &groupUpdate);
 
     //
     //  Return message if found, nullptr otherwise.
     //
     ModifiableMessageHandler findById(const MessageId &messageId) const;
 
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
 
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
     void messageAdding(); // TODO(fpohtmeh): remove
-    void groupInvitationReceived(const UserId &ownerId, const QString &ownerUsername, const QString &helloText);
+    void groupInvitationReceived(const QString &ownerUsername, const MessageHandler &message);
 
 private:
     static QVector<int> rolesFromMessageUpdate(const MessageUpdate &messageUpdate);
     static QString statusIconPath(MessageHandler message);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowById(const MessageId &messageId) const;
+    QModelIndex findIndexById(const MessageId &messageId) const;
+    MessageHandler getNeighbourMessage(int row, int offset) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
 
@@ -160,6 +156,7 @@ private:
 
 private:
     QPointer<Messenger> m_messenger;
+    QPointer<MessagesProxyModel> m_proxy;
     ModifiableMessages m_messages;
     ChatHandler m_currentChat;
 };

@@ -71,7 +71,6 @@ Self::UserDatabase(const QDir &databaseDir, QObject *parent)
     connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
     connect(this, &Self::writeGroupChat, this, &Self::onWriteGroupChat);
     connect(this, &Self::deleteNewGroupChat, this, &Self::onDeleteNewGroupChat);
-    connect(this, &Self::deleteGroupChatInvitation, this, &Self::onDeleteGroupChatInvitation);
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
 }
 
@@ -325,14 +324,6 @@ void Self::onDeleteNewGroupChat(const ChatId &chatId)
     const GroupId groupId(chatId);
     groupsTable()->deleteGroup(groupId);
     groupMembersTable()->deleteGroupMembers(groupId);
-}
-
-void Self::onDeleteGroupChatInvitation(const ChatId &chatId)
-{
-    ScopedConnection connection(*this);
-    ScopedTransaction transaction(*this);
-    chatsTable()->resetLastMessage(chatId);
-    messagesTable()->deleteGroupInvitationMessage(chatId);
 }
 
 void Self::onUpdateGroup(const GroupUpdate &groupUpdate)

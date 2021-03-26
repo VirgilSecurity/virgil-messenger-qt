@@ -319,3 +319,8 @@ QString Utils::contactDisplayName(const QString &name, const QString &username, 
     }
     return QObject::tr("Unknown");
 }
+
+QString Utils::displayUsername(const QString &username, const UserId &userId)
+{
+    return username.isEmpty() ? userId : username;
+}

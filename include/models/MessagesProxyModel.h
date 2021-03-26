@@ -50,6 +50,10 @@ class MessagesProxyModel : public ListProxyModel
 public:
     MessagesProxyModel(Messenger *messenger, MessagesModel *model);
 
+    QModelIndex getNeighbourIndex(int row, int offset) const;
+    QModelIndex getFirstIndex() const;
+    QModelIndex getLastIndex() const;
+
 private:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 

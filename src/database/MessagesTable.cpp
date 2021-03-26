@@ -49,10 +49,10 @@ MessagesTable::MessagesTable(Database *database) : DatabaseTable(QLatin1String("
     connect(this, &MessagesTable::fetchNotSentMessages, this, &MessagesTable::onFetchNotSentMessages);
     connect(this, &MessagesTable::addMessage, this, &MessagesTable::onAddMessage);
     connect(this, &MessagesTable::deleteChatMessages, this, &MessagesTable::onDeleteChatMessages);
-    connect(this, &MessagesTable::deleteGroupInvitationMessage, this, &MessagesTable::onDeleteGroupInvitationMessage);
     connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
     connect(this, &MessagesTable::markIncomingMessagesAsReadBeforeMessage, this,
             &MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage);
+    connect(this, &MessagesTable::updateMessageBody, this, &MessagesTable::onUpdateMessageBody);
 }
 
 bool MessagesTable::create()
@@ -150,21 +150,6 @@ void MessagesTable::onDeleteChatMessages(const ChatId &chatId)
     }
 }
 
-void MessagesTable::onDeleteGroupInvitationMessage(const ChatId &chatId)
-{
-    const DatabaseUtils::BindValues values {
-        { ":id", QString(chatId) }, { ":contentType", MessageContentTypeToString(MessageContentType::GroupInvitation) }
-    };
-    const auto query =
-            DatabaseUtils::readExecQuery(database(), QLatin1String("deleteGroupInvitationMessageByChatId"), values);
-    if (query) {
-        qCDebug(lcDatabase) << "Group invitation message was removed, chatId:" << chatId;
-    } else {
-        qCCritical(lcDatabase) << "MessagesTable::onDeleteGroupInvitationMessage deletion error";
-        emit errorOccurred(tr("Failed to delete group invitation message"));
-    }
-}
-
 void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
 {
     DatabaseUtils::BindValues bindValues;
@@ -229,6 +214,20 @@ void MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &m
         qCWarning(lcDatabase) << "Marked all messages as read before message:" << messageId;
         emit chatUnreadMessageCountChanged(chatId);
     } else {
-        qCWarning(lcDatabase) << "Self::onMarkIncomingMessagesAsReadBeforeMessage error";
+        qCWarning(lcDatabase) << "MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage error";
+    }
+}
+
+void MessagesTable::onUpdateMessageBody(const MessageId &messageId, const QString &body)
+{
+    ScopedConnection connection(*database());
+
+    DatabaseUtils::BindValues bindValues { { ":id", QString(messageId) }, { ":body", body } };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageBody"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Message body was updated" << messageId;
+    } else {
+        qCCritical(lcDatabase) << "MessagesTable::onUpdateMessageBody error";
+        emit errorOccurred(tr("Failed to update message body"));
     }
 }

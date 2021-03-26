@@ -43,6 +43,7 @@
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
+#include "MessageContentJsonUtils.h"
 #include "Controller.h"
 #include "Utils.h"
 
@@ -67,9 +68,6 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(m_messenger, &Messenger::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
     connect(m_messenger, &Messenger::updateGroup, this, &Self::onUpdateGroup);
     connect(m_messenger, &Messenger::newGroupChatLoaded, this, &Self::onNewGroupChatLoaded);
-
-    connect(m_models->messages(), &MessagesModel::groupInvitationReceived, m_chatObject,
-            &ChatObject::setGroupInvitationOwnerId);
 }
 
 ChatHandler Self::currentChat() const
@@ -85,16 +83,25 @@ void Self::loadGroupMembers()
     }
 }
 
-void Self::acceptGroupInvitation()
+void Self::acceptGroupInvitation(const MessageHandler &invitationMessage)
 {
-    const auto chatId(currentChat()->id());
-    m_messenger->acceptGroupInvitation(GroupId(chatId), m_chatObject->groupInvitationOwnerId());
+    const GroupId groupId(invitationMessage->chatId());
+    const auto invitation = std::get_if<MessageContentGroupInvitation>(&invitationMessage->content());
+    m_messenger->acceptGroupInvitation(groupId, invitation->superOwnerId());
+
+    const auto newInvitation = invitation->newInvitationStatus(GroupInvitationStatus::Accepted);
+    m_userDatabase->messagesTable()->updateMessageBody(invitationMessage->id(),
+                                                       MessageContentJsonUtils::toString(newInvitation));
 }
 
-void Self::rejectGroupInvitation()
+void Self::rejectGroupInvitation(const MessageHandler &invitationMessage)
 {
-    const auto chatId(currentChat()->id());
-    m_messenger->rejectGroupInvitation(GroupId(chatId), m_chatObject->groupInvitationOwnerId());
+    const auto chatId(invitationMessage->chatId());
+    const auto invitation = std::get_if<MessageContentGroupInvitation>(&invitationMessage->content());
+    m_messenger->rejectGroupInvitation(GroupId(chatId), invitation->superOwnerId());
+
+    m_models->chats()->deleteChat(chatId);
+    m_userDatabase->deleteNewGroupChat(chatId);
     emit groupInvitationRejected();
 }
 
@@ -261,6 +268,7 @@ void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
     //
     m_chatObject->updateGroup(groupUpdate);
     m_models->chats()->updateGroup(groupUpdate);
+    m_models->messages()->updateGroup(groupUpdate);
 
     //
     //  Update DB.

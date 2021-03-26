@@ -203,7 +203,7 @@ void Self::setupTableConnections()
 {
     auto table = m_userDatabase->messagesTable();
     connect(table, &MessagesTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
+    connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::addMessages);
 }
 
 void Self::onUpdateMessage(const MessageUpdate &messageUpdate)

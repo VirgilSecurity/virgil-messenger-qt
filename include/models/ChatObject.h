@@ -64,13 +64,8 @@ public:
     QString title() const;
     bool isGroup() const;
 
-    void setGroupInvitationOwnerId(const UserId &ownerId);
-    UserId groupInvitationOwnerId() const;
-
     void setGroupMembers(const GroupMembers &groupMembers);
     GroupMembers selectedGroupMembers() const;
-
-    UserId groupOwnerId() const;
 
     void updateGroup(const GroupUpdate &groupUpdate);
 
@@ -89,7 +84,6 @@ private:
     ChatHandler m_chat;
     GroupMembersModel *m_groupMembersModel;
     QString m_lastActivityText;
-    UserId m_groupInvitationOwnerId;
     bool m_userIsOwner = false;
     bool m_userCanEdit = false;
 };
