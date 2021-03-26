@@ -34,14 +34,17 @@
 
 #include "GroupMember.h"
 
+#include <algorithm>
+
 using namespace vm;
 using Self = GroupMember;
 
-Self::GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation)
+Self::GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation, ContactHandler contact)
     : m_groupId(std::move(groupId)),
       m_memberId(std::move(memberId)),
-      m_memberNickName(std::move(memberNickName)),
-      m_memberAffiliation(memberAffiliation)
+      m_memberNickName(m_memberId),
+      m_memberAffiliation(memberAffiliation),
+      m_contact(std::move(contact))
 {
 }
 
@@ -65,27 +68,39 @@ GroupAffiliation Self::memberAffiliation() const
     return m_memberAffiliation;
 }
 
+ContactHandler Self::contact() const
+{
+    return m_contact;
+}
+
 Contacts vm::GroupMembersToContacts(const GroupMembers &groupMembers)
 {
     Contacts contacts;
-    for (auto &member : groupMembers) {
-        auto contact = std::make_shared<Contact>();
-        contact->setUserId(member->memberId());
-        contact->setUsername(member->memberId());
-        contact->setName(member->memberNickName());
-        contacts.push_back(std::move(contact));
-    }
+    std::transform(groupMembers.cbegin(), groupMembers.cend(), std::back_inserter(contacts),
+                   [](const auto &member) -> ContactHandler {
+                       if (auto contact = member->contact()) {
+                           return contact;
+                       }
+
+                       auto contact = std::make_shared<Contact>();
+                       contact->setUserId(member->memberId());
+                       contact->setUsername(member->memberId());
+                       contact->setName(member->memberNickName());
+
+                       return contact;
+                   });
+
     return contacts;
 }
 
 GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts)
 {
     GroupMembers members;
-    for (auto &contact : contacts) {
-        auto member =
-                std::make_shared<GroupMember>(groupId, contact->userId(), contact->name(), GroupAffiliation::Member);
-        members.push_back(std::move(member));
-    }
+    std::transform(contacts.cbegin(), contacts.cend(), std::back_inserter(members),
+                   [&groupId](const auto &contact) -> GroupMemberHandler {
+                       return std::make_shared<GroupMember>(groupId, contact->userId(), GroupAffiliation::Member,
+                                                            contact);
+                   });
     return members;
 }
 

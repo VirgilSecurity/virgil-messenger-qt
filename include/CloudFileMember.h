@@ -47,26 +47,29 @@ public:
     enum class Type { Member, Owner };
 
     CloudFileMember();
-    CloudFileMember(const ContactHandler &contact, const Type type);
+    CloudFileMember(UserId memberId, Type type, ContactHandler contact = {});
 
-    ContactHandler contact() const;
-    void setContact(const ContactHandler &contact);
-    Type type() const;
+    [[nodiscard]] UserId memberId() const;
+
+    [[nodiscard]] Type type() const;
+
+    [[nodiscard]] QString typeAsDisplayString() const;
+
+    [[nodiscard]] ContactHandler contact() const;
+
+    [[nodiscard]] CloudFileMember cloneWithContact(ContactHandler contact) const;
 
 private:
-    ContactHandler m_contact;
+    UserId m_memberId;
     Type m_type;
+    ContactHandler m_contact;
 };
 
 using CloudFileMemberHandler = std::shared_ptr<CloudFileMember>;
 using CloudFileMembers = std::vector<CloudFileMemberHandler>;
 
-QString CloudFileMemberTypeToDisplayString(const CloudFileMember::Type type);
-
 CloudFileMembers ContactsToCloudFileMembers(const Contacts &contacts);
 Contacts CloudFileMembersToContacts(const CloudFileMembers &members);
-
-CloudFileMemberHandler FindCloudFileMemberById(const CloudFileMembers &members, const UserId &memberId);
 
 } // namespace vm
 

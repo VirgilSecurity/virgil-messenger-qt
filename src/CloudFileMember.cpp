@@ -36,61 +36,67 @@
 
 #include <QObject>
 
+#include <algorithm>
+
 using namespace vm;
 using Self = CloudFileMember;
 
-Self::CloudFileMember() : m_type(Type::Member) { }
+Self::CloudFileMember() : m_memberId(), m_type(Type::Member), m_contact() { }
 
-Self::CloudFileMember(const ContactHandler &contact, const Type type) : m_contact(contact), m_type(type) { }
+Self::CloudFileMember(UserId memberId, Type type, ContactHandler contact)
+    : m_memberId(std::move(memberId)), m_contact(std::move(contact)), m_type(type)
+{
+}
+
+UserId Self::memberId() const
+{
+    return m_memberId;
+}
+
+Self::Type Self::type() const
+{
+    return m_type;
+}
+
+QString Self::typeAsDisplayString() const
+{
+    switch (m_type) {
+    case Self::Type::Owner:
+        return QObject::tr("Owner");
+
+    case Self::Type::Member:
+        return QObject::tr("Member");
+
+    default:
+        throw std::logic_error("Invalid CloudFileMember type");
+    }
+}
 
 ContactHandler Self::contact() const
 {
     return m_contact;
 }
 
-void Self::setContact(const ContactHandler &contact)
+CloudFileMember Self::cloneWithContact(ContactHandler contact) const
 {
-    m_contact = contact;
-}
-
-CloudFileMember::Type Self::type() const
-{
-    return m_type;
+    auto self = *this;
+    self.m_contact = std::move(contact);
+    return self;
 }
 
 CloudFileMembers vm::ContactsToCloudFileMembers(const Contacts &contacts)
 {
     CloudFileMembers members;
-    for (auto &c : contacts) {
-        members.push_back(std::make_shared<CloudFileMember>(c, CloudFileMember::Type::Member));
-    }
+    std::transform(contacts.cbegin(), contacts.cend(), std::back_inserter(members), [](const auto &contact) {
+        return std::make_unique<CloudFileMember>(contact->userId(), CloudFileMember::Type::Member, contact);
+    });
     return members;
 }
 
 Contacts vm::CloudFileMembersToContacts(const CloudFileMembers &members)
 {
     Contacts contacts;
-    for (auto &m : members) {
-        contacts.push_back(m->contact());
-    }
+    std::transform(members.cbegin(), members.cend(), std::back_inserter(contacts),
+                   [](const auto &member) { return member->contact(); });
     return contacts;
-}
-
-QString vm::CloudFileMemberTypeToDisplayString(const CloudFileMember::Type type)
-{
-    switch (type) {
-    case CloudFileMember::Type::Owner:
-        return QObject::tr("Owner");
-    case CloudFileMember::Type::Member:
-        return QObject::tr("Member");
-    default:
-        throw std::logic_error("Invalid CloudFileMember type");
-    }
-}
-
-CloudFileMemberHandler vm::FindCloudFileMemberById(const CloudFileMembers &members, const UserId &memberId)
-{
-    const auto it = std::find_if(members.cbegin(), members.cend(),
-                                 [memberId](auto member) { return memberId == member->contact()->userId(); });
-    return (it == members.cend()) ? CloudFileMemberHandler() : *it;
 }

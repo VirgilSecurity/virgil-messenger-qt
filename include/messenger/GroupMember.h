@@ -54,7 +54,7 @@ public:
     //
     GroupMember() = default;
 
-    GroupMember(GroupId groupId, UserId memberId, QString memberNickName, GroupAffiliation memberAffiliation);
+    GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation, ContactHandler contact = {});
 
     [[nodiscard]] GroupId groupId() const;
 
@@ -64,12 +64,15 @@ public:
 
     [[nodiscard]] GroupAffiliation memberAffiliation() const;
 
+    [[nodiscard]] ContactHandler contact() const;
+
 private:
     GroupId m_groupId;
     UserId m_groupOwnerId;
     UserId m_memberId;
     QString m_memberNickName;
     GroupAffiliation m_memberAffiliation;
+    ContactHandler m_contact;
 };
 
 using GroupMemberHandler = std::shared_ptr<GroupMember>;

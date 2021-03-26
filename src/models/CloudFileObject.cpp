@@ -36,6 +36,8 @@
 
 #include "Messenger.h"
 
+#include <algorithm>
+
 using namespace vm;
 using Self = CloudFileObject;
 
@@ -111,7 +113,7 @@ CloudFileMembers Self::selectedMembers() const
 
 CloudFileMemberHandler Self::findMemberById(const UserId &userId) const
 {
-    return FindCloudFileMemberById(m_membersModel->members(), userId);
+    return m_membersModel->findMemberById(userId);
 }
 
 void Self::updateCloudFiles(const CloudFilesUpdate &update)

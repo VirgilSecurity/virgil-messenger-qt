@@ -40,15 +40,17 @@
 #include "CloudFilesUpdate.h"
 #include "UserDatabase.h"
 
+#include <algorithm>
+
 using namespace vm;
 using Self = ListMembersCloudFileOperation;
 
-Self::ListMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
-                                    const CloudFileHandler &parentFolder, UserDatabase *userDatabase)
+Self::ListMembersCloudFileOperation(CloudFileOperation *parent, CloudFileHandler file, CloudFileHandler parentFolder,
+                                    UserDatabase *userDatabase)
     : Operation(QLatin1String("ShareCloudFiles"), parent),
       m_parent(parent),
-      m_file(file),
-      m_parentFolder(parentFolder),
+      m_file(std::move(file)),
+      m_parentFolder(std::move(parentFolder)),
       m_userDatabase(userDatabase),
       m_requestId(0)
 {
@@ -63,13 +65,19 @@ void Self::run()
     m_requestId = m_parent->cloudFileSystem()->fetchMembers(m_file);
 }
 
-void Self::onListFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members)
+void Self::onListFetched(const CloudFileRequestId &requestId, const CloudFileHandler &file, CloudFileMembers members)
 {
     if (m_requestId == requestId) {
         m_file = file;
-        m_members = members;
-        m_membersContacts = CloudFileMembersToContacts(members);
-        m_userDatabase->contactsTable()->fetch(m_membersContacts);
+
+        std::transform(members.begin(), members.end(), std::inserter(m_members, m_members.end()),
+                       [](auto &&member) { return std::make_pair(member->memberId(), member); });
+
+        QStringList memberIds;
+        std::transform(m_members.cbegin(), m_members.cend(), std::back_inserter(memberIds),
+                       [](const auto &member) { return QString(member.second->memberId()); });
+
+        m_userDatabase->contactsTable()->fetch(m_requestId, memberIds);
     }
 }
 
@@ -80,27 +88,34 @@ void Self::onListFetchErrorOccured(CloudFileRequestId requestId, const QString &
     }
 }
 
-void Self::onContactsFetched(const Contacts &requestedContacts, const Contacts &fetchedContacts)
+void Self::onContactsFetched(const quint64 requestId, MutableContacts fetchedContacts)
 {
-    if (requestedContacts == m_membersContacts) {
-        // Build map for quick search
-        std::map<UserId, ContactHandler> map;
-        for (auto &c : fetchedContacts) {
-            map[c->userId()] = c;
-        }
-
-        // Update contacts in members
-        for (auto &m : m_members) {
-            if (const auto c = map[m->contact()->userId()]) {
-                m->setContact(c);
+    if (m_requestId == requestId) {
+        //
+        //  Update contacts in members.
+        //
+        CloudFileMembers updatedMembers;
+        for (auto &&contact : fetchedContacts) {
+            auto currentMember = m_members.find(contact->userId());
+            if (currentMember != m_members.end()) {
+                updatedMembers.push_back(
+                        std::make_unique<CloudFileMember>(currentMember->second->cloneWithContact(contact)));
+                m_members.erase(currentMember);
             }
         }
 
-        // Emit update and finish
+        std::transform(m_members.begin(), m_members.end(), std::back_inserter(updatedMembers),
+                       [this](auto &&member) { return std::move(member.second); });
+
+        m_members.clear();
+
+        //
+        //  Emit update and finish.
+        //
         ListMembersCloudFileUpdate update;
-        update.parentFolder = m_parentFolder;
-        update.file = m_file;
-        update.members = m_members;
+        update.parentFolder = std::move(m_parentFolder);
+        update.file = std::move(m_file);
+        update.members = std::move(updatedMembers);
         m_parent->updateCloudFiles(update);
 
         finish();
