@@ -79,11 +79,9 @@ ContactHandler Self::contact() const
     return m_contact;
 }
 
-CloudFileMember Self::cloneWithContact(ContactHandler contact) const
+void Self::setContact(ContactHandler contact)
 {
-    auto self = *this;
-    self.m_contact = std::move(contact);
-    return self;
+    m_contact = std::move(contact);
 }
 
 CloudFileMembers vm::ContactsToCloudFileMembers(const Contacts &contacts)

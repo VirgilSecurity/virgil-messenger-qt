@@ -98,14 +98,14 @@ void Self::onContactsFetched(const quint64 requestId, MutableContacts fetchedCon
         for (auto &&contact : fetchedContacts) {
             auto currentMember = m_members.find(contact->userId());
             if (currentMember != m_members.end()) {
-                updatedMembers.push_back(
-                        std::make_unique<CloudFileMember>(currentMember->second->cloneWithContact(contact)));
+                currentMember->second->setContact(contact);
+                updatedMembers.push_back(currentMember->second);
                 m_members.erase(currentMember);
             }
         }
 
         std::transform(m_members.begin(), m_members.end(), std::back_inserter(updatedMembers),
-                       [this](auto &&member) { return std::move(member.second); });
+                       [](auto &&member) { return std::move(member.second); });
 
         m_members.clear();
 

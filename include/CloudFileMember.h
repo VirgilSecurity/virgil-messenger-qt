@@ -60,7 +60,7 @@ public:
 
     [[nodiscard]] ContactHandler contact() const;
 
-    [[nodiscard]] CloudFileMember cloneWithContact(ContactHandler contact) const;
+    void setContact(ContactHandler contact);
 
 private:
     UserId m_memberId;
