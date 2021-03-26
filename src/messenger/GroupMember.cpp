@@ -82,7 +82,7 @@ GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &
 {
     GroupMembers members;
     for (auto &contact : contacts) {
-        const auto member =
+        auto member =
                 std::make_shared<GroupMember>(groupId, contact->userId(), contact->name(), GroupAffiliation::Member);
         members.push_back(std::move(member));
     }
