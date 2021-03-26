@@ -2600,10 +2600,6 @@ void Self::loadGroupChats(const Groups &groups)
 
     QtConcurrent::run([this, groups]() {
         for (const auto &group : groups) {
-            if (group->invitationStatus() != GroupInvitationStatus::Accepted) {
-                continue;
-            }
-
             vssq_error_t error;
             vssq_error_reset(&error);
 
@@ -2826,6 +2822,16 @@ void Self::xmppOnFetchRoomsFromServer()
 void Self::xmppOnJoinRoom(const GroupId &groupId)
 {
     Q_ASSERT(m_impl->xmppGroupChatManager);
+
+    const auto group = findGroupInCache(groupId);
+    Q_ASSERT(group);
+
+    //
+    //  Filter out not accepted groups.
+    //
+    if (group->localGroup->invitationStatus() != GroupInvitationStatus::Accepted) {
+        return;
+    }
 
     //
     //  Join to XMPP group.
