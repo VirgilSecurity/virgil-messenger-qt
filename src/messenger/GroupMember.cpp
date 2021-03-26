@@ -39,9 +39,18 @@
 using namespace vm;
 using Self = GroupMember;
 
-Self::GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation, ContactHandler contact)
+Self::GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation)
     : m_groupId(std::move(groupId)),
       m_memberId(std::move(memberId)),
+      m_memberNickName(m_memberId),
+      m_memberAffiliation(memberAffiliation),
+      m_contact()
+{
+}
+
+Self::GroupMember(GroupId groupId, ContactHandler contact, GroupAffiliation memberAffiliation)
+    : m_groupId(std::move(groupId)),
+      m_memberId(contact->userId()),
       m_memberNickName(m_memberId),
       m_memberAffiliation(memberAffiliation),
       m_contact(std::move(contact))
@@ -98,8 +107,7 @@ GroupMembers vm::ContactsToGroupMembers(const GroupId &groupId, const Contacts &
     GroupMembers members;
     std::transform(contacts.cbegin(), contacts.cend(), std::back_inserter(members),
                    [&groupId](const auto &contact) -> GroupMemberHandler {
-                       return std::make_shared<GroupMember>(groupId, contact->userId(), GroupAffiliation::Member,
-                                                            contact);
+                       return std::make_shared<GroupMember>(groupId, contact, GroupAffiliation::Member);
                    });
     return members;
 }

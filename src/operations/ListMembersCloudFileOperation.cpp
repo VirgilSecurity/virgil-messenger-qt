@@ -113,7 +113,7 @@ void Self::onContactsFetched(const quint64 requestId, MutableContacts fetchedCon
         //  Emit update and finish.
         //
         ListMembersCloudFileUpdate update;
-        update.parentFolder = std::move(m_parentFolder);
+        update.parentFolder = m_parentFolder;
         update.file = std::move(m_file);
         update.members = std::move(updatedMembers);
         m_parent->updateCloudFiles(update);

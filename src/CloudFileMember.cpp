@@ -43,8 +43,10 @@ using Self = CloudFileMember;
 
 Self::CloudFileMember() : m_memberId(), m_type(Type::Member), m_contact() { }
 
-Self::CloudFileMember(UserId memberId, Type type, ContactHandler contact)
-    : m_memberId(std::move(memberId)), m_contact(std::move(contact)), m_type(type)
+Self::CloudFileMember(UserId memberId, Type type) : m_memberId(std::move(memberId)), m_type(type), m_contact() { }
+
+Self::CloudFileMember(ContactHandler contact, Type type)
+    : m_memberId(contact->userId()), m_type(type), m_contact(std::move(contact))
 {
 }
 
@@ -88,7 +90,7 @@ CloudFileMembers vm::ContactsToCloudFileMembers(const Contacts &contacts)
 {
     CloudFileMembers members;
     std::transform(contacts.cbegin(), contacts.cend(), std::back_inserter(members), [](const auto &contact) {
-        return std::make_unique<CloudFileMember>(contact->userId(), CloudFileMember::Type::Member, contact);
+        return std::make_unique<CloudFileMember>(contact, CloudFileMember::Type::Member);
     });
     return members;
 }

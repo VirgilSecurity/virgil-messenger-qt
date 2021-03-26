@@ -159,12 +159,6 @@ GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
     auto memberId = query.value("memberId").toString();
     auto memberAffiliation = query.value("memberAffiliation").toString();
 
-    auto contact = std::make_unique<Contact>();
-    contact->setUserId(UserId(memberId));
-    contact->setUsername(query.value("username").toString());
-    contact->setEmail(query.value("email").toString());
-    contact->setPhone(query.value("phone").toString());
-
     if (groupId.isEmpty() || memberId.isEmpty() || memberAffiliation.isEmpty()) {
 
         qCCritical(lcDatabase) << "GroupMembersTable: failed to parse query result";
@@ -172,6 +166,12 @@ GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
         return GroupMemberHandler();
     }
 
-    return std::make_shared<GroupMember>(GroupId(std::move(groupId)), UserId(std::move(memberId)),
-                                         GroupAffiliationFromString(memberAffiliation), std::move(contact));
+    auto contact = std::make_unique<Contact>();
+    contact->setUserId(UserId(std::move(memberId)));
+    contact->setUsername(query.value("username").toString());
+    contact->setEmail(query.value("email").toString());
+    contact->setPhone(query.value("phone").toString());
+
+    return std::make_shared<GroupMember>(GroupId(std::move(groupId)), std::move(contact),
+                                         GroupAffiliationFromString(memberAffiliation));
 }

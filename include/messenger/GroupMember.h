@@ -54,7 +54,9 @@ public:
     //
     GroupMember() = default;
 
-    GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation, ContactHandler contact = {});
+    GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation);
+
+    GroupMember(GroupId groupId, ContactHandler contact, GroupAffiliation memberAffiliation);
 
     [[nodiscard]] GroupId groupId() const;
 

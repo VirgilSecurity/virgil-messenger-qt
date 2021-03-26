@@ -47,7 +47,10 @@ public:
     enum class Type { Member, Owner };
 
     CloudFileMember();
-    CloudFileMember(UserId memberId, Type type, ContactHandler contact = {});
+
+    CloudFileMember(UserId memberId, Type type);
+
+    CloudFileMember(ContactHandler contact, Type type);
 
     [[nodiscard]] UserId memberId() const;
 

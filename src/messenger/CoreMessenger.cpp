@@ -2532,7 +2532,7 @@ void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
                 //  This hack is needed to fetch user when decrypt a group message to be able to verify signature.
                 //  Also initial affiliation is "None" that means participant was not added to the XMPP group yet.
                 //
-                auto groupMember = std::make_unique<GroupMember>(groupId, user->id(), GroupAffiliation::None, contact);
+                auto groupMember = std::make_unique<GroupMember>(groupId, contact, GroupAffiliation::None);
                 groupMembers.push_back(std::move(groupMember));
 
                 vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
@@ -2558,8 +2558,7 @@ void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
         ownerContact->setUserId(owner->id());
         ownerContact->setUsername(owner->username());
 
-        auto groupOwner =
-                std::make_unique<GroupMember>(groupId, owner->id(), GroupAffiliation::Owner, std::move(ownerContact));
+        auto groupOwner = std::make_unique<GroupMember>(groupId, std::move(ownerContact), GroupAffiliation::Owner);
         groupMembers.push_back(std::move(groupOwner));
 
         //
