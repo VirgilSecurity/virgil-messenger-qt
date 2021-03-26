@@ -155,6 +155,12 @@ void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const 
 void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
     Q_ASSERT(message->contentType() == MessageContentType::Picture);
+    if (message->createdAt().addDays(6) <= QDateTime::currentDateTime()) {
+        qCDebug(lcMessagesQueue) << "Message preload is outdated. Id:" << message->id()
+                                 << "Date:" << message->createdAt();
+        return;
+    }
+
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Preload;
     addSource(std::make_shared<MessageOperationSource>(message, std::move(parameter)));
