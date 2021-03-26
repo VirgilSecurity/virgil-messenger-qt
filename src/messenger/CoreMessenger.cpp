@@ -1115,9 +1115,9 @@ std::shared_ptr<User> Self::findUserByUsername(const QString &username) const
     //
     auto userIt = m_impl->usernameToUser.find(username);
     if (userIt != m_impl->usernameToUser.end()) {
-        auto publicKeyId = vsc_str_to_qstring(
-                vsc_str_from_data(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get())));
-        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId;
+        const auto publicKeyId =
+                vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get()));
+        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId.toHex();
         emit userWasFound(userIt->second);
         return userIt->second;
     }
@@ -1143,7 +1143,7 @@ std::shared_ptr<User> Self::findUserByUsername(const QString &username) const
         return nullptr;
     }
 
-    auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
+    const auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
     qCDebug(lcCoreMessenger) << "User found in the cloud with public key id:" << publicKeyId.toHex();
 
     //
@@ -1171,9 +1171,9 @@ std::shared_ptr<User> Self::findUserById(const UserId &userId) const
     //
     auto userIt = m_impl->identityToUser.find(userId);
     if (userIt != m_impl->identityToUser.end()) {
-        auto publicKeyId = vsc_str_to_qstring(
-                vsc_str_from_data(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get())));
-        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId;
+        const auto publicKeyId =
+                vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(userIt->second->impl()->user.get()));
+        qCDebug(lcCoreMessenger) << "User found in the cache with public key id:" << publicKeyId.toHex();
         emit userWasFound(userIt->second);
         return userIt->second;
     }
@@ -1198,7 +1198,7 @@ std::shared_ptr<User> Self::findUserById(const UserId &userId) const
         return nullptr;
     }
 
-    auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
+    const auto publicKeyId = vsc_data_to_qbytearray(vssq_messenger_user_public_key_id(user));
     qCDebug(lcCoreMessenger) << "User found in the cloud with public key id:" << publicKeyId.toHex();
 
     //
@@ -2600,10 +2600,6 @@ void Self::loadGroupChats(const Groups &groups)
 
     QtConcurrent::run([this, groups]() {
         for (const auto &group : groups) {
-            if (group->invitationStatus() != GroupInvitationStatus::Accepted) {
-                continue;
-            }
-
             vssq_error_t error;
             vssq_error_reset(&error);
 
@@ -2834,6 +2830,16 @@ void Self::xmppOnFetchRoomsFromServer()
 void Self::xmppOnJoinRoom(const GroupId &groupId)
 {
     Q_ASSERT(m_impl->xmppGroupChatManager);
+
+    const auto group = findGroupInCache(groupId);
+    Q_ASSERT(group);
+
+    //
+    //  Filter out not accepted groups.
+    //
+    if (group->localGroup->invitationStatus() != GroupInvitationStatus::Accepted) {
+        return;
+    }
 
     //
     //  Join to XMPP group.
@@ -3291,11 +3297,18 @@ void Self::xmppOnArchivedMessageReceived(const QString &queryId, const QXmppMess
         }
     }();
 
-    if (senderId == currentUser()->id()) {
-        processReceivedXmppCarbonMessage(message);
-    } else {
-        processReceivedXmppMessage(message);
-    }
+    auto future = [this, &message, &senderId]() {
+        if (senderId == currentUser()->id()) {
+            return processReceivedXmppCarbonMessage(message);
+        } else {
+            return processReceivedXmppMessage(message);
+        }
+    }();
+
+    //
+    //  Archived messages should be processed sequentially to grantee correct order of messages and it's marks.
+    //
+    future.waitForFinished();
 }
 
 void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResultSetReply &resultSetReply,
