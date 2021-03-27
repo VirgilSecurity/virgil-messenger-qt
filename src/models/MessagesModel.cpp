@@ -189,7 +189,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
             text = textContent->text();
         } else if (auto groupInvitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
             if (groupInvitation->superOwnerId() == m_messenger->currentUser()->id()) {
-                text = tr("Invitation for %1")
+                text = tr("Invitation sent to %1")
                                .arg(Utils::displayUsername(message->recipientUsername(), message->recipientId()));
             } else {
                 text = tr("Invited by %1").arg(Utils::displayUsername(message->senderUsername(), message->senderId()));

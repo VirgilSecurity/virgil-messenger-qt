@@ -41,6 +41,7 @@
 #include "ContactUpdate.h"
 
 #include <QSqlQuery>
+#include <QStringList>
 
 namespace vm {
 class ContactsTable : public DatabaseTable
@@ -49,25 +50,24 @@ class ContactsTable : public DatabaseTable
 
 signals:
     void addContact(const Contact &contact);
-    void fetch(const Contacts &requestedContacts);
+    void fetch(quint64 requestId, const QStringList &userIds);
 
     void updateContact(const ContactUpdate &update);
 
     void errorOccurred(const QString &errorText);
-    void fetched(const Contacts &requestedContacts, const Contacts &fetchedContacts);
+    void fetched(quint64 requestId, MutableContacts fetchedContacts);
 
 public:
     explicit ContactsTable(Database *database);
-
     bool create() override;
 
 private:
     void onAddContact(const Contact &contact);
-    void onFetch(const Contacts &requestedContacts);
+    void onFetch(quint64 requestId, const QStringList &userIds);
 
     void onUpdateContact(const ContactUpdate &update);
 
-    ContactHandler readContact(const QSqlQuery &query) const;
+    [[nodiscard]] MutableContactHandler readContact(const QSqlQuery &query) const;
 };
 
 } // namespace vm
