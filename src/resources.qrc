@@ -227,8 +227,8 @@
         <file>resources/database/updateCloudFolder.sql</file>
         <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
-        <file>resources/database/updateMessageStage.sql</file>
-        <file>resources/database/updateMessageStage.sql</file>
+        <file>resources/database/updateIncomingMessageStage.sql</file>
+        <file>resources/database/updateOutgoingMessageStage.sql</file>
         <file>resources/database/insertGroup.sql</file>
         <file>resources/database/selectGroups.sql</file>
         <file>resources/database/updateGroupCache.sql</file>

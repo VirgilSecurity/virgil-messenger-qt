@@ -47,7 +47,7 @@ IncomingMessageStage vm::IncomingMessageStageFromString(const QString &stageStri
     } else if (stageString == QLatin1String("broken")) {
         return IncomingMessageStage::Broken;
     } else {
-        throw std::logic_error("Invalid IncomingMessageStage string");
+        throw std::logic_error("Invalid IncomingMessageStage string: " + stageString.toStdString());
     }
 }
 

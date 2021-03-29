@@ -152,9 +152,11 @@ void MessagesTable::onDeleteChatMessages(const ChatId &chatId)
 
 void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
 {
+    QString queryId;
     DatabaseUtils::BindValues bindValues;
 
     if (auto update = std::get_if<IncomingMessageStageUpdate>(&messageUpdate)) {
+        queryId = QLatin1String("updateIncomingMessageStage");
         bindValues.push_back({ ":id", QString(update->messageId) });
         bindValues.push_back({ ":stage", IncomingMessageStageToString(update->stage) });
 
@@ -163,6 +165,7 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
         }
 
     } else if (auto update = std::get_if<OutgoingMessageStageUpdate>(&messageUpdate)) {
+        queryId = QLatin1String("updateOutgoingMessageStage");
         bindValues.push_back({ ":id", QString(update->messageId) });
         bindValues.push_back({ ":stage", OutgoingMessageStageToString(update->stage) });
     }
@@ -171,7 +174,7 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
         return;
     }
 
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageStage"), bindValues);
+    const auto query = DatabaseUtils::readExecQuery(database(), queryId, bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Message was updated" << bindValues.front().second << bindValues.back();
     } else {

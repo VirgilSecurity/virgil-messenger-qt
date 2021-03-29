@@ -844,6 +844,8 @@ QFuture<Self::Result> Self::signInWithBackupKey(const QString &username, const Q
             return Self::Result::Error_RestoreKeyBackup;
         }
 
+        m_impl->creds = vssq_messenger_creds_wrap_ptr(vssq_messenger_creds(m_impl->messenger.get()));
+
         qCInfo(lcCoreMessenger) << "User has been successfully signed in with a backup key";
 
         return finishSignIn();
@@ -2199,7 +2201,10 @@ void Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage)
     //  Got non archived message so send 'received' mark.
     //  TODO: Decide if need to filter group chat messages.
     //
-    if (xmppMessage.isMarkable() && !xmppMessage.from().isEmpty() && !xmppMessage.id().isEmpty()) {
+    const bool isIncomingValidMarkableMessage = (xmppMessage.type() != QXmppMessage::Error)
+            && !xmppMessage.from().isEmpty() && !xmppMessage.id().isEmpty() && xmppMessage.isMarkable();
+
+    if (isIncomingValidMarkableMessage) {
         QXmppMessage mark;
         mark.setTo(xmppMessage.from());
         mark.setFrom(xmppMessage.to());

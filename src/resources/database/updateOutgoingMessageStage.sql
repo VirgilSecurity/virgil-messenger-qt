@@ -1,3 +1,3 @@
 UPDATE messages
 SET stage = :stage
-WHERE id = :id
+WHERE id = :id AND isOutgoing = 1;
