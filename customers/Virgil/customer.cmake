@@ -45,7 +45,7 @@ else()
     # ***********************************************************************************
     elseif(VS_PLATFORM STREQUAL "windows")
         # Windows sparkle feed URL
-        set(WIN_SU_FEED_URL "https://test.site/appcast.xml")
+        set(WIN_SU_FEED_URL "https://virgilsecurity.bintray.com/messenger/windows/nightly/appcast.xml")
         set(WIN_SU_PUBLIC_ED_KEY "44RVxRhV4h4Hlw+VOeXvCj78Z5NUhJ2Qi5N+kpu8KxI=")
 
     # ----------
