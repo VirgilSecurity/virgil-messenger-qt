@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,45 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILE_UTILS_H
-#define VM_FILE_UTILS_H
+#ifndef IOS_VIEW_CONTROLLER_H
+#define IOS_VIEW_CONTROLLER_H
 
-#include <QString>
-#include <QUrl>
-#include <QFileInfo>
+#import <UIKit/UIKit.h>
 
-#include <optional>
+@interface IosViewController : UIViewController <UIDocumentInteractionControllerDelegate>
+@end
 
-namespace vm {
-class FileUtils
-{
-public:
-    static QString calculateFingerprint(const QString &path);
-
-    static QString findUniqueFileName(const QString &fileName);
-
-    static bool forceCreateDir(const QString &absolutePath);
-
-    static std::optional<QString> readTextFile(const QString &filePath);
-
-    static bool fileExists(const QString &filePath);
-
-    static void removeFile(const QString &filePath);
-
-    static void removeDir(const QString &dirPath);
-
-    static QString fileName(const QString &filePath);
-
-    static QString attachmentFileName(const QUrl &url, bool isPicture);
-
-    static QString fileMimeType(const QString &filePath);
-
-    static bool isValidUrl(const QUrl &url);
-
-    static QString urlToLocalFile(const QUrl &url);
-
-    static QUrl localFileToUrl(const QString &filePath);
-};
-}; // namespace vm
-
-#endif // VM_FILE_UTILS_H
+#endif // IOS_VIEW_CONTROLLER_H
