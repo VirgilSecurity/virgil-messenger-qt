@@ -96,7 +96,9 @@ private:
     bool m_isBanned;
 };
 
-using ContactHandler = std::shared_ptr<Contact>;
+using MutableContactHandler = std::shared_ptr<Contact>;
+using MutableContacts = std::vector<MutableContactHandler>;
+using ContactHandler = std::shared_ptr<const Contact>;
 using Contacts = std::vector<ContactHandler>;
 
 } // namespace vm

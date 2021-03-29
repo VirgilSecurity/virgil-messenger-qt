@@ -157,13 +157,6 @@ GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
 
     auto groupId = query.value("groupId").toString();
     auto memberId = query.value("memberId").toString();
-    auto memberNickname = query.value("memberNickname").toString();
-    if (memberNickname.isEmpty()) {
-        const auto username = query.value("username").toString();
-        const auto email = query.value("email").toString();
-        const auto phone = query.value("phone").toString();
-        memberNickname = Utils::contactDisplayName(memberNickname, username, email, phone);
-    }
     auto memberAffiliation = query.value("memberAffiliation").toString();
 
     if (groupId.isEmpty() || memberId.isEmpty() || memberAffiliation.isEmpty()) {
@@ -173,6 +166,12 @@ GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
         return GroupMemberHandler();
     }
 
-    return std::make_shared<GroupMember>(GroupId(std::move(groupId)), UserId(std::move(memberId)),
-                                         std::move(memberNickname), GroupAffiliationFromString(memberAffiliation));
+    auto contact = std::make_unique<Contact>();
+    contact->setUserId(UserId(std::move(memberId)));
+    contact->setUsername(query.value("username").toString());
+    contact->setEmail(query.value("email").toString());
+    contact->setPhone(query.value("phone").toString());
+
+    return std::make_shared<GroupMember>(GroupId(std::move(groupId)), std::move(contact),
+                                         GroupAffiliationFromString(memberAffiliation));
 }

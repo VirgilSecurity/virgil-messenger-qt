@@ -320,6 +320,7 @@ struct RegisterMetaTypesOnce
         qRegisterMetaType<vm::GroupMembers>("GroupMembers");
         qRegisterMetaType<vm::Contact>("Contact");
         qRegisterMetaType<vm::Contacts>("Contacts");
+        qRegisterMetaType<vm::MutableContacts>("MutableContacts");
 
         qRegisterMetaType<vm::ChatId>("ChatId");
         qRegisterMetaType<vm::GroupId>("GroupId");
@@ -2531,8 +2532,7 @@ void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
                 //  This hack is needed to fetch user when decrypt a group message to be able to verify signature.
                 //  Also initial affiliation is "None" that means participant was not added to the XMPP group yet.
                 //
-                auto groupMember = std::make_unique<GroupMember>(groupId, user->id(), user->id() /*nickname*/,
-                                                                 GroupAffiliation::None);
+                auto groupMember = std::make_unique<GroupMember>(groupId, contact, GroupAffiliation::None);
                 groupMembers.push_back(std::move(groupMember));
 
                 vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
@@ -2553,8 +2553,12 @@ void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
         //  Add self as owner to the group.
         //
         auto owner = currentUser();
-        auto groupOwner =
-                std::make_unique<GroupMember>(groupId, owner->id(), owner->id() /*nickname*/, GroupAffiliation::Owner);
+
+        auto ownerContact = std::make_unique<Contact>();
+        ownerContact->setUserId(owner->id());
+        ownerContact->setUsername(owner->username());
+
+        auto groupOwner = std::make_unique<GroupMember>(groupId, std::move(ownerContact), GroupAffiliation::Owner);
         groupMembers.push_back(std::move(groupOwner));
 
         //
@@ -2781,6 +2785,8 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                     invitationMessage->setSenderId(currentUser()->id());
                     invitationMessage->setSenderUsername(currentUser()->username());
                     invitationMessage->setRecipientId(memberId);
+                    // TODO: Review next line to pass display name when search by email and contact will be added.
+                    invitationMessage->setRecipientUsername(member->contact()->username());
                     invitationMessage->setContent(
                             MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
                     invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));

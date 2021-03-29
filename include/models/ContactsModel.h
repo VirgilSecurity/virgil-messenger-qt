@@ -64,21 +64,21 @@ public:
 
     explicit ContactsModel(QObject *parent, bool createProxy = true);
 
-    void setContacts(const Contacts &contacts);
-    const Contacts &getContacts() const;
-    int getContactsCount() const;
+    void setContacts(Contacts contacts);
+    [[nodiscard]] Contacts getContacts() const;
+    [[nodiscard]] int getContactsCount() const;
 
-    ContactHandler createContact(const QString &username) const;
-    const ContactHandler getContact(const int row) const;
-    bool hasContact(const QString &contactUsername) const;
+    [[nodiscard]] ContactHandler createContact(const QString &username) const;
+    [[nodiscard]] ContactHandler getContact(int row) const;
+    [[nodiscard]] bool hasContact(const QString &contactUsername) const;
 
-    void addContact(const ContactHandler contact);
+    void addContact(ContactHandler contact);
     void removeContact(const QString &contactUsername);
-    void removeContactByRow(const int row);
-    void removeContactsByRows(const int startRow, const int endRow);
-    void updateContact(const ContactHandler contact, int row);
+    void removeContactByRow(int row);
+    void removeContactsByRows(int startRow, int endRow);
+    void updateContact(ContactHandler contact, int row);
 
-    Contacts selectedContacts() const;
+    [[nodiscard]] Contacts selectedContacts() const;
 
     Q_INVOKABLE virtual void toggleByUsername(const QString &contactUsername);
 
@@ -86,16 +86,16 @@ signals:
     void avatarUrlNotFound(const QString &contactName, QPrivateSignal) const;
 
 protected:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
+    [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
-    QModelIndex findByUsername(const QString &contactUsername) const;
-    QModelIndex findByUserId(const UserId &userId) const;
+    [[nodiscard]] QModelIndex findByUsername(const QString &contactUsername) const;
+    [[nodiscard]] QModelIndex findByUserId(const UserId &userId) const;
 
 private:
     void loadAvatarUrl(const QString &contactUsername);
-    void setAvatarUrl(const ContactHandler contact, const QUrl &url);
+    void setAvatarUrl(const ContactHandler &contact, const QUrl &url);
 
     Contacts m_contacts;
     ContactAvatarLoader *m_avatarLoader;
