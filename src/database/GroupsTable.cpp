@@ -60,14 +60,22 @@ bool Self::create()
     }
 }
 
-static GroupHandler readGroup(const QSqlQuery &query)
+GroupHandler Self::readGroup(const QSqlQuery &query, const QString &preffix)
 {
+    auto queryValue = [&query, &preffix](auto &name) {
+        if (preffix.isEmpty()) {
+            return query.value(name);
+        }
+        QString newName(name);
+        newName[0] = newName[0].toUpper();
+        return query.value(preffix + newName);
+    };
 
-    auto id = GroupId(query.value("id").toString());
-    auto superOwnerId = UserId(query.value("superOwnerId").toString());
-    auto name = query.value("name").toString();
-    auto cache = query.value("cache").toString();
-    auto invitationStatus = GroupInvitationStatusFromString(query.value("invitationStatus").toString());
+    auto id = GroupId(queryValue("id").toString());
+    auto superOwnerId = UserId(queryValue("superOwnerId").toString());
+    auto name = queryValue("name").toString();
+    auto cache = queryValue("cache").toString();
+    auto invitationStatus = GroupInvitationStatusFromString(queryValue("invitationStatus").toString());
 
     if (!id.isValid() || !superOwnerId.isValid()) {
         return nullptr;
@@ -126,6 +134,8 @@ void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
 
     } else if (auto update = std::get_if<GroupCacheUpdate>(&groupUpdate)) {
         updateGroupCache(update->groupId, update->cache);
+    } else if (auto update = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
+        updateGroupInvitation(update->groupId, update->invitationStatus);
     }
 }
 
@@ -164,6 +174,20 @@ void Self::updateGroupCache(const GroupId &groupId, const QString &cache)
         qCDebug(lcDatabase) << "Group cache was updated: " << bindValues.front().second;
     } else {
         qCCritical(lcDatabase) << "GroupsTable::updateGroupCache error";
+        emit errorOccurred(tr("Failed to update groups table"));
+    }
+}
+
+void Self::updateGroupInvitation(const GroupId &groupId, GroupInvitationStatus status)
+{
+    ScopedConnection connection(*database());
+    const DatabaseUtils::BindValues bindValues { { ":id", QString(groupId) },
+                                                 { ":invitationStatus", GroupInvitationStatusToString(status) } };
+    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateGroupInvitation"), bindValues);
+    if (query) {
+        qCDebug(lcDatabase) << "Group invitation was updated: " << bindValues.front().second;
+    } else {
+        qCCritical(lcDatabase) << "GroupsTable::updateGroupInvitation error";
         emit errorOccurred(tr("Failed to update groups table"));
     }
 }
