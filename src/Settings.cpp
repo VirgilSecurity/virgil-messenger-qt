@@ -46,6 +46,7 @@ static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
 static const QString kCredenitalsGroup = "Credentials";
 static const QString kUsersInfoGroup = "UsersInfo";
+static const QString kChatsLastSyncDateGroup = "ChatsLastSyncDateGroup";
 
 static const QString kDeviceId = "DeviceId";
 
@@ -347,5 +348,26 @@ void Settings::removeGroup(const QString &group)
 void Settings::createDeviceId()
 {
     setValue(kDeviceId, Utils::createUuid());
+    sync();
+}
+
+QDateTime Settings::chatHistoryLastSyncDate(const QString &chatId) const
+{
+    if (chatId.isEmpty()) {
+        return groupValue(kChatsLastSyncDateGroup, lastSignedInUser()).toDateTime();
+    } else {
+        return groupValue(makeGroupKey(kChatsLastSyncDateGroup, lastSignedInUser()), chatId).toDateTime();
+    }
+}
+
+void Settings::setChatHistoryLastSyncDate(const QString &chatId)
+{
+    if (chatId.isEmpty()) {
+        setGroupValue(kChatsLastSyncDateGroup, lastSignedInUser(), QDateTime::currentDateTimeUtc());
+    } else {
+        setGroupValue(makeGroupKey(kChatsLastSyncDateGroup, lastSignedInUser()), chatId,
+                      QDateTime::currentDateTimeUtc());
+    }
+
     sync();
 }

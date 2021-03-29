@@ -68,42 +68,110 @@ Self::XmppMucSubManager() : m_impl(std::make_shared<Self::Impl>())
     static MetaTypeInitilazer _;
 }
 
-QString Self::subscribe(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
-                        const QString &nickName)
+QString Self::subscribe(const std::list<XmppMucSubEvent> &events, const QString &roomJid, const QString &nickName)
 {
+    Q_ASSERT(m_impl->client);
+
+    const auto fromJid = m_impl->client->configuration().jid();
 
     XmppMucSubscribeItem subscribeItem;
     subscribeItem.setEvents(events);
     subscribeItem.setNickName(nickName);
 
     XmppMucSubscribeIq iq(QXmppIq::Type::Set);
-    iq.setTo(to);
-    iq.setFrom(from);
+    iq.setTo(roomJid);
+    iq.setFrom(fromJid);
     iq.setItem(subscribeItem);
 
-    if (m_impl->client && m_impl->client->sendPacket(iq)) {
-        qCDebug(lsXmppMucSubManager) << "User:" << from << "nickname:" << nickName << "subscribed to the room:" << to;
+    if (m_impl->client->sendPacket(iq)) {
+        qCDebug(lsXmppMucSubManager) << "User:" << fromJid << "nickname:" << nickName
+                                     << "subscribed to the room:" << roomJid;
     }
 
     return iq.id();
 }
 
-QString Self::subscribeOther(const std::list<XmppMucSubEvent> &events, const QString &from, const QString &to,
-                             const QString &jid, const QString &nickName)
+QString Self::subscribeOther(const std::list<XmppMucSubEvent> &events, const QString &roomJid,
+                             const QString &otherUserJid, const QString &nickName)
 {
+    Q_ASSERT(m_impl->client);
+
+    const auto fromJid = m_impl->client->configuration().jid();
 
     XmppMucSubscribeItem subscribeItem;
     subscribeItem.setEvents(events);
     subscribeItem.setNickName(nickName);
-    subscribeItem.setJid(jid);
+    subscribeItem.setJid(otherUserJid);
 
     XmppMucSubscribeIq iq(QXmppIq::Type::Set);
-    iq.setTo(to);
-    iq.setFrom(from);
+    iq.setTo(roomJid);
+    iq.setFrom(fromJid);
     iq.setItem(subscribeItem);
 
+    if (m_impl->client->sendPacket(iq)) {
+        qCDebug(lsXmppMucSubManager) << "User:" << otherUserJid << "nickname:" << nickName
+                                     << "subscribed to the room:" << roomJid;
+    }
+
+    return iq.id();
+}
+
+QString Self::unsubscribe(const QString &roomJid)
+{
+    Q_ASSERT(m_impl->client);
+
+    const auto fromJid = m_impl->client->configuration().jid();
+
+    XmppMucUnsubscribeIq iq(QXmppIq::Type::Set);
+    iq.setTo(roomJid);
+    iq.setFrom(fromJid);
+
+    if (m_impl->client->sendPacket(iq)) {
+        qCDebug(lsXmppMucSubManager) << "User:" << fromJid << "was unsubscribed from the room:" << roomJid;
+    }
+
+    return iq.id();
+}
+
+QString Self::unsubscribeOther(const QString &roomJid, const QString &otherUserJid)
+{
+    Q_ASSERT(m_impl->client);
+
+    const auto fromJid = m_impl->client->configuration().jid();
+
+    XmppMucUnsubscribeIq iq(QXmppIq::Type::Set);
+    iq.setTo(roomJid);
+    iq.setFrom(fromJid);
+    iq.setJid(otherUserJid);
+
+    if (m_impl->client->sendPacket(iq)) {
+        qCDebug(lsXmppMucSubManager) << "User:" << otherUserJid << "was unsubscribed from the room:" << roomJid;
+    }
+
+    return iq.id();
+}
+
+QString Self::retrieveSubscribedRooms(const QString &roomDomain)
+{
+    XmppMucSubscriptionsIq iq(QXmppIq::Type::Get);
+    iq.setFrom(m_impl->client->configuration().jid());
+    iq.setTo(roomDomain);
+
     if (m_impl->client && m_impl->client->sendPacket(iq)) {
-        qCDebug(lsXmppMucSubManager) << "User:" << jid << "nickname:" << nickName << "subscribed to the room:" << to;
+        qCDebug(lsXmppMucSubManager) << "Requested rooms, request id:" << iq.id();
+    }
+
+    return iq.id();
+}
+
+QString Self::retrieveRoomSubscribers(const QString &roomJid)
+{
+    XmppMucSubscriptionsIq iq(QXmppIq::Type::Get);
+    iq.setFrom(m_impl->client->configuration().jid());
+    iq.setTo(roomJid);
+
+    if (m_impl->client && m_impl->client->sendPacket(iq)) {
+        qCDebug(lsXmppMucSubManager) << "Requested a room subscribers, room:" << roomJid << ", request id:" << iq.id();
     }
 
     return iq.id();
@@ -118,6 +186,8 @@ bool Self::handleStanza(const QDomElement &element)
             iq.parse(element);
 
             if (iq.isMySubscriptions()) {
+                emit subscribedRoomsCountReceived(iq.id(), iq.items().size());
+
                 for (const auto &subscribedRoom : iq.items()) {
                     emit subscribedRoomReceived(iq.id(), subscribedRoom.jid(), iq.to(), subscribedRoom.events());
                 }

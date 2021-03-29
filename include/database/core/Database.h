@@ -73,6 +73,11 @@ public:
     Version version() const;
     void setMigration(std::unique_ptr<Migration> migration);
 
+    //
+    //  Proxy to sqlite3_changes().
+    //
+    qsizetype rowsChangedCount() const;
+
     operator QSqlDatabase() const;
 
 signals:
@@ -81,7 +86,7 @@ signals:
     void errorOccurred(const QString &errorText);
 
 protected:
-    virtual bool create();
+    virtual bool create() = 0;
 
 private:
     bool readVersion();

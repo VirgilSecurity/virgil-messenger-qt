@@ -52,9 +52,16 @@ class XmppRoomParticipantsManager : public QXmppClientExtension
 
 public:
     //
-    //  Should be called on the same thread where QXmppClient was created.
+    //  Request all room's participants.
+    //  Prerequisite: is called on the same thread where QXmppClient was created.
     //
     void requestAll(const QString &roomJid);
+
+    //
+    //  Request room's participants with an owner affiliation.
+    //  Prerequisite: is called on the same thread where QXmppClient was created.
+    //
+    void requestOwners(const QString &roomJid);
 
     //
     //  Handle IQs with room participants.
@@ -66,12 +73,6 @@ Q_SIGNALS:
     //  This signal is emitted when a room participant info received.
     //
     void participantReceived(const QString &roomJid, const QString &jid, QXmppMucItem::Affiliation affiliation);
-
-    //
-    //  This signal is emitted when a room participant affiliation was changed.
-    //
-    void participantAffiliationChanged(const QString &roomJid, const QString &jid,
-                                       QXmppMucItem::Affiliation affiliation);
 
 protected:
     void setClient(QXmppClient *client) override;

@@ -54,23 +54,19 @@ struct GroupUpdateBase
     GroupId groupId;
 };
 
-struct AddGroupOwnersUpdate : public GroupUpdateBase
+struct GroupNameUpdate : public GroupUpdateBase
 {
-    Users owners;
+    QString name;
 };
 
-struct AddGroupMembersUpdate : public GroupUpdateBase
+struct GroupCacheUpdate : public GroupUpdateBase
 {
-    Users members;
+    QString cache;
 };
 
-struct RemoveGroupMembersUpdate : public GroupUpdateBase
+struct GroupInvitationUpdate : public GroupUpdateBase
 {
-    Users members;
-};
-
-struct AddGroupUpdate : public GroupUpdateBase
-{
+    GroupInvitationStatus invitationStatus;
 };
 
 struct GroupMemberAffiliationUpdate : public GroupUpdateBase
@@ -79,8 +75,8 @@ struct GroupMemberAffiliationUpdate : public GroupUpdateBase
     GroupAffiliation memberAffiliation;
 };
 
-using GroupUpdate = std::variant<AddGroupOwnersUpdate, AddGroupMembersUpdate, RemoveGroupMembersUpdate, AddGroupUpdate,
-                                 GroupMemberAffiliationUpdate>;
+using GroupUpdate =
+        std::variant<GroupNameUpdate, GroupCacheUpdate, GroupInvitationUpdate, GroupMemberAffiliationUpdate>;
 
 //
 //  Return group unique identifier the update relates to.

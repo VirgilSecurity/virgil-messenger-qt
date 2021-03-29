@@ -54,12 +54,11 @@ public:
     //
     GroupMember() = default;
 
-    GroupMember(GroupId groupId, UserId groupOwnerId, UserId memberId, QString memberNickName,
-                GroupAffiliation memberAffiliation);
+    GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation);
+
+    GroupMember(GroupId groupId, ContactHandler contact, GroupAffiliation memberAffiliation);
 
     [[nodiscard]] GroupId groupId() const;
-
-    [[nodiscard]] UserId groupOwnerId() const;
 
     [[nodiscard]] UserId memberId() const;
 
@@ -67,19 +66,20 @@ public:
 
     [[nodiscard]] GroupAffiliation memberAffiliation() const;
 
+    [[nodiscard]] ContactHandler contact() const;
+
 private:
     GroupId m_groupId;
     UserId m_groupOwnerId;
-    UserId m_memberId;
-    QString m_memberNickName;
     GroupAffiliation m_memberAffiliation;
+    ContactHandler m_contact;
 };
 
 using GroupMemberHandler = std::shared_ptr<GroupMember>;
 using GroupMembers = std::vector<GroupMemberHandler>;
 
 Contacts GroupMembersToContacts(const GroupMembers &groupMembers);
-GroupMembers ContactsToGroupMembers(const GroupId &groupId, const UserId &groupOwnerId, const Contacts &contacts);
+GroupMembers ContactsToGroupMembers(const GroupId &groupId, const Contacts &contacts);
 
 GroupMemberHandler FindGroupMemberById(const GroupMembers &groupMembers, const UserId &memberId);
 GroupMemberHandler FindGroupOwner(const GroupMembers &groupMembers);

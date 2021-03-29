@@ -64,14 +64,15 @@ GroupMembers Self::selectedGroupMembers() const
 
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
-    if (auto upd = std::get_if<RemoveGroupMembersUpdate>(&groupUpdate)) {
-        for (auto &member : upd->members) {
-            if (auto index = findByUserId(member->id()); index.isValid()) {
-                m_groupMembers.erase(m_groupMembers.begin() + index.row());
-                removeContactByRow(index.row());
-            }
-        }
-    }
+    // FIXME: Port this solution as update "RemoveGroupMembersUpdate" was removed.
+    //    if (auto upd = std::get_if<RemoveGroupMembersUpdate>(&groupUpdate)) {
+    //        for (auto &member : upd->members) {
+    //            if (auto index = findByUserId(member->id()); index.isValid()) {
+    //                m_groupMembers.erase(m_groupMembers.begin() + index.row());
+    //                removeContactByRow(index.row());
+    //            }
+    //        }
+    //    }
 }
 
 QVariant Self::data(const QModelIndex &index, int role) const

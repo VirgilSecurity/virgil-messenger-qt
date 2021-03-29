@@ -51,6 +51,19 @@ Self::Contact()
 {
 }
 
+Self::Contact(UserId userId)
+    : m_userId(std::move(userId)),
+      m_username(""),
+      m_name(""),
+      m_phone(""),
+      m_email(""),
+      m_platformId(""),
+      m_avatarLocalPath(""),
+      m_isBanned(false)
+{
+    Q_ASSERT(m_userId.isValid());
+}
+
 UserId Self::userId() const
 {
     return m_userId;

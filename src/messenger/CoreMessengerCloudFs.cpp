@@ -751,11 +751,8 @@ Self::FutureResult<CloudFileMembers> Self::getSharedGroupUsers(const CloudFsShar
             const auto identity = vssq_messenger_cloud_fs_access_identity(user_permission);
             const auto permission = vssq_messenger_cloud_fs_access_permission(user_permission);
 
-            auto contact = std::make_shared<Contact>();
-            contact->setUserId(UserId(vsc_str_to_qstring(identity)));
-
-            cloudFileMembers.emplace_back(
-                    std::make_unique<CloudFileMember>(contact, permissionToMemberType(permission)));
+            cloudFileMembers.push_back(std::make_unique<CloudFileMember>(UserId(vsc_str_to_qstring(identity)),
+                                                                         permissionToMemberType(permission)));
         }
 
         return cloudFileMembers;

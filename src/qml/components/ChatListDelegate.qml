@@ -9,12 +9,12 @@ ListDelegate {
 
     Avatar {
         id: avatar
-        nickname: model.contactId
+        nickname: model.title
     }
 
     TwoLineLabel {
         Layout.fillWidth: true
-        title: model.contactId
+        title: model.title
         description: model.lastMessageBody
     }
 

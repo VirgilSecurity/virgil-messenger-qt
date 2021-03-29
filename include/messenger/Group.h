@@ -36,6 +36,7 @@
 #define VM_GROUP_H
 
 #include "GroupId.h"
+#include "GroupInvitationStatus.h"
 #include "Contact.h"
 
 #include <memory>
@@ -45,19 +46,24 @@ namespace vm {
 class Group
 {
 public:
-    Group(GroupId id, QString name, Contacts contacts);
+    Group(GroupId id, UserId superOwnerId, QString name, GroupInvitationStatus invitationStatus, QString cache = {});
 
-    GroupId id() const;
-    QString name() const;
-    Contacts contacts() const;
+    [[nodiscard]] GroupId id() const;
+    [[nodiscard]] UserId superOwnerId() const;
+    [[nodiscard]] QString name() const;
+    [[nodiscard]] GroupInvitationStatus invitationStatus() const;
+    [[nodiscard]] QString cache() const;
 
 private:
     GroupId m_id;
+    UserId m_superOwnerId;
     QString m_name;
-    Contacts m_contacts;
+    GroupInvitationStatus m_invitationStatus;
+    QString m_cache;
 };
 
 using GroupHandler = std::shared_ptr<Group>;
+using Groups = std::list<GroupHandler>;
 
 } // namespace vm
 
