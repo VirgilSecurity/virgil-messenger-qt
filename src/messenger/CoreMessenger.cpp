@@ -1109,6 +1109,7 @@ void Self::onCleanupXmppMucRooms()
 
 void Self::onCleanupCommKitMessenger()
 {
+    std::scoped_lock<std::mutex> _(m_impl->authMutex);
     m_impl->messenger = nullptr;
     m_impl->creds = nullptr;
     m_impl->currentUser = nullptr;
