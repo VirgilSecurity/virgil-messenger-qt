@@ -61,7 +61,6 @@ signals:
 
     void updateMessage(const MessageUpdate &messageUpdate);
     void markIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
-    void updateMessageBody(const MessageId &messageId, const QString &body);
 
     //
     //  Notification signals.
@@ -82,7 +81,6 @@ private:
 
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
-    void onUpdateMessageBody(const MessageId &messageId, const QString &body);
 };
 } // namespace vm
 

@@ -123,11 +123,10 @@ Operation *Self::createOperation(OperationSourcePtr source)
         op->appendChild(new SetMembersCloudFileOperation(op, cloudFileSource->members(), cloudFileSource->file(),
                                                          cloudFileSource->folder()));
         break;
-    case SourceType::ListMembers: {
+    case SourceType::ListMembers:
         op->appendChild(new ListMembersCloudFileOperation(op, cloudFileSource->file(), cloudFileSource->folder(),
                                                           m_userDatabase));
         break;
-    }
     default:
         throw std::logic_error("CloudFilesQueue::createOperation is not fully implemented");
     }

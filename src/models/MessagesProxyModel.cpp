@@ -66,10 +66,8 @@ QModelIndex Self::getLastIndex() const
 
 bool MessagesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    const auto message = m_model->getMessage(0);
-    if (const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
-        return invitation->superOwnerId() == m_messenger->currentUser()->id()
-                || invitation->invitationStatus() != GroupInvitationStatus::None;
+    if (m_model->findIncomingInvitationMessage()) {
+        return false;
     }
     return ListProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }
