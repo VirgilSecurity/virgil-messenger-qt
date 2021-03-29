@@ -88,10 +88,6 @@ void Self::acceptGroupInvitation(const MessageHandler &invitationMessage)
     const GroupId groupId(invitationMessage->chatId());
     const auto invitation = std::get_if<MessageContentGroupInvitation>(&invitationMessage->content());
     m_messenger->acceptGroupInvitation(groupId, invitation->superOwnerId());
-
-    const auto newInvitation = invitation->newInvitationStatus(GroupInvitationStatus::Accepted);
-    m_userDatabase->messagesTable()->updateMessageBody(invitationMessage->id(),
-                                                       MessageContentJsonUtils::toString(newInvitation));
 }
 
 void Self::rejectGroupInvitation(const MessageHandler &invitationMessage)
@@ -247,6 +243,7 @@ void Self::onGroupChatCreated(const GroupHandler &group, const GroupMembers &gro
     newChat->setId(ChatId(group->id()));
     newChat->setCreatedAt(QDateTime::currentDateTime());
     newChat->setType(Chat::Type::Group);
+    newChat->setGroup(group);
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->writeGroupChat(newChat, group, groupMembers);
@@ -282,6 +279,7 @@ void Self::onNewGroupChatLoaded(const GroupHandler &group)
     newChat->setId(ChatId(group->id()));
     newChat->setCreatedAt(QDateTime::currentDateTime());
     newChat->setType(Chat::Type::Group);
+    newChat->setGroup(group);
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->writeGroupChat(newChat, group, {});

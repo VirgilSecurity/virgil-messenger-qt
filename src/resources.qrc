@@ -228,10 +228,10 @@
         <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
         <file>resources/database/updateMessageStage.sql</file>
-        <file>resources/database/updateMessageStage.sql</file>
         <file>resources/database/insertGroup.sql</file>
         <file>resources/database/selectGroups.sql</file>
         <file>resources/database/updateGroupCache.sql</file>
+        <file>resources/database/updateGroupInvitation.sql</file>
         <file>resources/database/updateGroupName.sql</file>
         <file>resources/database/insertGroupMember.sql</file>
         <file>resources/database/selectGroupMembers.sql</file>
@@ -248,7 +248,6 @@
         <file>resources/database/updateContactPhone.sql</file>
         <file>resources/database/updateContactPlatformId.sql</file>
         <file>resources/database/updateContactUsername.sql</file>
-        <file>resources/database/updateMessageBody.sql</file>
         <!-- Database patches -->
         <file>resources/database/patches/version1/dropContacts.sql</file>
         <file>resources/database/patches/version1/insertContactsFromChats.sql</file>
