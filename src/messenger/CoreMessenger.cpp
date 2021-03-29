@@ -127,9 +127,19 @@ static vssc_json_object_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr)
     return vssc_json_object_ptr_t { ptr, vssc_json_object_delete };
 }
 
-static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(const vssq_messenger_creds_t *ptr)
+static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_nullptr()
+{
+    return vssq_messenger_creds_ptr_t { nullptr, vssq_messenger_creds_delete };
+}
+
+static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(vssq_messenger_creds_t *ptr)
 {
     return vssq_messenger_creds_ptr_t { ptr, vssq_messenger_creds_delete };
+}
+
+static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(const vssq_messenger_creds_t *ptr)
+{
+    return vssq_messenger_creds_ptr_t { vssq_messenger_creds_shallow_copy_const(ptr), vssq_messenger_creds_delete };
 }
 
 static vssq_messenger_ptr_t vssq_messenger_wrap_ptr(vssq_messenger_t *ptr)
@@ -245,7 +255,7 @@ public:
     vscf_impl_ptr_t random = vscf_impl_ptr_t(nullptr, vscf_impl_delete);
 
     vssq_messenger_ptr_t messenger = vssq_messenger_wrap_ptr(nullptr);
-    vssq_messenger_creds_ptr_t creds = vssq_messenger_creds_wrap_ptr(nullptr);
+    vssq_messenger_creds_ptr_t creds = vssq_messenger_creds_wrap_nullptr();
     UserHandler currentUser = nullptr;
     std::mutex authMutex;
 
