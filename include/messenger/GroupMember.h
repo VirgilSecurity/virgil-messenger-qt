@@ -71,8 +71,6 @@ public:
 private:
     GroupId m_groupId;
     UserId m_groupOwnerId;
-    UserId m_memberId;
-    QString m_memberNickName;
     GroupAffiliation m_memberAffiliation;
     ContactHandler m_contact;
 };

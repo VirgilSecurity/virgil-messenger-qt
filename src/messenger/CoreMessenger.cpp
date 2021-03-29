@@ -2528,11 +2528,18 @@ void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
 
             if (user) {
                 //
+                //  Copy contact to be able define founded user identity.
+                //
+                auto memberContact = std::make_unique<Contact>(*contact);
+                memberContact->setUserId(user->id());
+
+                //
                 //  For now User Identity is used as user nickname.
                 //  This hack is needed to fetch user when decrypt a group message to be able to verify signature.
                 //  Also initial affiliation is "None" that means participant was not added to the XMPP group yet.
                 //
-                auto groupMember = std::make_unique<GroupMember>(groupId, contact, GroupAffiliation::None);
+                auto groupMember =
+                        std::make_unique<GroupMember>(groupId, std::move(memberContact), GroupAffiliation::None);
                 groupMembers.push_back(std::move(groupMember));
 
                 vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
