@@ -250,6 +250,15 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         chats->updateLastMessage(message);
 
         m_userDatabase->writeMessage(message);
+
+        //
+        //  Mark message as "read" if posting the message to the current chat.
+        //
+        if (message->isIncoming()) {
+            if (auto currentChat = messages->chat(); currentChat && (currentChat->id() == message->chatId())) {
+                message->setStageString(IncomingMessageStageToString(IncomingMessageStage::Read));
+            }
+        }
     } else {
         //
         //  Create a new chat.
