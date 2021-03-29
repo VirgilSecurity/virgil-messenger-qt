@@ -38,6 +38,7 @@
 #include "CloudFilesTable.h"
 #include "CloudFileSystem.h"
 #include "FileUtils.h"
+#include "Messenger.h"
 #include "UserDatabase.h"
 
 using namespace vm;
@@ -161,7 +162,12 @@ void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const Mod
     update.files = cloudFiles;
     m_parent->updateCloudFiles(update);
 
-    m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
+    if (m_parent->messenger()->isOnline()) {
+        m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
+    } else {
+        qCDebug(lcOperation) << "Network is offline";
+        fail();
+    }
 }
 
 bool Self::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)

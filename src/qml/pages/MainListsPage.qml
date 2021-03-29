@@ -63,18 +63,21 @@ Page {
             text: qsTr("Add files")
             onTriggered: attachmentPicker.open(AttachmentTypes.file, true)
             visible: d.isCloudFileList
+            enabled: d.online
         }
 
         ContextMenuItem {
             text: qsTr("New directory")
             onTriggered: createCloudFolderDialog.open()
             visible: d.isCloudFileList && !d.cloudFolder.isShared
+            enabled: d.online
         }
 
         ContextMenuItem {
             text: qsTr("Share")
             onTriggered: appState.requestSharingInfo();
             visible: d.isCloudFileList && d.cloudFolder.isShared
+            enabled: d.online
         }
 
         ContextMenuSeparator {
@@ -85,6 +88,7 @@ Page {
             text: qsTr("Refresh")
             onTriggered: controllers.cloudFiles.refresh()
             visible: d.isCloudFileList
+            enabled: d.online
         }
 
         ContextMenuSeparator {
@@ -114,6 +118,7 @@ Page {
             text: qsTr("Delete")
             onTriggered: deleteCloudFilesDialog.open()
             visible: d.isCloudFileList && d.cloudFilesSelectedCount
+            enabled: d.online
         }
     }
 
