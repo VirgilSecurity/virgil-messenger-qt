@@ -458,6 +458,8 @@ Q_DECLARE_METATYPE(vm::GroupMember);
 Q_DECLARE_METATYPE(vm::GroupMembers);
 Q_DECLARE_METATYPE(vm::Contact);
 Q_DECLARE_METATYPE(vm::Contacts);
+Q_DECLARE_METATYPE(vm::MessageUpdate);
+Q_DECLARE_METATYPE(vm::ContactUpdate);
 
 Q_DECLARE_METATYPE(QXmppClient::State);
 Q_DECLARE_METATYPE(QXmppClient::Error);

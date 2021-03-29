@@ -331,6 +331,8 @@ struct RegisterMetaTypesOnce
         qRegisterMetaType<vm::Contact>("Contact");
         qRegisterMetaType<vm::Contacts>("Contacts");
         qRegisterMetaType<vm::MutableContacts>("MutableContacts");
+        qRegisterMetaType<vm::MessageUpdate>("MessageUpdate");
+        qRegisterMetaType<vm::ContactUpdate>("ContactUpdate");
 
         qRegisterMetaType<vm::ChatId>("ChatId");
         qRegisterMetaType<vm::GroupId>("GroupId");
