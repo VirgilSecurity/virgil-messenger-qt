@@ -208,6 +208,7 @@ signals:
     // Users.
     //
     void userWasFound(const UserHandler &user);
+    void updateContact(const ContactUpdate &update);
     //--
 
     //

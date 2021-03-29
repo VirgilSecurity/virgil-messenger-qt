@@ -48,6 +48,7 @@
 #include "GroupMember.h"
 #include "GroupUpdate.h"
 #include "Contact.h"
+#include "ContactUpdate.h"
 #include "XmppMucSubIq.h"
 
 #include <qxmpp/QXmppClient.h>
@@ -124,6 +125,8 @@ signals:
     void updateMessage(const MessageUpdate &messageUpdate);
 
     void userWasFound(const UserHandler &user) const;
+
+    void updateContact(const ContactUpdate &update) const;
 
     //
     //  Group Chats has signal / slot architecture.

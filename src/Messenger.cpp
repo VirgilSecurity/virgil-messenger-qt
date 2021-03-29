@@ -82,6 +82,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
     connect(m_coreMessenger, &CoreMessenger::updateMessage, this, &Self::updateMessage);
     connect(m_coreMessenger, &CoreMessenger::userWasFound, this, &Self::userWasFound);
+    connect(m_coreMessenger, &CoreMessenger::updateContact, this, &Self::updateContact);
 
     connect(this, &Self::sendMessageStatusDisplayed, m_coreMessenger, &CoreMessenger::sendMessageStatusDisplayed);
 

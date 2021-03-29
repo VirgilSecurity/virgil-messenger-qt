@@ -1169,6 +1169,7 @@ std::shared_ptr<User> Self::findUserByUsername(const QString &username) const
     m_impl->identityToUser[commKitUser->id()] = commKitUser;
 
     emit userWasFound(commKitUser);
+    emit updateContact(UsernameContactUpdate { commKitUser->id(), commKitUser->username() });
 
     return commKitUser;
 }

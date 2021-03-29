@@ -40,6 +40,7 @@
 #include "database/UserDatabase.h"
 #include "database/GroupMembersTable.h"
 #include "database/GroupsTable.h"
+#include "database/ContactsTable.h"
 #include "models/ChatsModel.h"
 #include "models/MessagesModel.h"
 #include "models/Models.h"
@@ -220,6 +221,9 @@ void Self::setupTableConnections()
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
+
+    // TODO: Move to an appropriate place.
+    connect(m_messenger, &Messenger::updateContact, m_userDatabase->contactsTable(), &ContactsTable::updateContact);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
