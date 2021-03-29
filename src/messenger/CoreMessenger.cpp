@@ -110,7 +110,7 @@ static QString toXmlString(const T &obj)
 using vscf_ctr_drbg_ptr_t = vsc_unique_ptr<vscf_ctr_drbg_t>;
 
 using vssc_json_object_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
-using vssq_messenger_creds_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
+using vssq_messenger_creds_ptr_t = vsc_unique_ptr<const vssq_messenger_creds_t>;
 using vssq_messenger_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
 using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_cipher_t>;
 using vssq_messenger_user_ptr_t = vsc_unique_ptr<const vssq_messenger_user_t>;
@@ -127,7 +127,7 @@ static vssc_json_object_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr)
     return vssc_json_object_ptr_t { ptr, vssc_json_object_delete };
 }
 
-static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(vssq_messenger_creds_t *ptr)
+static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(const vssq_messenger_creds_t *ptr)
 {
     return vssq_messenger_creds_ptr_t { ptr, vssq_messenger_creds_delete };
 }
@@ -787,6 +787,8 @@ QFuture<Self::Result> Self::signUp(const QString &username)
                                        << vsc_str_to_qstring(vssq_error_message_from_error(&error));
             return Self::Result::Error_Signup;
         }
+
+        m_impl->creds = vssq_messenger_creds_wrap_ptr(vssq_messenger_creds(m_impl->messenger.get()));
 
         qCInfo(lcCoreMessenger) << "User has been successfully signed up";
 
