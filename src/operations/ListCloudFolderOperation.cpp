@@ -162,7 +162,7 @@ void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const Mod
     update.files = cloudFiles;
     m_parent->updateCloudFiles(update);
 
-    if (m_parent->messenger()->isNetworkOnline()) {
+    if (m_parent->messenger()->isOnline()) {
         m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
     } else {
         failAndNotify(tr("Network is offline"));
