@@ -165,7 +165,8 @@ void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const Mod
     if (m_parent->messenger()->isOnline()) {
         m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
     } else {
-        failAndNotify(tr("Network is offline"));
+        qCDebug(lcOperation) << "Network is offline";
+        fail();
     }
 }
 
