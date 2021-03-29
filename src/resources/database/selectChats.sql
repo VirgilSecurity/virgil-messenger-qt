@@ -33,12 +33,7 @@ SELECT
     CASE chats.type
         WHEN 'personal' THEN chats.title
         WHEN 'group' THEN groups.name
-    END title,
-    groups.id as groupId,
-    groups.superOwnerId as groupSuperOwnerId,
-    groups.name as groupName,
-    groups.invitationStatus as groupInvitationStatus,
-    groups.cache as groupCache
+    END title
 FROM
     chats
 LEFT JOIN messages ON chats.lastMessageId = messages.id

@@ -54,8 +54,6 @@ public:
     [[nodiscard]] GroupInvitationStatus invitationStatus() const;
     [[nodiscard]] QString cache() const;
 
-    void setInvitationStatus(GroupInvitationStatus status);
-
 private:
     GroupId m_id;
     UserId m_superOwnerId;

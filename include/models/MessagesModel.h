@@ -133,9 +133,7 @@ public:
     ModifiableMessageHandler findById(const MessageId &messageId) const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
-    const MessageHandler findIncomingInvitationMessage() const;
 
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
@@ -153,6 +151,8 @@ private:
     MessageHandler getNeighbourMessage(int row, int offset) const;
     void invalidateRow(const int row, const QVector<int> &roles = {});
     void invalidateModel(const QModelIndex &index, const QVector<int> &roles);
+
+    const MessageContentGroupInvitation *findIncomingInvitation() const;
 
 private:
     QPointer<Messenger> m_messenger;

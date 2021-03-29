@@ -37,7 +37,6 @@
 
 #include "ChatId.h"
 #include "ChatType.h"
-#include "Group.h"
 #include "Message.h"
 
 #include <vector>
@@ -85,16 +84,6 @@ public:
     void setType(Type type);
 
     //
-    //  Return group
-    //
-    GroupHandler group() const;
-
-    //
-    //  Set group
-    //
-    void setGroup(GroupHandler group);
-
-    //
     //  Return timestamp when chat was created.
     //
     QDateTime createdAt() const;
@@ -128,7 +117,6 @@ private:
     ChatId m_id;
     QString m_title;
     Type m_type;
-    GroupHandler m_group;
     QDateTime m_createdAt;
     std::shared_ptr<const Message> m_lastMessage;
     qsizetype m_unreadMessageCount;

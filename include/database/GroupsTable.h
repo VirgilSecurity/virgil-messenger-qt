@@ -42,8 +42,6 @@
 
 #include <QString>
 
-class QSqlQuery;
-
 namespace vm {
 class GroupsTable : public DatabaseTable
 {
@@ -51,8 +49,6 @@ class GroupsTable : public DatabaseTable
 
 public:
     explicit GroupsTable(Database *database);
-
-    static GroupHandler readGroup(const QSqlQuery &query, const QString &preffix = QString());
 
 signals:
     //
@@ -78,7 +74,6 @@ private:
     void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
     void updateGroupName(const GroupId &groupId, const QString &name);
     void updateGroupCache(const GroupId &groupId, const QString &cache);
-    void updateGroupInvitation(const GroupId &groupId, GroupInvitationStatus status);
 
     bool create() override;
 };

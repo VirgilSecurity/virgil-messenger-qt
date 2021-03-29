@@ -75,7 +75,8 @@ void Self::addMessages(ModifiableMessages messages)
     m_messages.insert(m_messages.end(), messages.begin(), messages.end());
     endInsertRows();
 
-    if (auto message = findIncomingInvitationMessage()) {
+    if (findIncomingInvitation()) {
+        const auto &message = m_messages.front();
         const auto displayUsername = Utils::displayUsername(message->senderUsername(), message->senderId());
         emit groupInvitationReceived(displayUsername, message);
     }
@@ -124,8 +125,9 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate)
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     if (const auto upd = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
-        if (auto message = findIncomingInvitationMessage()) {
-            m_currentChat->group()->setInvitationStatus(upd->invitationStatus);
+        if (auto invitation = findIncomingInvitation()) {
+            auto newInvitation = invitation->newInvitationStatus(upd->invitationStatus);
+            m_messages[0]->setContent(newInvitation);
             m_proxy->invalidate();
         }
     }
@@ -393,11 +395,8 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
     emit dataChanged(index, index, roles);
 }
 
-const MessageHandler Self::findIncomingInvitationMessage() const
+const MessageContentGroupInvitation *Self::findIncomingInvitation() const
 {
-    if (!chat() || !chat()->group() || chat()->group()->invitationStatus() != GroupInvitationStatus::Invited) {
-        return nullptr;
-    }
     if (m_messages.empty()) {
         return nullptr;
     }
@@ -405,7 +404,12 @@ const MessageHandler Self::findIncomingInvitationMessage() const
     if (!message->isIncoming()) {
         return nullptr;
     }
-    return std::holds_alternative<MessageContentGroupInvitation>(message->content()) ? message : nullptr;
+    const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content());
+    if (invitation && invitation->invitationStatus() == GroupInvitationStatus::Invited) {
+        return invitation;
+    } else {
+        return nullptr;
+    }
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)

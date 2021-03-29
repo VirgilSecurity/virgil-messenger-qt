@@ -47,11 +47,6 @@ CloudFileOperation::CloudFileOperation(Messenger *messenger, CloudFolderUpdateWa
     setName(QLatin1String("CloudFile(%1)").arg(QString::number(++m_nameCounter)));
 }
 
-Messenger *CloudFileOperation::messenger()
-{
-    return m_messenger;
-}
-
 Settings *CloudFileOperation::settings()
 {
     return m_messenger->settings();
