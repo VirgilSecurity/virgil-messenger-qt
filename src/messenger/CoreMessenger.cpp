@@ -2650,22 +2650,12 @@ void Self::loadGroupChats(const Groups &groups)
 
 void Self::onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
 {
-    Q_UNUSED(groupOwnerId)
-
-    auto roomJid = groupIdToJid(groupId);
-    auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
-    room->setNickName(currentUser()->id());
-
-    connectXmppRoomSignals(room);
-
     GroupInvitationUpdate update;
     update.groupId = groupId;
     update.invitationStatus = GroupInvitationStatus::Accepted;
     emit updateGroup(update);
 
-    if (isOnline()) {
-        room->join();
-    }
+    tryLoadGroupInBackground(groupId, groupOwnerId, false /* do not emit a new group creating */);
 }
 
 void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
@@ -2871,6 +2861,8 @@ void Self::xmppOnJoinRoom(const GroupId &groupId)
     //  Join to XMPP group.
     //
     auto roomJid = groupIdToJid(groupId);
+    qCDebug(lcCoreMessenger) << "Joining XMPP room:" << roomJid;
+
     auto room = m_impl->xmppGroupChatManager->addRoom(roomJid);
     room->setNickName(currentUser()->id());
 
@@ -2992,7 +2984,7 @@ void Self::xmppOnRoomParticipantReceived(const QString &roomJid, const QString &
         emit updateGroup(GroupMemberAffiliationUpdate { groupId, userId, userAffiliation });
 
     } else if (userAffiliation == GroupAffiliation::Owner) {
-        tryLoadGroupInBackground(groupId, userId);
+        tryLoadGroupInBackground(groupId, userId, true /* emit creating a new group */);
     }
 }
 
@@ -3109,7 +3101,7 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
             [room](const QString &subject) { qCDebug(lcCoreMessenger) << "---> subjectChanged:" << subject; });
 }
 
-CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superOwnerId)
+CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup)
 {
     qCDebug(lcCoreMessenger) << "Loading group with id:" << groupId << "and owner:" << superOwnerId;
 
@@ -3155,17 +3147,19 @@ CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superO
         m_impl->groups[groupId] = std::make_shared<GroupImpl>(group, std::move(groupC));
     }
 
-    emit newGroupChatLoaded(group);
+    if (emitNewGroup) {
+        emit newGroupChatLoaded(group);
+    }
 
     xmppJoinRoom(groupId);
 
     return Self::Result::Success;
 }
 
-void Self::tryLoadGroupInBackground(const GroupId &groupId, const UserId &superOwnerId)
+void Self::tryLoadGroupInBackground(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup)
 {
-    QtConcurrent::run([this, groupId, superOwnerId]() {
-        const auto status = loadGroup(groupId, superOwnerId);
+    QtConcurrent::run([this, groupId, superOwnerId, emitNewGroup]() {
+        const auto status = loadGroup(groupId, superOwnerId, emitNewGroup);
         Q_UNUSED(status);
     });
 }

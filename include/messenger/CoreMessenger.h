@@ -322,9 +322,9 @@ private:
     //
     //  Group helpers.
     //--
-    CoreMessengerStatus loadGroup(const GroupId &groupId, const UserId &superOwnerId);
+    CoreMessengerStatus loadGroup(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup);
 
-    void tryLoadGroupInBackground(const GroupId &groupId, const UserId &superOwnerId);
+    void tryLoadGroupInBackground(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup);
 
     bool isGroupCached(const GroupId &groupId) const;
 
