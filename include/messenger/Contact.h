@@ -51,6 +51,8 @@ public:
     //
     Contact();
 
+    explicit Contact(UserId userId);
+
     UserId userId() const;
 
     void setUserId(UserId userId);

@@ -110,7 +110,7 @@ static QString toXmlString(const T &obj)
 using vscf_ctr_drbg_ptr_t = vsc_unique_ptr<vscf_ctr_drbg_t>;
 
 using vssc_json_object_ptr_t = vsc_unique_ptr<vssc_json_object_t>;
-using vssq_messenger_creds_ptr_t = vsc_unique_ptr<vssq_messenger_creds_t>;
+using vssq_messenger_creds_ptr_t = vsc_unique_ptr<const vssq_messenger_creds_t>;
 using vssq_messenger_ptr_t = vsc_unique_ptr<vssq_messenger_t>;
 using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_cipher_t>;
 using vssq_messenger_user_ptr_t = vsc_unique_ptr<const vssq_messenger_user_t>;
@@ -127,7 +127,7 @@ static vssc_json_object_ptr_t vssc_json_object_wrap_ptr(vssc_json_object_t *ptr)
     return vssc_json_object_ptr_t { ptr, vssc_json_object_delete };
 }
 
-static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(vssq_messenger_creds_t *ptr)
+static vssq_messenger_creds_ptr_t vssq_messenger_creds_wrap_ptr(const vssq_messenger_creds_t *ptr)
 {
     return vssq_messenger_creds_ptr_t { ptr, vssq_messenger_creds_delete };
 }
@@ -787,6 +787,8 @@ QFuture<Self::Result> Self::signUp(const QString &username)
                                        << vsc_str_to_qstring(vssq_error_message_from_error(&error));
             return Self::Result::Error_Signup;
         }
+
+        m_impl->creds = vssq_messenger_creds_wrap_ptr(vssq_messenger_creds(m_impl->messenger.get()));
 
         qCInfo(lcCoreMessenger) << "User has been successfully signed up";
 
@@ -2528,11 +2530,18 @@ void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
 
             if (user) {
                 //
+                //  Copy contact to be able define founded user identity.
+                //
+                auto memberContact = std::make_unique<Contact>(*contact);
+                memberContact->setUserId(user->id());
+
+                //
                 //  For now User Identity is used as user nickname.
                 //  This hack is needed to fetch user when decrypt a group message to be able to verify signature.
                 //  Also initial affiliation is "None" that means participant was not added to the XMPP group yet.
                 //
-                auto groupMember = std::make_unique<GroupMember>(groupId, contact, GroupAffiliation::None);
+                auto groupMember =
+                        std::make_unique<GroupMember>(groupId, std::move(memberContact), GroupAffiliation::None);
                 groupMembers.push_back(std::move(groupMember));
 
                 vssq_messenger_user_list_add(userListC.get(), (vssq_messenger_user_t *)user->impl()->user.get());
@@ -2787,8 +2796,8 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                     invitationMessage->setRecipientId(memberId);
                     // TODO: Review next line to pass display name when search by email and contact will be added.
                     invitationMessage->setRecipientUsername(member->contact()->username());
-                    invitationMessage->setContent(
-                            MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
+                    invitationMessage->setContent(MessageContentGroupInvitation {
+                            currentUser()->id(), group->name(), GroupInvitationStatus::Invited, "Hello!" });
                     invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
                     invitationMessage->setCreatedNow();
 

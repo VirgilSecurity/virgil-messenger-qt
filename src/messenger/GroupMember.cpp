@@ -41,20 +41,18 @@ using Self = GroupMember;
 
 Self::GroupMember(GroupId groupId, UserId memberId, GroupAffiliation memberAffiliation)
     : m_groupId(std::move(groupId)),
-      m_memberId(std::move(memberId)),
-      m_memberNickName(m_memberId),
       m_memberAffiliation(memberAffiliation),
-      m_contact()
+      m_contact(std::make_unique<Contact>(std::move(memberId)))
 {
+    Q_ASSERT(m_groupId.isValid());
+    Q_ASSERT(m_contact->userId().isValid());
 }
 
 Self::GroupMember(GroupId groupId, ContactHandler contact, GroupAffiliation memberAffiliation)
-    : m_groupId(std::move(groupId)),
-      m_memberId(contact->userId()),
-      m_memberNickName(m_memberId),
-      m_memberAffiliation(memberAffiliation),
-      m_contact(std::move(contact))
+    : m_groupId(std::move(groupId)), m_memberAffiliation(memberAffiliation), m_contact(std::move(contact))
 {
+    Q_ASSERT(m_groupId.isValid());
+    Q_ASSERT(m_contact->userId().isValid());
 }
 
 GroupId Self::groupId() const
@@ -64,12 +62,12 @@ GroupId Self::groupId() const
 
 UserId Self::memberId() const
 {
-    return m_memberId;
+    return m_contact->userId();
 }
 
 QString Self::memberNickName() const
 {
-    return m_memberNickName;
+    return memberId();
 }
 
 GroupAffiliation Self::memberAffiliation() const
