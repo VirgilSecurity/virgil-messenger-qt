@@ -52,6 +52,8 @@ MessagesTable::MessagesTable(Database *database) : DatabaseTable(QLatin1String("
     connect(this, &MessagesTable::updateMessage, this, &MessagesTable::onUpdateMessage);
     connect(this, &MessagesTable::markIncomingMessagesAsReadBeforeMessage, this,
             &MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage);
+    connect(this, &MessagesTable::markOutgoingMessagesAsReadBeforeMessage, this,
+            &MessagesTable::onMarkOutgoingMessagesAsReadBeforeMessage);
     connect(this, &MessagesTable::updateMessageBody, this, &MessagesTable::onUpdateMessageBody);
 }
 
@@ -168,6 +170,10 @@ void MessagesTable::onUpdateMessage(const MessageUpdate &messageUpdate)
         queryId = QLatin1String("updateOutgoingMessageStage");
         bindValues.push_back({ ":id", QString(update->messageId) });
         bindValues.push_back({ ":stage", OutgoingMessageStageToString(update->stage) });
+
+        if (update->stage == OutgoingMessageStage::Read) {
+            markOutgoingMessagesAsReadBeforeMessage(update->messageId);
+        }
     }
 
     if (bindValues.empty()) {
@@ -212,12 +218,52 @@ void MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &m
     //  Update messages
     //
     const DatabaseUtils::BindValues values { { ":chatId", QString(chatId) }, { ":beforeDate", createdAt } };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("resetUnreadCountBeforeDate"), values);
+    const auto query =
+            DatabaseUtils::readExecQuery(database(), QLatin1String("setIncomingMessagesReadBeforeDate"), values);
     if (query) {
         qCWarning(lcDatabase) << "Marked all messages as read before message:" << messageId;
         emit chatUnreadMessageCountChanged(chatId);
     } else {
         qCWarning(lcDatabase) << "MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage error";
+    }
+}
+
+void MessagesTable::onMarkOutgoingMessagesAsReadBeforeMessage(const MessageId &messageId)
+{
+    ScopedConnection connection(*database());
+
+    qCDebug(lcDatabase) << "Start mark all outgoing messages as read before message:" << messageId;
+
+    //
+    //  Find the message chat.
+    //
+    const DatabaseUtils::BindValues readMessageValues { { ":id", QString(messageId) } };
+    auto readMessageQuery =
+            DatabaseUtils::readExecQuery(database(), QLatin1String("selectChatMessage"), readMessageValues);
+    if (!readMessageQuery || !readMessageQuery->next()) {
+        qCWarning(lcDatabase) << "Failed mark all outgoing messages as read before message:" << messageId
+                              << "- message not found";
+        return;
+    }
+
+    const auto chatId = ChatId(readMessageQuery->value("chatId").toString());
+    const auto createdAt = readMessageQuery->value("createdAt").toULongLong();
+    if (!chatId.isValid()) {
+        qCCritical(lcDatabase) << "Failed mark all outgoing messages as read before message:" << messageId
+                               << "- chat not found";
+        return;
+    }
+
+    //
+    //  Update messages
+    //
+    const DatabaseUtils::BindValues values { { ":chatId", QString(chatId) }, { ":beforeDate", createdAt } };
+    const auto query =
+            DatabaseUtils::readExecQuery(database(), QLatin1String("setOutgoingMessagesReadBeforeDate"), values);
+    if (query) {
+        qCWarning(lcDatabase) << "Marked all outgoing messages as read before message:" << messageId;
+    } else {
+        qCWarning(lcDatabase) << "MessagesTable::onMarkOutgoingMessagesAsReadBeforeMessage error";
     }
 }
 
