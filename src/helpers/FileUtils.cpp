@@ -38,7 +38,6 @@
 
 #include <QCryptographicHash>
 #include <QDir>
-#include <QDesktopServices>
 #include <QLoggingCategory>
 
 #include <android/VSQAndroid.h>
@@ -207,9 +206,4 @@ QString FileUtils::fileMimeType(const QString &filePath)
 {
     static QMimeDatabase db;
     return db.mimeTypeForFile(filePath).name();
-}
-
-bool Self::openUrl(const QUrl &url)
-{
-    return QDesktopServices::openUrl(url);
 }
