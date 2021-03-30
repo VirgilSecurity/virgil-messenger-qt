@@ -1,5 +1,5 @@
 import QtQml 2.15
-import QtQuick 2.12
+import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 import "../theme"
@@ -34,8 +34,9 @@ Column {
         elide: Label.ElideRight
         color: Theme.secondaryTextColor
         horizontalAlignment: titleLabel.horizontalAlignment
+        visible: descriptionLabel.text
 
-        Binding on width { when: root.fillWidth && descriptionLabel.text; value: root.width }
+        Binding on width { when: root.fillWidth; value: root.width }
         Binding on anchors.horizontalCenter { when: horizontalAlignment == Qt.AlignHCenter; value: root.horizontalCenter }
         Binding on font.family { when: root.bold; value: Theme.mainFont }
     }
