@@ -37,12 +37,31 @@
 using namespace vm;
 using Self = MessageContentGroupInvitation;
 
+constexpr static const auto kJsonKey_Owner = "owner";
 constexpr static const auto kJsonKey_Tile = "title";
 constexpr static const auto kJsonKey_HelloText = "greetings";
+constexpr static const auto kJsonKey_InvitationStatus = "invitationStatus";
 
-Self::MessageContentGroupInvitation(QString title, QString helloText)
-    : m_title(std::move(title)), m_helloText(std::move(helloText))
+Self::MessageContentGroupInvitation(UserId superOwnerId, QString title, QString helloText)
+    : m_superOwnerId(std::move(superOwnerId)),
+      m_title(std::move(title)),
+      m_helloText(std::move(helloText)),
+      m_invitationStatus(GroupInvitationStatus::None)
 {
+}
+
+Self::MessageContentGroupInvitation(UserId superOwnerId, QString title, GroupInvitationStatus invitationStatus,
+                                    QString helloText)
+    : m_superOwnerId(std::move(superOwnerId)),
+      m_title(std::move(title)),
+      m_helloText(std::move(helloText)),
+      m_invitationStatus(invitationStatus)
+{
+}
+
+UserId Self::superOwnerId() const
+{
+    return m_superOwnerId;
 }
 
 QString Self::title() const
@@ -55,23 +74,51 @@ QString Self::helloText() const
     return m_helloText;
 }
 
+GroupInvitationStatus Self::invitationStatus() const
+{
+    return m_invitationStatus;
+}
+
+Self Self::newInvitationStatus(GroupInvitationStatus invitationStatus) const
+{
+    Self self = *this;
+    self.m_invitationStatus = invitationStatus;
+    return self;
+}
+
 void Self::writeJson(QJsonObject &json) const
 {
+    json[kJsonKey_Owner] = QString(m_superOwnerId);
     json[kJsonKey_Tile] = m_title;
     json[kJsonKey_HelloText] = m_helloText;
+    json[kJsonKey_InvitationStatus] = GroupInvitationStatusToString(m_invitationStatus);
 }
 
 bool Self::readJson(const QJsonObject &json)
 {
+    auto ownerValue = json[kJsonKey_Owner];
     auto titleValue = json[kJsonKey_Tile];
     auto helloTextValue = json[kJsonKey_HelloText];
+    auto invitationStatusValue = json[kJsonKey_InvitationStatus];
 
-    if (!titleValue.isString() || !helloTextValue.isString()) {
+    if (!ownerValue.isString() || !titleValue.isString()) {
         return false;
     }
 
+    m_superOwnerId = UserId(ownerValue.toString());
     m_title = titleValue.toString();
     m_helloText = helloTextValue.toString();
+
+    if (!m_superOwnerId.isValid()) {
+        return false;
+    }
+
+    if (invitationStatusValue.isString()) {
+        const auto invitationStatus = invitationStatusValue.toString();
+        if (!invitationStatus.isEmpty()) {
+            m_invitationStatus = GroupInvitationStatusFromString(invitationStatus);
+        }
+    }
 
     return true;
 }

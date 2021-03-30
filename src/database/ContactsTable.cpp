@@ -78,12 +78,8 @@ void Self::onAddContact(const Contact &contact)
     }
 }
 
-void Self::onFetch(const Contacts &requestedContacts)
+void Self::onFetch(quint64 requestId, const QStringList &userIds)
 {
-    QStringList userIds;
-    for (auto &c : requestedContacts) {
-        userIds.push_back(c->userId());
-    }
     DatabaseUtils::BindValues bindValues { { ":userIds", userIds } };
 
     ScopedConnection connection(*database());
@@ -92,12 +88,12 @@ void Self::onFetch(const Contacts &requestedContacts)
         qCCritical(lcDatabase) << "ContactsTable::onFetch error";
         emit errorOccurred(tr("Failed to fetch contacts by ids"));
     } else {
-        Contacts contacts;
+        MutableContacts contacts;
         while (query->next()) {
             contacts.push_back(readContact(*query));
         }
         qCDebug(lcDatabase) << "Fetched contacts count: " << contacts.size();
-        emit fetched(requestedContacts, contacts);
+        emit fetched(requestId, std::move(contacts));
     }
 }
 
@@ -130,7 +126,7 @@ void Self::onUpdateContact(const ContactUpdate &contactUpdate)
     }
 }
 
-ContactHandler Self::readContact(const QSqlQuery &query) const
+MutableContactHandler Self::readContact(const QSqlQuery &query) const
 {
     auto contact = std::make_shared<Contact>();
     contact->setUserId(UserId(query.value("userId").toString()));

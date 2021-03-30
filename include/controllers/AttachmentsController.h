@@ -59,6 +59,7 @@ public:
 
 signals:
     void openPreviewRequested(const QUrl &url);
+    void openUrlRequested(const QUrl &url);
     void notificationCreated(const QString &notification, const bool error) const;
 
 private:

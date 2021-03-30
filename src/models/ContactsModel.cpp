@@ -38,6 +38,8 @@
 #include "ContactsProxyModel.h"
 #include "ListSelectionModel.h"
 
+#include <algorithm>
+
 using namespace vm;
 
 ContactsModel::ContactsModel(QObject *parent, bool createProxy)
@@ -53,15 +55,15 @@ ContactsModel::ContactsModel(QObject *parent, bool createProxy)
     connect(m_avatarLoader, &ContactAvatarLoader::loaded, this, &ContactsModel::setAvatarUrl);
 }
 
-void ContactsModel::setContacts(const Contacts &contacts)
+void ContactsModel::setContacts(Contacts contacts)
 {
     beginResetModel();
-    m_contacts = contacts;
+    m_contacts = std::move(contacts);
     endResetModel();
     m_avatarLoader->load(m_contacts, 10);
 }
 
-const Contacts &ContactsModel::getContacts() const
+Contacts ContactsModel::getContacts() const
 {
     return m_contacts;
 }
@@ -79,7 +81,7 @@ ContactHandler ContactsModel::createContact(const QString &username) const
     return contact;
 }
 
-const ContactHandler ContactsModel::getContact(const int row) const
+ContactHandler ContactsModel::getContact(const int row) const
 {
     return m_contacts[row];
 }
@@ -89,10 +91,10 @@ bool ContactsModel::hasContact(const QString &contactUsername) const
     return findByUsername(contactUsername).isValid();
 }
 
-void ContactsModel::addContact(const ContactHandler contact)
+void ContactsModel::addContact(ContactHandler contact)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_contacts.push_back(contact);
+    m_contacts.push_back(std::move(contact));
     endInsertRows();
     m_avatarLoader->load(m_contacts.back());
 }
@@ -118,9 +120,9 @@ void ContactsModel::removeContactsByRows(const int startRow, const int endRow)
     endRemoveRows();
 }
 
-void ContactsModel::updateContact(const ContactHandler contact, int row)
+void ContactsModel::updateContact(ContactHandler contact, int row)
 {
-    m_contacts[row] = contact;
+    m_contacts[row] = std::move(contact);
     const auto rowIndex = index(row);
     emit dataChanged(rowIndex, rowIndex);
 }
@@ -129,6 +131,7 @@ Contacts ContactsModel::selectedContacts() const
 {
     Contacts contacts;
     const auto indices = selection()->selectedIndexes();
+
     for (const auto &i : indices) {
         contacts.push_back(m_contacts[i.row()]);
     }
@@ -169,10 +172,13 @@ void ContactsModel::loadAvatarUrl(const QString &contactUsername)
     }
 }
 
-void ContactsModel::setAvatarUrl(const ContactHandler contact, const QUrl &url)
+void ContactsModel::setAvatarUrl(const ContactHandler &contact, const QUrl &url)
 {
     if (const auto index = findByUsername(contact->username()); index.isValid()) {
-        m_contacts[index.row()]->setAvatarLocalPath(url.toLocalFile());
+        const auto &oldContact = m_contacts[index.row()];
+        auto newContact = std::make_unique<Contact>(*oldContact); // make copy
+        newContact->setAvatarLocalPath(url.toLocalFile());
+        m_contacts[index.row()] = std::move(newContact);
         emit dataChanged(index, index, { AvatarUrlRole });
     }
 }

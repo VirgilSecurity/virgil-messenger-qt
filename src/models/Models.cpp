@@ -54,7 +54,7 @@ Models::Models(Messenger *messenger, Settings *settings, UserDatabase *userDatab
       m_accountSelection(new AccountSelectionModel(settings, this)),
       m_chats(new ChatsModel(this)),
       m_discoveredContacts(new DiscoveredContactsModel(validator, this)),
-      m_messages(new MessagesModel(this)),
+      m_messages(new MessagesModel(messenger, this)),
       m_cloudFiles(new CloudFilesModel(settings, this)),
       m_cloudFilesTransfers(new CloudFilesTransfersModel(this)),
       m_cloudFilesQueue(new CloudFilesQueue(messenger, userDatabase, this)),

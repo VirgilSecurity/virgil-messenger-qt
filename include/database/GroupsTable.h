@@ -38,6 +38,7 @@
 #include "core/DatabaseTable.h"
 #include "GroupUpdate.h"
 #include "Chat.h"
+#include "Group.h"
 
 #include <QString>
 
@@ -53,20 +54,26 @@ signals:
     //
     //  Control signals.
     //
-    void addGroupForChat(const ChatHandler &chat);
+    void add(const GroupHandler &group);
+    void fetch();
     void updateGroup(const GroupUpdate &groupUpdate);
     void deleteGroup(const GroupId &groupId);
 
     //
     //  Notification signals.
     //
+    void fetched(const Groups &groups);
     void errorOccurred(const QString &errorText);
 
 private:
-    void onAddGroupForChat(const ChatHandler &chat);
+    void onAdd(const GroupHandler &group);
+    void onFetch();
     void onUpdateGroup(const GroupUpdate &groupUpdate);
     void onDeleteGroup(const GroupId &groupId);
-    void insertGroup(const GroupId &groupId);
+
+    void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
+    void updateGroupName(const GroupId &groupId, const QString &name);
+    void updateGroupCache(const GroupId &groupId, const QString &cache);
 
     bool create() override;
 };

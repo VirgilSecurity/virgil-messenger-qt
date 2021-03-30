@@ -39,8 +39,6 @@
 #include "Chat.h"
 #include "GroupUpdate.h"
 
-#include <optional>
-
 namespace vm {
 class ChatsModel : public ListModel
 {
@@ -58,8 +56,8 @@ public:
     ChatHandler findChat(const ChatId &chatId) const;
     ModifiableChatHandler findChat(const ChatId &chatId);
 
-    void resetUnreadCount(const ChatId &chatId);
-    void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void resetUnreadCount(const ChatId &chatId, qsizetype unreadMessageCount = 0);
+    void updateLastMessage(const MessageHandler &message);
     void resetLastMessage(const ChatId &chatId);
 
     Q_INVOKABLE void toggleById(const QString &chatId);
@@ -76,7 +74,7 @@ signals:
 private:
     enum Roles {
         IdRole = Qt::UserRole,
-        ContactIdRole,
+        TitleRole,
         LastEventTimeRole,
         LastEventTimestampRole,
         LastMessageBodyRole,
@@ -87,9 +85,8 @@ private:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    std::optional<int> findRowById(const ChatId &chatId) const;
+    QModelIndex findByChatId(const ChatId &chatId) const;
 
-private:
     ModifiableChats m_chats;
 };
 } // namespace vm

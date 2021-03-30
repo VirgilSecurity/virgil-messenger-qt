@@ -4,7 +4,6 @@ CREATE TABLE chats (
     type TEXT NOT NULL,
     createdAt INT NOT NULL,
     lastMessageId TEXT,
-    unreadMessageCount INT NOT NULL,
     FOREIGN KEY(lastMessageId) REFERENCES messages(id)
 );
 

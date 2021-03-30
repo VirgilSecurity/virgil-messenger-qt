@@ -35,6 +35,9 @@
 #ifndef VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 #define VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 
+#include "GroupInvitationStatus.h"
+#include "UserId.h"
+
 #include <QString>
 #include <QJsonObject>
 
@@ -49,7 +52,15 @@ class MessageContentGroupInvitation
 public:
     MessageContentGroupInvitation() = default;
 
-    explicit MessageContentGroupInvitation(QString title, QString helloText = {});
+    explicit MessageContentGroupInvitation(UserId superOwnerId, QString title, QString helloText = {});
+
+    explicit MessageContentGroupInvitation(UserId superOwnerId, QString title, GroupInvitationStatus invitationStatus,
+                                           QString helloText = {});
+
+    //
+    //  Return identifier of owner that has unique ownership for a group.
+    //
+    UserId superOwnerId() const;
 
     //
     //  Return group title.
@@ -62,18 +73,30 @@ public:
     QString helloText() const;
 
     //
+    //  Return current invitation status.
+    //
+    GroupInvitationStatus invitationStatus() const;
+
+    //
+    //  Return copy with a changed invitation status.
+    //
+    MessageContentGroupInvitation newInvitationStatus(GroupInvitationStatus invitationStatus) const;
+
+    //
     //  Serialize object to JSON.
     //
     void writeJson(QJsonObject &json) const;
 
     //
-    //  restore object from JSON.
+    //  Restore object from JSON.
     //
     bool readJson(const QJsonObject &json);
 
 private:
+    UserId m_superOwnerId;
     QString m_title;
     QString m_helloText;
+    GroupInvitationStatus m_invitationStatus = GroupInvitationStatus::None;
 };
 } // namespace vm
 

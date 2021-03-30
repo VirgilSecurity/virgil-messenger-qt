@@ -35,20 +35,41 @@
 #include "MessagesProxyModel.h"
 
 #include "MessagesModel.h"
+#include "Messenger.h"
 
 using namespace vm;
+using Self = MessagesProxyModel;
 
-MessagesProxyModel::MessagesProxyModel(MessagesModel *model) : ListProxyModel(model), m_model(model)
+Self::MessagesProxyModel(Messenger *messenger, MessagesModel *model)
+    : ListProxyModel(model), m_messenger(messenger), m_model(model)
 {
     setSortRole(MessagesModel::SortRole);
     sort(0, Qt::DescendingOrder);
 }
 
+QModelIndex Self::getNeighbourIndex(int row, int offset) const
+{
+    const auto rowIndex = mapFromSource(m_model->index(row));
+    const auto neighbourIndex = index(rowIndex.row() - offset, 0);
+    return mapToSource(neighbourIndex);
+}
+
+QModelIndex Self::getFirstIndex() const
+{
+    return mapToSource(index(m_model->rowCount() - 1, 0));
+}
+
+QModelIndex Self::getLastIndex() const
+{
+    return mapToSource(index(0, 0));
+}
+
 bool MessagesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    const auto message = m_model->getMessage(sourceRow);
-    if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-        return false;
+    const auto message = m_model->getMessage(0);
+    if (const auto invitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
+        return invitation->superOwnerId() == m_messenger->currentUser()->id()
+                || invitation->invitationStatus() != GroupInvitationStatus::None;
     }
     return ListProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }

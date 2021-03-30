@@ -36,6 +36,7 @@
 #define VM_MESSAGESTABLE_H
 
 #include "core/DatabaseTable.h"
+#include "GroupId.h"
 #include "Message.h"
 #include "Chat.h"
 
@@ -57,10 +58,11 @@ signals:
     void fetchNotSentMessages();
     void addMessage(const MessageHandler &message);
     void deleteChatMessages(const ChatId &chatId);
-    void deleteGroupInvitationMessage(const ChatId &chatId);
 
     void updateMessage(const MessageUpdate &messageUpdate);
-    void markAllAsRead(const Chat &chat);
+    void markIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
+    void markOutgoingMessagesAsReadBeforeMessage(const MessageId &messageId);
+    void updateMessageBody(const MessageId &messageId, const QString &body);
 
     //
     //  Notification signals.
@@ -68,6 +70,8 @@ signals:
     void errorOccurred(const QString &errorText);
     void chatMessagesFetched(ModifiableMessages messages);
     void notSentMessagesFetched(ModifiableMessages messages);
+    void messageAdded(const MessageHandler &message);
+    void chatUnreadMessageCountChanged(const ChatId &chatId);
 
 private:
     bool create() override;
@@ -76,10 +80,11 @@ private:
     void onFetchNotSentMessages();
     void onAddMessage(const MessageHandler &message);
     void onDeleteChatMessages(const ChatId &chatId);
-    void onDeleteGroupInvitationMessage(const ChatId &chatId);
 
     void onUpdateMessage(const MessageUpdate &messageUpdate);
-    void onMarkAllAsRead(const Chat &chat);
+    void onMarkIncomingMessagesAsReadBeforeMessage(const MessageId &messageId);
+    void onMarkOutgoingMessagesAsReadBeforeMessage(const MessageId &messageId);
+    void onUpdateMessageBody(const MessageId &messageId, const QString &body);
 };
 } // namespace vm
 

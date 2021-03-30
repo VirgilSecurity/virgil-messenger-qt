@@ -69,9 +69,8 @@ Self::UserDatabase(const QDir &databaseDir, QObject *parent)
     connect(this, &Self::writeMessage, this, &Self::onWriteMessage);
     connect(this, &Self::updateMessage, this, &Self::onUpdateMessage);
     connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
-    connect(this, &Self::resetUnreadCount, this, &Self::onResetUnreadCount);
+    connect(this, &Self::writeGroupChat, this, &Self::onWriteGroupChat);
     connect(this, &Self::deleteNewGroupChat, this, &Self::onDeleteNewGroupChat);
-    connect(this, &Self::deleteGroupChatInvitation, this, &Self::onDeleteGroupChatInvitation);
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
 }
 
@@ -184,6 +183,9 @@ bool Self::create()
         return false;
     }
 
+    connect(messagesTable(), &MessagesTable::chatUnreadMessageCountChanged, chatsTable(),
+            &ChatsTable::requestChatUnreadMessageCount);
+
     return true;
 }
 
@@ -209,18 +211,22 @@ void Self::onClose()
     Database::close();
 }
 
-void Self::onWriteMessage(const MessageHandler &message, qsizetype unreadCount)
+void Self::onWriteMessage(const MessageHandler &message)
 {
     ScopedConnection connection(*this);
     ScopedTransaction transaction(*this);
     messagesTable()->addMessage(message);
-    if (message->contentIsAttachment()) {
-        attachmentsTable()->addAttachment(message);
-    }
-    chatsTable()->updateLastMessage(message, unreadCount);
 
-    if (message->isIncoming()) {
-        contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
+    if (rowsChangedCount() > 0) {
+        if (message->contentIsAttachment()) {
+            attachmentsTable()->addAttachment(message);
+        }
+
+        if (message->isIncoming()) {
+            contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
+        }
+
+        chatsTable()->updateLastMessage(message);
     }
 }
 
@@ -231,10 +237,12 @@ void UserDatabase::onUpdateMessage(const MessageUpdate &messageUpdate)
         return;
     }
 
-    ScopedConnection connection(*this);
-    ScopedTransaction transaction(*this);
-    messagesTable()->updateMessage(messageUpdate);
-    attachmentsTable()->updateAttachment(messageUpdate);
+    {
+        ScopedConnection connection(*this);
+        ScopedTransaction transaction(*this);
+        messagesTable()->updateMessage(messageUpdate);
+        attachmentsTable()->updateAttachment(messageUpdate);
+    }
 }
 
 void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
@@ -251,27 +259,24 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     //
     if (chat->type() == ChatType::Group) {
 
-        groupsTable()->addGroupForChat(chat);
-
         //
         //  Expect invitation message here.
-        //  Add Group Owner and myself with affiliation "none" that equals to "invitation is not accepted yet".
         //
         const auto message = chat->lastMessage();
 
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            groupMembersTable()->updateGroup(
-                    GroupMemberAffiliationUpdate { GroupId(chat->id()), message->senderId(), GroupAffiliation::Owner });
+        if (const auto content = std::get_if<MessageContentGroupInvitation>(&message->content())) {
 
-            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->recipientId(),
-                                                                            GroupAffiliation::None });
+            const auto groupId = GroupId(chat->id());
 
-        } else {
-            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->senderId(),
-                                                                            GroupAffiliation::Member });
+            auto group = std::make_shared<Group>(groupId, content->superOwnerId(), content->title(),
+                                                 GroupInvitationStatus::Invited);
 
-            groupMembersTable()->updateGroup(GroupMemberAffiliationUpdate { GroupId(chat->id()), message->recipientId(),
-                                                                            GroupAffiliation::Member });
+            groupsTable()->add(group);
+
+            if (rowsChangedCount() > 0) {
+                groupMembersTable()->updateGroup(
+                        GroupMemberAffiliationUpdate { groupId, content->superOwnerId(), GroupAffiliation::Owner });
+            }
         }
     }
 
@@ -289,17 +294,24 @@ void Self::onWriteChatAndLastMessage(const ChatHandler &chat)
     }
 
     // Update last message
-    chatsTable()->updateLastMessage(message, chat->unreadMessageCount());
+    chatsTable()->updateLastMessage(message);
 
     if (message->isIncoming()) {
         contactsTable()->updateContact(UsernameContactUpdate { message->senderId(), message->senderUsername() });
     }
+
+    chatsTable()->requestChatUnreadMessageCount(message->chatId());
 }
 
-void Self::onResetUnreadCount(const ChatHandler &chat)
+void Self::onWriteGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers)
 {
     ScopedConnection connection(*this);
-    chatsTable()->resetUnreadCount(chat);
+    ScopedTransaction transaction(*this);
+    chatsTable()->addChat(chat);
+    groupsTable()->add(group);
+    if (!groupMembers.empty()) {
+        groupMembersTable()->add(groupMembers);
+    }
 }
 
 void Self::onDeleteNewGroupChat(const ChatId &chatId)
@@ -312,14 +324,6 @@ void Self::onDeleteNewGroupChat(const ChatId &chatId)
     const GroupId groupId(chatId);
     groupsTable()->deleteGroup(groupId);
     groupMembersTable()->deleteGroupMembers(groupId);
-}
-
-void Self::onDeleteGroupChatInvitation(const ChatId &chatId)
-{
-    ScopedConnection connection(*this);
-    ScopedTransaction transaction(*this);
-    chatsTable()->resetLastMessage(chatId);
-    messagesTable()->deleteGroupInvitationMessage(chatId);
 }
 
 void Self::onUpdateGroup(const GroupUpdate &groupUpdate)

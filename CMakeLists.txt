@@ -47,9 +47,9 @@ include(customers)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.9.3")
+set(VS_TARGET_VERSION "3.10.0")
 set(VS_CORE_VERSION "0.2.1.82")
-set(VERSION_DATABASE_SCHEME "2")
+set(VERSION_DATABASE_SCHEME "3")
 
 # ---------------------------------------------------------------------------
 # Code formatting
@@ -462,6 +462,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h
@@ -480,6 +481,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/CloudFilesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controllers.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/controllers/DocumentInteractionController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/MessagesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/UsersController.h
         # Helpers
@@ -531,6 +533,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version1/PatchContacts.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchChats.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchGroups.h
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -602,6 +606,8 @@ target_sources(${VS_TARGET_NAME}
         # MacOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
         # IOS
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.h>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosViewController.h>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
         # Android
@@ -675,6 +681,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp
@@ -690,6 +697,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/ChatsController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/CloudFilesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controllers.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/controllers/DocumentInteractionController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/MessagesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/UsersController.cpp
         # Helpers
@@ -738,6 +746,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version1/PatchContacts.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchChats.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchGroups.cpp
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
@@ -814,6 +824,8 @@ target_sources(${VS_TARGET_NAME}
         # IOS
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.mm>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosViewController.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
         # Android

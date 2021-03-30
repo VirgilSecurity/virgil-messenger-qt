@@ -291,7 +291,7 @@ void XmppMucSubscriptionsIq::toXmlElementFromChild(QXmlStreamWriter *writer) con
 }
 
 // --------------------------------------------------------------------------
-//  XmppMucSubscriptionsIq
+//  XmppMucSubscribeIq
 // --------------------------------------------------------------------------
 XmppMucSubscribeItem XmppMucSubscribeIq::item() const
 {
@@ -318,4 +318,37 @@ void XmppMucSubscribeIq::parseElementFromChild(const QDomElement &element)
 void XmppMucSubscribeIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
     m_item.toXml(writer);
+}
+
+// --------------------------------------------------------------------------
+//  XmppMucUnsubscribeIq
+// --------------------------------------------------------------------------
+QString XmppMucUnsubscribeIq::jid() const
+{
+    return m_jid;
+}
+
+void XmppMucUnsubscribeIq::setJid(const QString &jid)
+{
+    m_jid = jid;
+}
+
+bool XmppMucUnsubscribeIq::isMucUnsubscribeIq(const QDomElement &element)
+{
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("unsubscribe"));
+    return (queryElement.namespaceURI() == ns_muc_sub);
+}
+
+void XmppMucUnsubscribeIq::parseElementFromChild(const QDomElement &element)
+{
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("unsubscribe"));
+    m_jid = queryElement.attribute(QStringLiteral("jid"));
+}
+
+void XmppMucUnsubscribeIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
+{
+    writer->writeStartElement(QStringLiteral("unsubscribe"));
+    writer->writeDefaultNamespace(ns_muc_sub);
+    helperToXmlAddAttribute(writer, QStringLiteral("jid"), m_jid);
+    writer->writeEndElement();
 }

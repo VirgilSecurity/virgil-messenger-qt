@@ -84,7 +84,7 @@ private:
 };
 
 //
-//  Represents XML element: <subscription/> from the  <subscriptions xmlns='urn:xmpp:mucsub:0'/>
+//  Represents XML element: <subscription/> from the <subscriptions xmlns='urn:xmpp:mucsub:0'/>
 //
 class XmppMucSubscriptionItem
 {
@@ -153,6 +153,27 @@ protected:
 
 private:
     XmppMucSubscribeItem m_item;
+};
+
+//
+//  IQ for unsubscribing from MUC/Sub events.
+//
+class XmppMucUnsubscribeIq : public QXmppIq
+{
+public:
+    using QXmppIq::QXmppIq;
+
+    QString jid() const;
+    void setJid(const QString &jid);
+
+    static bool isMucUnsubscribeIq(const QDomElement &element);
+
+protected:
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
+
+private:
+    QString m_jid;
 };
 
 } // namespace vm

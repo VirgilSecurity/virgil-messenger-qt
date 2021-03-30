@@ -70,6 +70,18 @@ CloudFileMembers Self::members() const
     return m_members;
 }
 
+[[nodiscard]] CloudFileMemberHandler Self::findMemberById(const UserId &memberId) const
+{
+    const auto it = std::find_if(m_members.cbegin(), m_members.cend(),
+                                 [&memberId](const auto &member) { return memberId == member->memberId(); });
+
+    if (it != m_members.cend()) {
+        return *it;
+    }
+
+    return nullptr;
+}
+
 CloudFileMembers Self::selectedMembers() const
 {
     CloudFileMembers result;
@@ -83,7 +95,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
 {
     switch (role) {
     case DetailsRole:
-        return CloudFileMemberTypeToDisplayString(m_members[index.row()]->type());
+        return m_members[index.row()]->typeAsDisplayString();
 
     case SortRole: {
         const auto &m = m_members[index.row()];
