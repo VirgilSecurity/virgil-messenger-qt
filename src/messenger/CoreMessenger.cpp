@@ -3071,42 +3071,6 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 
         emit updateGroup(GroupNameUpdate { groupId, name });
     });
-
-    //
-    //  TODO: Replace this events with MUC/Sub events.
-    //
-    connect(room, &QXmppMucRoom::kicked,
-            [room](const QString &jid, const QString &reason) { qCDebug(lcCoreMessenger) << "---> kicked:"; });
-
-    connect(room, &QXmppMucRoom::isJoinedChanged,
-            [room]() { qCDebug(lcCoreMessenger) << "---> isJoinedChanged:" << room->isJoined(); });
-
-    connect(room, &QXmppMucRoom::left, [room]() { qCDebug(lcCoreMessenger) << "---> left:"; });
-
-    connect(room, &QXmppMucRoom::nickNameChanged,
-            [room](const QString &nickName) { qCDebug(lcCoreMessenger) << "---> nickNameChanged:" << nickName; });
-
-    connect(room, &QXmppMucRoom::participantAdded,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantAdded:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantChanged,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantChanged:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantRemoved,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantRemoved:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantsChanged,
-            [room]() { qCDebug(lcCoreMessenger) << "---> participantsChanged"; });
-
-    connect(room, &QXmppMucRoom::permissionsReceived, [room](const QList<QXmppMucItem> &permissions) {
-        qCDebug(lcCoreMessenger) << "Room permissions received:" << room->jid();
-        for (const auto &permission : permissions) {
-            qCDebug(lcCoreMessengerXMPP).noquote() << "Room permission:" << toXmlString(permission);
-        }
-    });
-
-    connect(room, &QXmppMucRoom::subjectChanged,
-            [room](const QString &subject) { qCDebug(lcCoreMessenger) << "---> subjectChanged:" << subject; });
 }
 
 CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup)
