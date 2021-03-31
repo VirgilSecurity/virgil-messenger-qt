@@ -45,7 +45,7 @@ Self::ChatObject(Messenger *messenger, QObject *parent)
     connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatObject::setLastActivityText);
 }
 
-void Self::setChat(const ChatHandler &chat)
+void Self::setChat(const ModifiableChatHandler &chat)
 {
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
@@ -102,6 +102,7 @@ void Self::updateGroup(const GroupUpdate &groupUpdate)
 
     if (auto nameUpdate = std::get_if<GroupNameUpdate>(&groupUpdate); nameUpdate && m_chat) {
         if (nameUpdate->groupId == m_chat->id()) {
+            m_chat->setTitle(nameUpdate->name);
             emit titleChanged(nameUpdate->name);
         }
     }

@@ -62,6 +62,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
               new AddGroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),
       m_attachmentPreviewState(new AttachmentPreviewState(this)),
       m_backupKeyState(new BackupKeyState(m_messenger, this)),
+      m_editChatInfoState(new EditChatInfoState(m_messenger, controllers->chats(), this)),
       m_editProfileState(new EditProfileState(controllers->users(), this)),
       m_verifyProfileState(new VerifyProfileState(this)),
       m_chatInfoState(new ChatInfoState(controllers->chats(), this)),
@@ -97,6 +98,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<AddGroupChatMembersState *>("AddGroupChatMembersState*");
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
+    qRegisterMetaType<EditChatInfoState *>("EditChatInfoState*");
     qRegisterMetaType<EditProfileState *>("EditProfileState*");
     qRegisterMetaType<VerifyProfileState *>("VerifyProfileState*");
     qRegisterMetaType<ChatInfoState *>("ChatInfoState*");
@@ -198,8 +200,11 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested,
                          m_addGroupChatMembersState);
+    addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::editRequested, m_editChatInfoState);
     connect(m_addGroupChatMembersState, &AddGroupChatMembersState::contactsSelected, this,
             &ApplicationStateManager::goBack);
+
+    connect(m_editChatInfoState, &EditChatInfoState::editingFinished, this, &Self::goBack);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 

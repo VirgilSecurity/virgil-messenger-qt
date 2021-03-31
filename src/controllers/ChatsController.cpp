@@ -185,7 +185,7 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
     m_messenger->createGroupChat(groupName, contacts);
 }
 
-void Self::openChat(const ChatHandler &chat)
+void Self::openChat(const ModifiableChatHandler &chat)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
     if (chat->unreadMessageCount() > 0) {
@@ -202,7 +202,7 @@ void Self::openChat(const QString &chatId)
 
 void Self::closeChat()
 {
-    m_chatObject->setChat(ChatHandler());
+    m_chatObject->setChat(ModifiableChatHandler());
     emit chatClosed();
 }
 

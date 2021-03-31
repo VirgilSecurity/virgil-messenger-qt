@@ -10,6 +10,7 @@
         <file>qml/pages/ChatInfoPage.qml</file>
         <file>qml/pages/CloudFileSharingPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/EditChatInfoPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/MainListsPage.qml</file>

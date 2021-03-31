@@ -32,61 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHAT_OBJECT_H
-#define VM_CHAT_OBJECT_H
+#include "EditChatInfoState.h"
 
-#include <QObject>
+#include "ChatsController.h"
+#include "Messenger.h"
 
-#include "Chat.h"
-#include "GroupMembersModel.h"
-#include "GroupUpdate.h"
-#include "User.h"
+using namespace vm;
+using Self = EditChatInfoState;
 
-namespace vm {
-class Messenger;
-
-class ChatObject : public QObject
+Self::EditChatInfoState(Messenger *messenger, ChatsController *controller, QState *parent)
+    : OperationState(parent), m_messenger(messenger), m_controller(controller)
 {
-    Q_OBJECT
-    Q_PROPERTY(QString title READ title NOTIFY titleChanged)
-    Q_PROPERTY(QString lastActivityText MEMBER m_lastActivityText NOTIFY lastActivityTextChanged)
-    Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
-    Q_PROPERTY(GroupMembersModel *groupMembers MEMBER m_groupMembersModel CONSTANT)
-    Q_PROPERTY(bool userIsOwner MEMBER m_userIsOwner NOTIFY userIsOwnerChanged)
-    Q_PROPERTY(bool userCanEdit MEMBER m_userCanEdit NOTIFY userCanEditChanged)
+}
 
-public:
-    ChatObject(Messenger *messenger, QObject *parent);
-
-    void setChat(const ModifiableChatHandler &chat);
-    ChatHandler chat() const;
-
-    QString title() const;
-    bool isGroup() const;
-
-    void setGroupMembers(const GroupMembers &groupMembers);
-    GroupMembers selectedGroupMembers() const;
-
-    void updateGroup(const GroupUpdate &groupUpdate);
-
-signals:
-    void titleChanged(const QString &title);
-    void lastActivityTextChanged(const QString &text);
-    void isGroupChanged(bool isGroup);
-
-    void userIsOwnerChanged(bool isOwner);
-    void userCanEditChanged(bool canEdit);
-
-private:
-    void setLastActivityText(const QString &text);
-
-    QPointer<Messenger> m_messenger;
-    ModifiableChatHandler m_chat;
-    GroupMembersModel *m_groupMembersModel;
-    QString m_lastActivityText;
-    bool m_userIsOwner = false;
-    bool m_userCanEdit = false;
-};
-} // namespace vm
-
-#endif // VM_CHAT_OBJECT_H
+void Self::save(const QString &name)
+{
+    const GroupId groupId(m_controller->currentChat()->id());
+    m_messenger->setGroupInfo(groupId, name);
+    emit editingFinished();
+}
