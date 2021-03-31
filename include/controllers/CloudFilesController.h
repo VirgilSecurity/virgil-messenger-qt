@@ -112,7 +112,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;
     bool m_isListUpdating = false;
-    bool m_onlineListingNeeded = false;
+    bool m_onlineRefreshNeeded = false;
 };
 } // namespace vm
 
