@@ -83,6 +83,14 @@ Page {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
                 selectionModel: d.chat.isGroup && d.chat.userCanEdit ? d.model.selection : null
+                itemContextMenu: ContextMenu {
+                    dropdown: true
+
+                    ContextMenuItem {
+                        text: qsTr("Remove member")
+                        onTriggered: removeParticipantsDialog.open()
+                    }
+                }
             }
         }
 
