@@ -73,6 +73,8 @@ signals:
     void interruptFileOperation(const CloudFileId &fileId);
     void updateCloudFiles(const CloudFilesUpdate &update);
 
+    void onlineListingFailed();
+
 private:
     using SourceType = CloudFileOperationSource::Type;
 

@@ -172,6 +172,7 @@ void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const Mod
         m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
     } else {
         qCDebug(lcOperation) << "Network is offline";
+        emit onlineListingFailed();
         fail();
     }
 }
