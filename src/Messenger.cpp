@@ -369,10 +369,7 @@ void Self::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwne
 
 void Self::setGroupInfo(const GroupId &groupId, const QString &name)
 {
-    GroupNameUpdate update;
-    update.groupId = groupId;
-    update.name = name;
-    emit updateGroup(update);
+    m_coreMessenger->renameGroupChat(groupId, name);
 }
 
 void Self::onPushNotificationTokenUpdate()
