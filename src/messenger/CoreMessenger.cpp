@@ -262,8 +262,7 @@ public:
     std::map<GroupId, GroupImplHandler> groups;
     std::mutex groupsMutex;
 
-    bool isPrivateChatsSynced = false;
-    bool isGroupChatsSynced = false;
+    std::map<GroupId, QString> groupRenameRequests;
 
     using QueryId = QString;
     using QueryParamTo = GroupId;
@@ -362,6 +361,9 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
     connect(this, &Self::sendMessageStatusDisplayed, this, &Self::onSendMessageStatusDisplayed);
+    connect(this, &Self::renameGroupChat, this, &Self::onRenameGroupChat);
+    connect(this, &Self::groupChatCreated, this, &Self::onGroupChatCreated);
+    connect(this, &Self::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
 
     connect(this, &Self::resetXmppConfiguration, this, &Self::onResetXmppConfiguration);
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
@@ -445,6 +447,21 @@ Self::Result Self::resetCommKitConfiguration()
 
 void Self::onResetXmppConfiguration()
 {
+    if (m_impl->xmpp) {
+        //
+        //  TODO: Make more reliable approach, see slot onCleanupXmppMucRooms() for details.
+        //
+        if (nullptr == m_impl->xmppGroupChatManager) {
+            m_impl->xmppGroupChatManager = new QXmppMucManager();
+            m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
+
+            connect(m_impl->xmppGroupChatManager, &QXmppMucManager::invitationReceived, this,
+                    &Self::xmppOnMucInvitationReceived);
+
+            connect(m_impl->xmppGroupChatManager, &QXmppMucManager::roomAdded, this, &Self::xmppOnMucRoomAdded);
+        }
+        return;
+    }
 
     qCDebug(lcCoreMessenger) << "Reset XMPP configuration";
 
@@ -520,9 +537,13 @@ void Self::onResetXmppConfiguration()
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
     connect(m_impl->xmpp.get(), &QXmppClient::stateChanged, this, &Self::xmppOnStateChanged);
     connect(m_impl->xmpp.get(), &QXmppClient::error, this, &Self::xmppOnError);
+    connect(m_impl->xmpp.get(), &QXmppClient::sslErrors, this, &Self::xmppOnSslErrors);
+
+    //
+    //
+    //
     connect(m_impl->xmpp.get(), &QXmppClient::presenceReceived, this, &Self::xmppOnPresenceReceived);
     connect(m_impl->xmpp.get(), &QXmppClient::iqReceived, this, &Self::xmppOnIqReceived);
-    connect(m_impl->xmpp.get(), &QXmppClient::sslErrors, this, &Self::xmppOnSslErrors);
     connect(m_impl->xmpp.get(), &QXmppClient::messageReceived, this, &Self::xmppOnMessageReceived);
 
     //
@@ -1066,12 +1087,8 @@ void Self::connectXmppServer()
     config.setPassword(xmppPass);
     config.setAutoReconnectionEnabled(false);
     config.setAutoAcceptSubscriptions(true);
-    if (nullptr == m_impl->xmpp) {
-        //
-        //  Configure QXMPP.
-        //
-        resetXmppConfiguration();
-    }
+
+    resetXmppConfiguration();
 
     qCDebug(lcCoreMessenger) << "Connecting to XMPP server...";
     m_impl->xmpp->connectToServer(config);
@@ -1106,9 +1123,16 @@ void Self::onCleanupXmppMucRooms()
 
     for (auto xmppRoom : m_impl->xmppGroupChatManager->rooms()) {
         xmppRoom->leave("Signed out");
-        disconnect(xmppRoom);
-        xmppRoom->deleteLater();
+        delete xmppRoom;
     }
+
+    //
+    //  Old rooms manager should be completely replaced, because after sign-out and then sign-in
+    //  the old rooms are iterated and contains dangling pointers, that leads to a crash.
+    //  TODO: Make more reliable approach.
+    //
+    m_impl->xmpp->removeExtension(m_impl->xmppGroupChatManager);
+    m_impl->xmppGroupChatManager = nullptr;
 }
 
 void Self::onCleanupCommKitMessenger()
@@ -2128,7 +2152,6 @@ void Self::xmppOnConnected()
                 qCDebug(lcCoreMessenger) << "Send request to join XMPP room:" << xmppRoom->jid();
             } else {
                 qCDebug(lcCoreMessenger) << "Failed to join to XMPP room:" << xmppRoom->jid();
-                ;
             }
         }
     }
@@ -2694,6 +2717,49 @@ void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOw
     }
 }
 
+void Self::onRenameGroupChat(const GroupId &groupId, const QString &groupName)
+{
+    Q_ASSERT(!groupName.isEmpty());
+
+    if (!isOnline()) {
+        qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- no connection";
+        return;
+    }
+
+    if (!isGroupCached(groupId)) {
+        qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- group is not loaded";
+        return;
+    }
+
+    m_impl->groupRenameRequests[groupId] = groupName;
+    if (!xmppRequestRoomConfiguration(groupIdToJid(groupId))) {
+        qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- failed to send XMPP request";
+        m_impl->groupRenameRequests.erase(groupId);
+    }
+}
+
+void Self::onGroupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers)
+{
+    //
+    //  Reconnect room signals as group was created.
+    //
+    for (auto room : m_impl->xmppGroupChatManager->rooms()) {
+        const auto roomGroupId = groupIdFromJid(room->jid());
+        if (group->id() == roomGroupId) {
+            room->disconnect();
+            connectXmppRoomSignals(room);
+            break;
+        }
+    }
+}
+
+void Self::onGroupChatCreateFailed(const GroupId &chatId, CoreMessengerStatus errorStatus)
+{
+    //
+    //  TODO: Remove CommKit group if it was created.
+    //
+}
+
 void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &members)
 {
     qCInfo(lcCoreMessenger) << "Trying to create group chat within XMPP server";
@@ -2714,12 +2780,7 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
         //  Request Room Configuration to Create Reserved Room.
         //  This is required to set a room name.
         //
-        QXmppMucOwnerIq requestConfigurationIq;
-        requestConfigurationIq.setFrom(currentUserJid());
-        requestConfigurationIq.setTo(room->jid());
-        requestConfigurationIq.setType(QXmppIq::Type::Get);
-
-        if (!m_impl->xmpp->sendPacket(requestConfigurationIq)) {
+        if (!xmppRequestRoomConfiguration(room->jid())) {
             emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
         }
     });
@@ -2730,26 +2791,7 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                 qCDebug(lcCoreMessengerXMPP).noquote()
                         << "Got an initial room configuration:" << toXmlString(configuration);
 
-                QXmppMucOwnerIq acceptIq;
-                acceptIq.setFrom(currentUserJid());
-                acceptIq.setTo(room->jid());
-                acceptIq.setType(QXmppIq::Type::Set);
-
-                QXmppDataForm submitForm;
-                submitForm.setType(QXmppDataForm::Type::Submit);
-
-                using Field = QXmppDataForm::Field::Type;
-
-                QList<QXmppDataForm::Field> configFields {
-                    { Field::HiddenField, "FORM_TYPE", "http://jabber.org/protocol/muc#roomconfig" },
-                    { Field::TextSingleField, "muc#roomconfig_roomname", group->name() },
-                };
-
-                submitForm.setFields(configFields);
-
-                acceptIq.setForm(submitForm);
-
-                if (!m_impl->xmpp->sendPacket(acceptIq)) {
+                if (!xmppSendRoomConfiguration(room->jid(), group->name())) {
                     emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
                     return;
                 }
@@ -2759,6 +2801,18 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                 //  Note, errors are not handled.
                 //
                 emit groupChatCreated(group, members);
+
+                //
+                //  Subscribe to Muc/Sub events.
+                //
+                m_impl->xmppMucSubManager->subscribe(
+                        {
+                                XmppMucSubEvent::Messages,
+                                XmppMucSubEvent::Affiliations,
+                                XmppMucSubEvent::Subscribers,
+                                XmppMucSubEvent::Presence,
+                        },
+                        room->jid(), currentUser()->id());
 
                 //
                 //  Add group members to the room.
@@ -3032,14 +3086,36 @@ void Self::xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &r
 
 void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 {
-
     qCDebug(lcCoreMessenger) << "Connecting room signals:" << room->jid();
 
-    connect(room, &QXmppMucRoom::allowedActionsChanged,
-            [room](QXmppMucRoom::Actions actions) { qCDebug(lcCoreMessenger) << "---> allowedActionsChanged:"; });
-
-    connect(room, &QXmppMucRoom::configurationReceived, [room](const QXmppDataForm &configuration) {
+    connect(room, &QXmppMucRoom::configurationReceived, [this, room](const QXmppDataForm &configuration) {
         qCDebug(lcCoreMessengerXMPP).noquote() << "Room configuration received:" << toXmlString(configuration);
+        //
+        //  For now only group name can be changed.
+        //
+        const auto groupId = groupIdFromJid(room->jid());
+
+        //
+        //  Find the group new name and remove it from the cache.
+        //
+        const auto groupName = [this, &groupId]() {
+            const auto it = m_impl->groupRenameRequests.find(groupId);
+            auto result = it != m_impl->groupRenameRequests.cend() ? it->second : QString();
+            m_impl->groupRenameRequests.erase(groupId);
+            return result;
+        }();
+
+        if (groupName.isEmpty()) {
+            qCCritical(lcCoreMessenger) << "Failed to rename group" << groupId << "- group name was not cached";
+            return;
+        }
+
+        if (xmppSendRoomConfiguration(room->jid(), groupName)) {
+            emit updateGroup(GroupNameUpdate { groupId, groupName });
+
+        } else {
+            qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- failed to send configuration";
+        }
     });
 
     connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
@@ -3071,42 +3147,6 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 
         emit updateGroup(GroupNameUpdate { groupId, name });
     });
-
-    //
-    //  TODO: Replace this events with MUC/Sub events.
-    //
-    connect(room, &QXmppMucRoom::kicked,
-            [room](const QString &jid, const QString &reason) { qCDebug(lcCoreMessenger) << "---> kicked:"; });
-
-    connect(room, &QXmppMucRoom::isJoinedChanged,
-            [room]() { qCDebug(lcCoreMessenger) << "---> isJoinedChanged:" << room->isJoined(); });
-
-    connect(room, &QXmppMucRoom::left, [room]() { qCDebug(lcCoreMessenger) << "---> left:"; });
-
-    connect(room, &QXmppMucRoom::nickNameChanged,
-            [room](const QString &nickName) { qCDebug(lcCoreMessenger) << "---> nickNameChanged:" << nickName; });
-
-    connect(room, &QXmppMucRoom::participantAdded,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantAdded:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantChanged,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantChanged:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantRemoved,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantRemoved:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantsChanged,
-            [room]() { qCDebug(lcCoreMessenger) << "---> participantsChanged"; });
-
-    connect(room, &QXmppMucRoom::permissionsReceived, [room](const QList<QXmppMucItem> &permissions) {
-        qCDebug(lcCoreMessenger) << "Room permissions received:" << room->jid();
-        for (const auto &permission : permissions) {
-            qCDebug(lcCoreMessengerXMPP).noquote() << "Room permission:" << toXmlString(permission);
-        }
-    });
-
-    connect(room, &QXmppMucRoom::subjectChanged,
-            [room](const QString &subject) { qCDebug(lcCoreMessenger) << "---> subjectChanged:" << subject; });
 }
 
 CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup)
@@ -3302,6 +3342,44 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(const Gr
     }
 
     return mapStatus(status);
+}
+
+bool Self::xmppRequestRoomConfiguration(const QString &roomJid)
+{
+    Q_ASSERT(m_impl->xmpp);
+
+    QXmppMucOwnerIq requestConfigurationIq;
+    requestConfigurationIq.setFrom(currentUserJid());
+    requestConfigurationIq.setTo(roomJid);
+    requestConfigurationIq.setType(QXmppIq::Type::Get);
+
+    return m_impl->xmpp->sendPacket(requestConfigurationIq);
+}
+
+bool Self::xmppSendRoomConfiguration(const QString &roomJid, const QString &roomName)
+{
+    Q_ASSERT(m_impl->xmpp);
+
+    QXmppMucOwnerIq acceptIq;
+    acceptIq.setFrom(currentUserJid());
+    acceptIq.setTo(roomJid);
+    acceptIq.setType(QXmppIq::Type::Set);
+
+    QXmppDataForm submitForm;
+    submitForm.setType(QXmppDataForm::Type::Submit);
+
+    using Field = QXmppDataForm::Field::Type;
+
+    QList<QXmppDataForm::Field> configFields {
+        { Field::HiddenField, "FORM_TYPE", "http://jabber.org/protocol/muc#roomconfig" },
+        { Field::TextSingleField, "muc#roomconfig_roomname", roomName },
+    };
+
+    submitForm.setFields(configFields);
+
+    acceptIq.setForm(submitForm);
+
+    return m_impl->xmpp->sendPacket(acceptIq);
 }
 
 // --------------------------------------------------------------------------

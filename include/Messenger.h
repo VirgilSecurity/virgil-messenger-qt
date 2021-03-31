@@ -134,6 +134,11 @@ public:
     //--
 
     //
+    //  Set group info
+    //
+    void setGroupInfo(const GroupId &groupId, const QString &name);
+
+    //
     //  Helpers.
     //
     void setApplicationActive(bool active);

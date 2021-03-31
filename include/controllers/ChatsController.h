@@ -70,14 +70,15 @@ public:
     void createChatWithUserId(const UserId &userId);
     void createGroupChat(const QString &groupName, const Contacts &contacts);
 
-    void openChat(const ChatHandler &chat);
+    void openChat(const ModifiableChatHandler &chat);
     Q_INVOKABLE void openChat(const QString &chatId); // can be used within QML only
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
 
-    void loadGroupMembers();
     Q_INVOKABLE void acceptGroupInvitation(const MessageHandler &invitationMessage);
     Q_INVOKABLE void rejectGroupInvitation(const MessageHandler &invitationMessage);
+
+    void loadGroupMembers();
     void addMembers(const Contacts &contacts);
     Q_INVOKABLE void removeSelectedMembers();
     Q_INVOKABLE void leaveGroup();

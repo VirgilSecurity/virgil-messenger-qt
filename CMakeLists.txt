@@ -498,6 +498,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileListState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileSharingState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/EditChatInfoState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/EditProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatInfoState.h
@@ -708,6 +709,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/EditChatInfoState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/EditProfileState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/VerifyProfileState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatInfoState.cpp

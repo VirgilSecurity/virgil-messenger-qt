@@ -2,9 +2,9 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "../theme"
 import "../components"
 import "../components/Dialogs"
+import "../theme"
 
 Page {
     readonly property var appState: app.stateManager.chatInfoState
@@ -24,6 +24,12 @@ Page {
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
         contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
         contextMenu: ContextMenu {
+            ContextMenuItem {
+                text: d.chat.isGroup ? qsTr("Edit group") : qsTr("Edit chat")
+                visible: d.chat.isGroup && d.chat.userCanEdit
+                onTriggered: appState.editRequested()
+            }
+
             ContextMenuItem {
                 id: addMembersItem
                 text: qsTr("Add members")
@@ -83,6 +89,14 @@ Page {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
                 selectionModel: d.chat.isGroup && d.chat.userCanEdit ? d.model.selection : null
+                itemContextMenu: ContextMenu {
+                    dropdown: true
+
+                    ContextMenuItem {
+                        text: qsTr("Remove member")
+                        onTriggered: removeParticipantsDialog.open()
+                    }
+                }
             }
         }
 

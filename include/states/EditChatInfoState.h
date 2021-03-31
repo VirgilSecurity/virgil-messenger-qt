@@ -32,61 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHAT_OBJECT_H
-#define VM_CHAT_OBJECT_H
+#ifndef VM_EDIT_CHAT_INFO_STATE_H
+#define VM_EDIT_CHAT_INFO_STATE_H
 
-#include <QObject>
-
-#include "Chat.h"
-#include "GroupMembersModel.h"
-#include "GroupUpdate.h"
-#include "User.h"
+#include "OperationState.h"
 
 namespace vm {
+class ChatsController;
 class Messenger;
 
-class ChatObject : public QObject
+class EditChatInfoState : public OperationState
 {
     Q_OBJECT
-    Q_PROPERTY(QString title READ title NOTIFY titleChanged)
-    Q_PROPERTY(QString lastActivityText MEMBER m_lastActivityText NOTIFY lastActivityTextChanged)
-    Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
-    Q_PROPERTY(GroupMembersModel *groupMembers MEMBER m_groupMembersModel CONSTANT)
-    Q_PROPERTY(bool userIsOwner MEMBER m_userIsOwner NOTIFY userIsOwnerChanged)
-    Q_PROPERTY(bool userCanEdit MEMBER m_userCanEdit NOTIFY userCanEditChanged)
 
 public:
-    ChatObject(Messenger *messenger, QObject *parent);
+    EditChatInfoState(Messenger *messenger, ChatsController *controller, QState *parent);
 
-    void setChat(const ModifiableChatHandler &chat);
-    ChatHandler chat() const;
-
-    QString title() const;
-    bool isGroup() const;
-
-    void setGroupMembers(const GroupMembers &groupMembers);
-    GroupMembers selectedGroupMembers() const;
-
-    void updateGroup(const GroupUpdate &groupUpdate);
+    Q_INVOKABLE void save(const QString &name);
 
 signals:
-    void titleChanged(const QString &title);
-    void lastActivityTextChanged(const QString &text);
-    void isGroupChanged(bool isGroup);
-
-    void userIsOwnerChanged(bool isOwner);
-    void userCanEditChanged(bool canEdit);
+    void editingFinished();
 
 private:
-    void setLastActivityText(const QString &text);
-
-    QPointer<Messenger> m_messenger;
-    ModifiableChatHandler m_chat;
-    GroupMembersModel *m_groupMembersModel;
-    QString m_lastActivityText;
-    bool m_userIsOwner = false;
-    bool m_userCanEdit = false;
+    Messenger *m_messenger;
+    ChatsController *m_controller;
 };
 } // namespace vm
 
-#endif // VM_CHAT_OBJECT_H
+#endif // VM_EDIT_CHAT_INFO_STATE_H
