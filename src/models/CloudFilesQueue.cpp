@@ -88,9 +88,12 @@ Operation *Self::createOperation(OperationSourcePtr source)
     connect(op, &CloudFileOperation::updateCloudFiles, this, &Self::updateCloudFiles);
 
     switch (cloudFileSource->type()) {
-    case SourceType::ListFolder:
-        op->appendChild(new ListCloudFolderOperation(op, cloudFileSource->folder(), m_userDatabase));
+    case SourceType::ListFolder: {
+        auto listOp = new ListCloudFolderOperation(op, cloudFileSource->folder(), m_userDatabase);
+        connect(listOp, &ListCloudFolderOperation::onlineListingFailed, this, &CloudFilesQueue::onlineListingFailed);
+        op->appendChild(listOp);
         break;
+    }
     case SourceType::CreateFolder:
         op->appendChild(new CreateCloudFolderOperation(op, cloudFileSource->name(), cloudFileSource->folder(),
                                                        cloudFileSource->members()));

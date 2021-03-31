@@ -56,6 +56,9 @@ public:
 
     void run() override;
 
+signals:
+    void onlineListingFailed();
+
 private:
     void onDatabaseListFetched(const CloudFileHandler &parentFolder, const ModifiableCloudFiles &cloudFiles);
     void onCloudListFetched(CloudFileRequestId requestId, const ModifiableCloudFileHandler &parentFolder,

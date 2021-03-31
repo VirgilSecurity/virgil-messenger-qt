@@ -93,12 +93,14 @@ private:
     using FoldersHierarchy = ModifiableCloudFiles;
 
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
+    void refreshIfOnline();
 
     QString displayPath() const;
     bool isRoot() const;
     ModifiableCloudFileHandler rootFolder() const;
     CloudFileHandler parentFolder() const;
 
+    void onOnlineListingFailed();
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<Messenger> m_messenger;
@@ -110,6 +112,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;
     bool m_isListUpdating = false;
+    bool m_onlineListingNeeded = false;
 };
 } // namespace vm
 
