@@ -90,13 +90,13 @@ Control {
         }
 
         function openAddNewGroupChatPage() {
-            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
-                return
-            }
             stackView.push(page("NewGroupChat"))
         }
 
         function openNameGroupChatPage() {
+            if (![manager.chatListState, manager.cloudFileListState, manager.newGroupChatState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NameGroupChat"))
         }
 

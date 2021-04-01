@@ -4,6 +4,7 @@ import "../components"
 
 SelectContactsPage {
     id: root
+    showButton: true
 
     property alias headerTitle: pageHeader.title
 
@@ -12,11 +13,5 @@ SelectContactsPage {
         title: qsTr("Add members")
         description: selectedContacts.count ? qsTr("%1 selected".arg(selectedContacts.count)) : ""
         titleHorizontalAlignment: Qt.AlignHCenter
-
-        rightControl: ImageButton {
-            image: "Send"
-            visible: selectedContacts.count
-            onClicked: appState.finishSelection()
-        }
     }
 }

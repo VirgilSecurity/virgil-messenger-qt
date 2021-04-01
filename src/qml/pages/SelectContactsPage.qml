@@ -12,6 +12,8 @@ OperationPage {
     footerText: ""
 
     property alias selectedContacts: flow
+    property alias showButton: button.visible
+    property alias buttonText: button.text
 
     QtObject {
         id: d
@@ -84,7 +86,13 @@ OperationPage {
         ServerSelectionRow {
             Layout.alignment: Qt.AlignHCenter
         }
+
+        FormPrimaryButton {
+            id: button
+            text: qsTr("Select")
+            visible: false
+            enabled: selectedContacts.count
+            onClicked: appState.finishSelection()
+        }
     }
-
-
 }

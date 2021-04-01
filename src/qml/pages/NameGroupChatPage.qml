@@ -22,8 +22,8 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            onClicked: appState.createGroup(nameInput.text)
-            text: qsTr("Create")
+            onClicked: appState.groupNamed(nameInput.text)
+            text: qsTr("Select members")
         }
     }
 }
