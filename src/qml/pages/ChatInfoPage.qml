@@ -78,6 +78,8 @@ Page {
             HeaderTitle {
                 title: d.chat.title
                 description: d.chat.isGroup ? qsTr("%1 members").arg(d.model.count) : d.chat.lastActivityText
+                clickable: true
+                onClicked: appState.editRequested()
             }
         }
 
