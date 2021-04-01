@@ -21,7 +21,7 @@ OperationPage {
 
         Avatar {
             Layout.alignment: Qt.AlignHCenter
-            diameter: 80 // TODO(fpohtmeh): move to theme
+            diameter: Theme.bigAvatarDiameter
             nickname: controllers.users.currentUsername
         }
 

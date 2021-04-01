@@ -22,7 +22,7 @@ OperationPage {
 
         Avatar {
             nickname: d.chat.title
-            diameter: 80 // TODO(fpohtmeh): move to theme
+            diameter: Theme.bigAvatarDiameter
             Layout.alignment: Qt.AlignHCenter
         }
 

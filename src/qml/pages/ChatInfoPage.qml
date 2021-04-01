@@ -13,6 +13,7 @@ Page {
         id: d
         readonly property var chat: controllers.chats.current
         readonly property var model: chat.groupMembers
+        readonly property bool editableMembership: false
     }
 
     background: Rectangle {
@@ -33,7 +34,7 @@ Page {
             ContextMenuItem {
                 id: addMembersItem
                 text: qsTr("Add members")
-                visible: d.chat.isGroup && d.chat.userCanEdit
+                visible: d.chat.isGroup && d.chat.userCanEdit && d.editableMembership
                 onTriggered: appState.addMembersRequested()
             }
 
@@ -44,14 +45,14 @@ Page {
             ContextMenuItem {
                 id: removeMembersItem
                 text: qsTr("Remove members")
-                visible: d.chat.isGroup && d.model.selection.hasSelection
+                visible: d.chat.isGroup && d.model.selection.hasSelection && d.editableMembership
                 onTriggered: removeParticipantsDialog.open()
             }
 
             ContextMenuItem {
                 id: leaveGroupItem
                 text: qsTr("Leave group")
-                visible: d.chat.isGroup && !d.chat.userIsOwner
+                visible: d.chat.isGroup && !d.chat.userIsOwner && d.editableMembership
                 onTriggered: controllers.chats.leaveGroup()
             }
         }
@@ -78,6 +79,8 @@ Page {
             HeaderTitle {
                 title: d.chat.title
                 description: d.chat.isGroup ? qsTr("%1 members").arg(d.model.count) : d.chat.lastActivityText
+                clickable: true
+                onClicked: appState.editRequested()
             }
         }
 
@@ -88,7 +91,7 @@ Page {
             ContactsListView {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
-                selectionModel: d.chat.isGroup && d.chat.userCanEdit ? d.model.selection : null
+                selectionModel: d.chat.isGroup && d.chat.userCanEdit && d.editableMembership ? d.model.selection : null
                 itemContextMenu: ContextMenu {
                     dropdown: true
 

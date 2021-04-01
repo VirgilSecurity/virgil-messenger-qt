@@ -34,11 +34,28 @@
 
 #include "NewGroupChatState.h"
 
+#include "ChatsController.h"
+
 using namespace vm;
 using Self = NewGroupChatState;
 
-Self::NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent)
-    : SelectContactsState(contactsModel, parent)
+Self::NewGroupChatState(ChatsController *controller, DiscoveredContactsModel *contactsModel, QState *parent)
+    : SelectContactsState(contactsModel, parent), m_controller(controller)
 {
     setMultiSelect(true);
+
+    connect(this, &Self::contactsSelected, this, &Self::onContactsSelected);
+    connect(controller, &ChatsController::chatOpened, this, &Self::operationFinished);
+    connect(controller, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
+}
+
+void Self::setName(const QString &name)
+{
+    m_name = name;
+}
+
+void Self::onContactsSelected(const Contacts &contacts)
+{
+    emit operationStarted();
+    m_controller->createGroupChat(m_name, contacts);
 }

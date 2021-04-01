@@ -38,12 +38,22 @@
 #include "SelectContactsState.h"
 
 namespace vm {
+class ChatsController;
+
 class NewGroupChatState : public SelectContactsState
 {
     Q_OBJECT
 
 public:
-    NewGroupChatState(DiscoveredContactsModel *contactsModel, QState *parent);
+    NewGroupChatState(ChatsController *controller, DiscoveredContactsModel *contactsModel, QState *parent);
+
+    void setName(const QString &name);
+
+private:
+    void onContactsSelected(const Contacts &contacts);
+
+    ChatsController *m_controller;
+    QString m_name;
 };
 } // namespace vm
 
