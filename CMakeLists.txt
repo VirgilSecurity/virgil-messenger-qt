@@ -955,6 +955,15 @@ target_compile_options(${VS_TARGET_NAME}
         -Wno-multichar
         )
 
+#
+#  Generate .dSYM file for all configurations and strip them from the release.
+#
+if (CMAKE_GENERATOR STREQUAL "Xcode")
+  set_xcode_property(${VS_TARGET_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS "YES")
+  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=MinSizeRel] "YES")
+  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=Release] "YES")
+endif()
+
 # ---------------------------------------------------------------------------
 #   Additional debug parameters
 # ---------------------------------------------------------------------------
