@@ -155,6 +155,10 @@ int Self::rowCount(const QModelIndex &parent) const
 
 QVariant Self::data(const QModelIndex &index, int role) const
 {
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
     const auto row = index.row();
     const auto message = m_messages.at(row);
     const auto attachment = message->contentIsAttachment() ? message->contentAsAttachment() : nullptr;
