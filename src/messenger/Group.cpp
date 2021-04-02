@@ -70,3 +70,8 @@ QString Self::cache() const
 {
     return m_cache;
 }
+
+void Self::setInvitationStatus(GroupInvitationStatus status)
+{
+    m_invitationStatus = status;
+}

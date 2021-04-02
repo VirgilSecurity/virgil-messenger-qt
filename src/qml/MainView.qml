@@ -94,7 +94,7 @@ Control {
         }
 
         function openNameGroupChatPage() {
-            if (![manager.chatListState, manager.cloudFileListState, manager.newGroupChatState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.cloudFileListState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("NameGroupChat"))
@@ -104,8 +104,8 @@ Control {
             if ([manager.attachmentPreviewState, manager.chatInfoState].includes(manager.previousState)) {
                 return
             }
-            const replace = [manager.newChatState, manager.nameGroupChatState, manager.downloadKeyState].includes(manager.previousState)
-            if (manager.previousState === manager.nameGroupChatState) {
+            const replace = [manager.newChatState, manager.newGroupChatState, manager.downloadKeyState].includes(manager.previousState)
+            if (manager.previousState === manager.newGroupChatState) {
                 stackView.pop()
             }
             var push = replace ? stackView.replace : stackView.push

@@ -54,7 +54,6 @@ MessagesTable::MessagesTable(Database *database) : DatabaseTable(QLatin1String("
             &MessagesTable::onMarkIncomingMessagesAsReadBeforeMessage);
     connect(this, &MessagesTable::markOutgoingMessagesAsReadBeforeMessage, this,
             &MessagesTable::onMarkOutgoingMessagesAsReadBeforeMessage);
-    connect(this, &MessagesTable::updateMessageBody, this, &MessagesTable::onUpdateMessageBody);
 }
 
 bool MessagesTable::create()
@@ -264,19 +263,5 @@ void MessagesTable::onMarkOutgoingMessagesAsReadBeforeMessage(const MessageId &m
         qCWarning(lcDatabase) << "Marked all outgoing messages as read before message:" << messageId;
     } else {
         qCWarning(lcDatabase) << "MessagesTable::onMarkOutgoingMessagesAsReadBeforeMessage error";
-    }
-}
-
-void MessagesTable::onUpdateMessageBody(const MessageId &messageId, const QString &body)
-{
-    ScopedConnection connection(*database());
-
-    DatabaseUtils::BindValues bindValues { { ":id", QString(messageId) }, { ":body", body } };
-    const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("updateMessageBody"), bindValues);
-    if (query) {
-        qCDebug(lcDatabase) << "Message body was updated" << messageId;
-    } else {
-        qCCritical(lcDatabase) << "MessagesTable::onUpdateMessageBody error";
-        emit errorOccurred(tr("Failed to update message body"));
     }
 }

@@ -63,6 +63,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
       m_chatObject(new ChatObject(messenger, this))
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
+
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
 
     connect(m_messenger, &Messenger::groupChatCreated, this, &Self::onGroupChatCreated);
@@ -89,10 +90,6 @@ void Self::acceptGroupInvitation(const MessageHandler &invitationMessage)
     const GroupId groupId(invitationMessage->chatId());
     const auto invitation = std::get_if<MessageContentGroupInvitation>(&invitationMessage->content());
     m_messenger->acceptGroupInvitation(groupId, invitation->superOwnerId());
-
-    const auto newInvitation = invitation->newInvitationStatus(GroupInvitationStatus::Accepted);
-    m_userDatabase->messagesTable()->updateMessageBody(invitationMessage->id(),
-                                                       MessageContentJsonUtils::toString(newInvitation));
 }
 
 void Self::rejectGroupInvitation(const MessageHandler &invitationMessage)
@@ -218,6 +215,7 @@ void Self::setupTableConnections()
             &Self::onLastUnreadMessageBeforeItWasRead);
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::fetched, this, &Self::onGroupsFetched);
+    connect(m_userDatabase->groupsTable(), &GroupsTable::added, this, &Self::onDatabaseGroupAdded);
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
@@ -251,6 +249,7 @@ void Self::onGroupChatCreated(const GroupHandler &group, const GroupMembers &gro
     newChat->setId(ChatId(group->id()));
     newChat->setCreatedAt(QDateTime::currentDateTime());
     newChat->setType(Chat::Type::Group);
+    newChat->setGroup(group);
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->writeGroupChat(newChat, group, groupMembers);
@@ -286,9 +285,17 @@ void Self::onNewGroupChatLoaded(const GroupHandler &group)
     newChat->setId(ChatId(group->id()));
     newChat->setCreatedAt(QDateTime::currentDateTime());
     newChat->setType(Chat::Type::Group);
+    newChat->setGroup(group);
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->writeGroupChat(newChat, group, {});
+}
+
+void Self::onDatabaseGroupAdded(const GroupHandler &group)
+{
+    if (auto chat = m_models->chats()->findChat(ChatId(group->id()))) {
+        chat->setGroup(group);
+    }
 }
 
 void Self::onGroupsFetched(const Groups &groups)
