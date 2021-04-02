@@ -95,7 +95,7 @@ void Self::addMessage(ModifiableMessageHandler message)
 
 MessageHandler Self::getMessage(const int row) const
 {
-    return m_messages[row];
+    return m_messages.at(row);
 }
 
 void Self::clearChat()
@@ -124,7 +124,7 @@ bool Self::updateMessage(const MessageUpdate &messageUpdate)
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     if (const auto upd = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
-        if (auto message = findIncomingInvitationMessage()) {
+        if (findIncomingInvitationMessage()) {
             m_currentChat->group()->setInvitationStatus(upd->invitationStatus);
             m_proxy->invalidate();
         }
@@ -156,7 +156,7 @@ int Self::rowCount(const QModelIndex &parent) const
 QVariant Self::data(const QModelIndex &index, int role) const
 {
     const auto row = index.row();
-    const auto message = m_messages[row];
+    const auto message = m_messages.at(row);
     const auto attachment = message->contentIsAttachment() ? message->contentAsAttachment() : nullptr;
 
     switch (role) {
@@ -298,7 +298,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentFileExistsRole: {
-        return attachment ? FileUtils::fileExists(attachment->localPath()) : false;
+        return attachment && FileUtils::fileExists(attachment->localPath());
     }
 
     case FirstInRowRole: {
@@ -393,7 +393,7 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
     emit dataChanged(index, index, roles);
 }
 
-const MessageHandler Self::findIncomingInvitationMessage() const
+MessageHandler Self::findIncomingInvitationMessage() const
 {
     if (!chat() || !chat()->group() || chat()->group()->invitationStatus() != GroupInvitationStatus::Invited) {
         return nullptr;

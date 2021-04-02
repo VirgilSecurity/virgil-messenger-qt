@@ -135,7 +135,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     Q_INVOKABLE QString lastMessageSenderId() const; // TODO(fpohtmeh): remove
-    const MessageHandler findIncomingInvitationMessage() const;
+    MessageHandler findIncomingInvitationMessage() const;
 
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
