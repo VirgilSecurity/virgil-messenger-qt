@@ -101,6 +101,7 @@ void Self::onAdd(const GroupHandler &group)
     const auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroup"), bindValues);
     if (query) {
         qCDebug(lcDatabase) << "Group was added: " << bindValues.front().second;
+        emit added(group);
     } else {
         qCCritical(lcDatabase) << "GroupsTable::insertGroup error";
         emit errorOccurred(tr("Failed to update groups table"));

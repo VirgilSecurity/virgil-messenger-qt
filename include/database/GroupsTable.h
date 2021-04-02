@@ -67,6 +67,7 @@ signals:
     //  Notification signals.
     //
     void fetched(const Groups &groups);
+    void added(const GroupHandler &group);
     void errorOccurred(const QString &errorText);
 
 private:

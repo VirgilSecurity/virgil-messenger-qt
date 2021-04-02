@@ -109,6 +109,7 @@ private:
     void onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText);
     void onUpdateGroup(const GroupUpdate &groupUpdate);
     void onNewGroupChatLoaded(const GroupHandler &group);
+    void onDatabaseGroupAdded(const GroupHandler &group);
 
     void onMessageAdded(const MessageHandler &message);
     void onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);

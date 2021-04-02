@@ -63,6 +63,7 @@ Self::ChatsController(Messenger *messenger, Models *models, UserDatabase *userDa
       m_chatObject(new ChatObject(messenger, this))
 {
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
+
     connect(this, &Self::createChatWithUser, this, &Self::onCreateChatWithUser);
 
     connect(m_messenger, &Messenger::groupChatCreated, this, &Self::onGroupChatCreated);
@@ -214,6 +215,7 @@ void Self::setupTableConnections()
             &Self::onLastUnreadMessageBeforeItWasRead);
 
     connect(m_userDatabase->groupsTable(), &GroupsTable::fetched, this, &Self::onGroupsFetched);
+    connect(m_userDatabase->groupsTable(), &GroupsTable::added, this, &Self::onDatabaseGroupAdded);
     connect(m_userDatabase->groupsTable(), &GroupsTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::errorOccurred, this, &Self::errorOccurred);
     connect(m_userDatabase->groupMembersTable(), &GroupMembersTable::fetched, this, &Self::onGroupMembersFetched);
@@ -287,6 +289,13 @@ void Self::onNewGroupChatLoaded(const GroupHandler &group)
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->writeGroupChat(newChat, group, {});
+}
+
+void Self::onDatabaseGroupAdded(const GroupHandler &group)
+{
+    if (auto chat = m_models->chats()->findChat(ChatId(group->id()))) {
+        chat->setGroup(group);
+    }
 }
 
 void Self::onGroupsFetched(const Groups &groups)
