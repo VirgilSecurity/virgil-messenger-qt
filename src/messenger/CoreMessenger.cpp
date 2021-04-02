@@ -2864,8 +2864,8 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                     invitationMessage->setRecipientId(memberId);
                     // TODO: Review next line to pass display name when search by email and contact will be added.
                     invitationMessage->setRecipientUsername(member->contact()->username());
-                    invitationMessage->setContent(MessageContentGroupInvitation {
-                            currentUser()->id(), group->name(), GroupInvitationStatus::Invited, "Hello!" });
+                    invitationMessage->setContent(
+                            MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
                     invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
                     invitationMessage->setCreatedNow();
 
