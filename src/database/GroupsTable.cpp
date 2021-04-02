@@ -73,14 +73,13 @@ GroupHandler Self::readGroup(const QSqlQuery &query, const QString &preffix)
 
     auto id = GroupId(queryValue("id").toString());
     auto superOwnerId = UserId(queryValue("superOwnerId").toString());
-    auto name = queryValue("name").toString();
-    auto cache = queryValue("cache").toString();
-    auto invitationStatus = GroupInvitationStatusFromString(queryValue("invitationStatus").toString());
-
     if (!id.isValid() || !superOwnerId.isValid()) {
         return nullptr;
     }
 
+    auto name = queryValue("name").toString();
+    auto cache = queryValue("cache").toString();
+    auto invitationStatus = GroupInvitationStatusFromString(queryValue("invitationStatus").toString());
     return std::make_shared<Group>(std::move(id), std::move(superOwnerId), std::move(name), invitationStatus,
                                    std::move(cache));
 }
