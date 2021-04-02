@@ -722,6 +722,8 @@ Self::Result Self::saveCurrentUserInfo()
 QFuture<Self::Result> Self::signIn(const QString &username)
 {
     return QtConcurrent::run([this, username = username]() -> Result {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Trying to sign in user";
 
         auto result = resetCommKitConfiguration();
@@ -782,8 +784,6 @@ QFuture<Self::Result> Self::signIn(const QString &username)
         if (!isNetworkOnline()) {
             return Self::Result::Error_Offline;
         }
-
-        std::scoped_lock<std::mutex> _(m_impl->authMutex);
 
         qCInfo(lcCoreMessenger) << "Authenticate user";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
@@ -1039,10 +1039,15 @@ void Self::authenticate()
     Q_ASSERT(isSignedIn());
 
     QtConcurrent::run([this] {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         vssq_error_t error;
         vssq_error_reset(&error);
 
-        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+        if (!m_impl->messenger) {
+            qCWarning(lcCoreMessenger) << "Try to authenticate when signed out";
+            return;
+        }
 
         qCInfo(lcCoreMessenger) << "Authenticate user";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
@@ -2149,9 +2154,9 @@ void Self::xmppOnConnected()
         } else {
             qCDebug(lcCoreMessenger) << "Re-join XMPP room:" << xmppRoom->jid();
             if (xmppRoom->join()) {
-                qCDebug(lcCoreMessenger) << "Send request to join XMPP room:" << xmppRoom->jid();
+                qCDebug(lcCoreMessenger) << "Sent request to join XMPP room:" << xmppRoom->jid();
             } else {
-                qCDebug(lcCoreMessenger) << "Failed to join to XMPP room:" << xmppRoom->jid();
+                qCDebug(lcCoreMessenger) << "Failed to sent request to join XMPP room:" << xmppRoom->jid();
             }
         }
     }
