@@ -100,7 +100,7 @@ bool Self::sendLogFiles(const QString &details)
     auto endpointUrl = m_coreMessenger->getCrashReportEndpointUrl();
     auto authHeaderValue = m_coreMessenger->getAuthHeaderVaue();
 
-    qCDebug(lcCrashReporter) << "Send crash report to the endpoint: " << endpointUrl;
+    qCDebug(lcCrashReporter) << "Send crash report to the endpoint: " << endpointUrl << "size:" << fileData.size();
     qCDebug(lcCrashReporter) << "Messenger Backend auth header value: " << authHeaderValue;
 
     QNetworkRequest request(endpointUrl);
