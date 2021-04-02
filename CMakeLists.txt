@@ -47,7 +47,7 @@ include(customers)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.10.4")
+set(VS_TARGET_VERSION "3.10.5")
 set(VS_CORE_VERSION "0.2.1.82")
 set(VERSION_DATABASE_SCHEME "3")
 
@@ -947,7 +947,7 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
         $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 
-        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
+        # $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
         )
 
 target_compile_options(${VS_TARGET_NAME}
