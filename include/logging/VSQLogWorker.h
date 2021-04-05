@@ -52,6 +52,7 @@ public:
 
 private:
     static QString formatLogType(QtMsgType type);
+    static QString getLogFileName(int logIndex);
 
     void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
     void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
@@ -61,11 +62,16 @@ private:
     //  Return false if message can't be written
     //
     bool prepareLogFile(qint64 messageLen);
+    //
+    //  Rotate log files
+    //
+    void rotateLogFiles();
+
     void logToFile(const QString &formattedMessage);
     void logToConsole(const QString &formattedMessage);
 
-    QFile m_logFile;
-    size_t m_logFileIndex;
+    QFile m_logFile; // automatically closed in destructor
+    bool m_isFirstMessage = true;
 };
 
 #endif // VSQLOGGWORKER_H

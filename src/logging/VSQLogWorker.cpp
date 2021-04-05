@@ -47,7 +47,7 @@ constexpr const qint64 LOG_MAX_FILESIZE = 1024 * 1024 / 2; // 0.5 Mb
 
 using namespace vm;
 
-VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile(), m_logFileIndex(0) { }
+VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile() { }
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
@@ -79,29 +79,37 @@ bool VSQLogWorker::prepareLogFile(qint64 messageLen)
 {
     if (messageLen > LOG_MAX_FILESIZE) {
         // Skip very long messages where size exceeds file size limit.
-        // This case is not possible
+        // This situation is almost not possible, so don't complicate the logic
         return false;
     }
 
-    if (!m_logFile.isOpen()) {
-        // Open log file
-        const auto fileName = QCoreApplication::applicationName() + "_" + QString::number(m_logFileIndex) + ".log";
-        m_logFile.setFileName(Settings::logsDir().filePath(fileName));
+    // Rotate log files before writing of 1st message
+    if (m_isFirstMessage) {
+        m_isFirstMessage = false;
+        rotateLogFiles();
+    }
 
+    if (m_logFile.isOpen() && (m_logFile.size() + messageLen > LOG_MAX_FILESIZE)) {
+        m_logFile.close();
+        rotateLogFiles();
+    }
+
+    if (!m_logFile.isOpen()) {
+        m_logFile.setFileName(getLogFileName(0));
         if (!m_logFile.open(QIODevice::WriteOnly)) {
             return false;
         }
-
-        m_logFileIndex = (0 == m_logFileIndex) ? 1 : 0;
-
-    } else if (m_logFile.size() > LOG_MAX_FILESIZE - messageLen) {
-        // Rotate log file.
-        m_logFile.close();
-
-        return prepareLogFile(messageLen);
     }
 
     return true;
+}
+
+void VSQLogWorker::rotateLogFiles()
+{
+    const auto currentFileName = getLogFileName(0);
+    if (QFile::exists(currentFileName)) {
+        QFile::rename(currentFileName, getLogFileName(1));
+    }
 }
 
 void VSQLogWorker::logToFile(const QString &formattedMessage)
@@ -143,4 +151,10 @@ QString VSQLogWorker::formatLogType(QtMsgType type)
     default:
         throw std::logic_error("Invalid Qt message type");
     }
+}
+
+QString VSQLogWorker::getLogFileName(int logIndex)
+{
+    const auto fileName = QCoreApplication::applicationName() + "_" + QString::number(logIndex) + ".log";
+    return Settings::logsDir().filePath(fileName);
 }
