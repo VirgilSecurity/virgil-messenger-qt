@@ -88,9 +88,10 @@ bool Self::sendLogFiles(const QString &details)
     qCDebug(lcCrashReporter) << "Lookup logs within directory: " << logsDir.absolutePath();
 
     QByteArray fileData;
-    QDirIterator fileIterator(logsDir.absolutePath(), QStringList() << "VirgilMessenger*.log");
-    while (fileIterator.hasNext()) {
-        QFile readFile(fileIterator.next());
+    const auto fileInfos =
+            logsDir.entryInfoList(QStringList() << "VirgilMessenger*.log", QDir::NoFilter, QDir::Name | QDir::Reversed);
+    for (auto &fileInfo : fileInfos) {
+        QFile readFile(fileInfo.filePath());
         if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCDebug(lcCrashReporter) << "Read file:" << readFile.fileName();
             fileData.append(readFile.readAll());
