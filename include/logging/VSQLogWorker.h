@@ -56,11 +56,14 @@ private:
     void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
     void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
 
+    //
+    //  Prepare log file for writing of message with size messageLen
+    //  Return false if message can't be written
+    //
     bool prepareLogFile(qint64 messageLen);
     void logToFile(const QString &formattedMessage);
     void logToConsole(const QString &formattedMessage);
 
-private:
     QFile m_logFile;
     size_t m_logFileIndex;
 };

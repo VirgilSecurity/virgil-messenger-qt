@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 
-constexpr const qint64 LOG_MAX_FILESIZE = 20 * 1024 * 1024;
+constexpr const qint64 LOG_MAX_FILESIZE = 1024 * 1024 / 2; // 0.5 Mb
 
 using namespace vm;
 
@@ -78,6 +78,8 @@ void VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogCont
 bool VSQLogWorker::prepareLogFile(qint64 messageLen)
 {
     if (messageLen > LOG_MAX_FILESIZE) {
+        // Skip very long messages where size exceeds file size limit.
+        // This case is not possible
         return false;
     }
 
