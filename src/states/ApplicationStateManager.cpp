@@ -35,6 +35,7 @@
 #include "states/ApplicationStateManager.h"
 
 #include "Messenger.h"
+#include "android/VSQAndroid.h"
 #include "controllers/Controllers.h"
 #include "controllers/ChatsController.h"
 #include "controllers/UsersController.h"
@@ -131,8 +132,7 @@ void Self::addTransitions()
     // NOTE: Queued connection is a workaround for working state transition
     connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()),
             Qt::QueuedConnection);
-    connect(this, &Self::openCloudFileList, this, std::bind(&Self::cloudFileListRequested, this, QPrivateSignal()),
-            Qt::QueuedConnection);
+    connect(this, &Self::openCloudFileList, this, &Self::checkCloudFileListPermissions, Qt::QueuedConnection);
 
     m_startState->addTransition(m_startState, &StartState::chatListRequested, m_chatListState);
     m_startState->addTransition(m_startState, &StartState::accountSelectionRequested, m_accountSelectionState);
@@ -226,4 +226,14 @@ void Self::setPreviousState(QState *state)
 {
     m_previousState = state;
     emit previousStateChanged(state);
+}
+
+void Self::checkCloudFileListPermissions()
+{
+#ifdef VS_ANDROID
+    if (!VSQAndroid::checkWriteExternalStoragePermission()) {
+        return;
+    }
+#endif
+    emit cloudFileListRequested(QPrivateSignal());
 }

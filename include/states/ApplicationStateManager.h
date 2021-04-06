@@ -127,6 +127,8 @@ private:
     void setCurrentState(QState *state);
     void setPreviousState(QState *state);
 
+    void checkCloudFileListPermissions();
+
     Messenger *m_messenger;
     Controllers *m_controllers;
     Validator *m_validator;

@@ -105,7 +105,9 @@ CloudFilesModel *Self::model()
 
 void Self::switchToRootFolder()
 {
-    switchToHierarchy({ rootFolder() });
+    if (FileUtils::forceCreateDir(rootFolder()->localPath())) {
+        switchToHierarchy({ rootFolder() });
+    }
 }
 
 void Self::clearFiles()
