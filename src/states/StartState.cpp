@@ -60,8 +60,10 @@ void Self::onRequestUi()
 
     const auto username = m_settings->lastSignedInUser();
     if (username.isEmpty() || m_settings->userCredential(username).isEmpty()) {
+        qDebug() << "### Last signed user is empty. Go to account selection";
         emit accountSelectionRequested();
     } else {
+        qDebug() << "### Last signed user is" << username << "Go to chat list";
         m_controller->signIn(username);
         emit chatListRequested();
     }

@@ -216,6 +216,7 @@ void Self::removeSelectedMembers()
 
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
+    qDebug() << "### Switch to hierarchy" << hierarchy.back()->name();
     m_requestedHierarchy = hierarchy;
     m_onlineRefreshNeeded = false;
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
@@ -223,8 +224,12 @@ void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 
 void Self::refreshIfOnline(bool isOnline)
 {
+    qDebug() << "### Refresh if online";
     if (m_onlineRefreshNeeded && isOnline) {
+        qDebug() << "### Refreshing cloud FS...";
         refresh();
+    } else {
+        qDebug() << "### Refresh was skipped";
     }
 }
 
@@ -255,6 +260,7 @@ CloudFileHandler Self::parentFolder() const
 
 void Self::onOnlineListingFailed()
 {
+    qDebug() << "### Online listing was failed";
     m_onlineRefreshNeeded = true;
 }
 

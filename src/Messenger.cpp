@@ -135,30 +135,37 @@ bool Self::isOnline() const noexcept
 void Self::signIn(const QString &username)
 {
     FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
+        qDebug() << "### Finished core messenger sign-in";
         m_settings->setLastSignedInUser((result == CoreMessengerStatus::Success) ? username : QString());
 
         switch (result) {
         case CoreMessengerStatus::Success:
+            qDebug() << "### Succesfull sign-in";
             emit signedIn(username);
             break;
 
         case CoreMessengerStatus::Error_NoCred:
+            qDebug() << "### Failed sign-in: no cred";
             emit signInErrorOccured(tr("Cannot load credentials"));
             break;
 
         case CoreMessengerStatus::Error_ImportCredentials:
+            qDebug() << "### Failed sign-in: import cred";
             emit signInErrorOccured(tr("Cannot import loaded credentials"));
             break;
 
         case CoreMessengerStatus::Error_Signin:
+            qDebug() << "### Failed sign-in";
             emit signInErrorOccured(tr("Cannot sign-in user"));
             break;
 
         case CoreMessengerStatus::Error_Offline:
+            qDebug() << "### Failed sign-in: offline";
             emit signInErrorOccured(tr("No internet"));
             break;
 
         default:
+            qDebug() << "### Failed sign-in: unknown";
             emit signInErrorOccured(tr("Unknown sign-in error"));
             break;
         }

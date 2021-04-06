@@ -75,6 +75,7 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
 
 void Self::signIn(const QString &username)
 {
+    qDebug() << "### Sign in as" << username;
     setNextUsername(username);
     m_messenger->signIn(username);
 }
