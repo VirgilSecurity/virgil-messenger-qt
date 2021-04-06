@@ -59,7 +59,7 @@ void Self::onRequestUi()
     hideNativeSplashScreen();
 
     const auto username = m_settings->lastSignedInUser();
-    if (username.isEmpty()) {
+    if (username.isEmpty() || m_settings->userCredential(username).isEmpty()) {
         emit accountSelectionRequested();
     } else {
         m_controller->signIn(username);
