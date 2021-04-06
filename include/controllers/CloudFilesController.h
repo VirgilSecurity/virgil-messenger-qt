@@ -93,7 +93,7 @@ private:
     using FoldersHierarchy = ModifiableCloudFiles;
 
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
-    void refreshIfOnline();
+    void refreshIfOnline(bool isOnline);
 
     QString displayPath() const;
     bool isRoot() const;

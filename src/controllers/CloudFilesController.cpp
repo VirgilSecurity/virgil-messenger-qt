@@ -221,9 +221,9 @@ void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
 }
 
-void Self::refreshIfOnline()
+void Self::refreshIfOnline(bool isOnline)
 {
-    if (m_onlineRefreshNeeded && m_messenger->isOnline()) {
+    if (m_onlineRefreshNeeded && isOnline) {
         refresh();
     }
 }
