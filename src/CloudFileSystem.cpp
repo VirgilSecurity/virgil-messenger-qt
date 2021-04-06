@@ -54,15 +54,11 @@ CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, Messenger *messen
 
 void CloudFileSystem::signIn()
 {
-    qDebug() << "### Sign-in cloud fs";
     qCDebug(lcCloudFileSystem) << "Sign-in cloud-fs";
     m_coreFs = m_coreMessenger->cloudFs();
-    qDebug() << "### Core fs was initialized";
 
     const auto userName = m_messenger->currentUser()->username();
-    qDebug() << "### Core fs username:" << userName;
     m_downloadsDir = m_messenger->settings()->cloudFilesDownloadsDir(userName);
-    qDebug() << "### Core fs downloadsDir:" << m_downloadsDir.absolutePath();
     emit downloadsDirChanged(m_downloadsDir);
 }
 

@@ -59,7 +59,6 @@ Self::ListCloudFolderOperation(CloudFileOperation *parent, const CloudFileHandle
 
 void Self::run()
 {
-    qDebug() << "### ListCloudFolderOperation::run";
     m_userDatabase->cloudFilesTable()->fetch(m_parentFolder);
 }
 
