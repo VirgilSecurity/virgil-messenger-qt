@@ -220,7 +220,7 @@ QDir Settings::logsDir()
 QDir Settings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
-        FileUtils::forceCreateDir(m_databaseDir.absolutePath());
+        FileUtils::forceCreateDir(m_databaseDir.absolutePath(), true);
     }
     return m_databaseDir;
 }
@@ -233,7 +233,7 @@ quint64 Settings::attachmentMaxFileSize() const
 QDir Settings::attachmentCacheDir() const
 {
     if (!m_attachmentCacheDir.exists()) {
-        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath(), true);
     }
     return m_attachmentCacheDir;
 }
@@ -241,7 +241,7 @@ QDir Settings::attachmentCacheDir() const
 QDir Settings::thumbnailsDir() const
 {
     if (!m_thumbnaisDir.exists()) {
-        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
+        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath(), true);
     }
     return m_thumbnaisDir;
 }
@@ -249,7 +249,7 @@ QDir Settings::thumbnailsDir() const
 QDir Settings::downloadsDir() const
 {
     if (!m_downloadsDir.exists()) {
-        FileUtils::forceCreateDir(m_downloadsDir.absolutePath());
+        FileUtils::forceCreateDir(m_downloadsDir.absolutePath(), true);
     }
     return m_downloadsDir;
 }
@@ -264,7 +264,7 @@ QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
 QDir Settings::cloudFilesCacheDir() const
 {
     if (!m_cloudFilesCacheDir.exists()) {
-        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath(), true);
     }
     return m_cloudFilesCacheDir;
 }

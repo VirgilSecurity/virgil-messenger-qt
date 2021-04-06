@@ -105,15 +105,25 @@ CloudFilesModel *Self::model()
 
 void Self::switchToRootFolder()
 {
-    if (FileUtils::forceCreateDir(rootFolder()->localPath())) {
-        switchToHierarchy({ rootFolder() });
-    }
+    switchToHierarchy({ rootFolder() });
 }
 
 void Self::clearFiles()
 {
     qCDebug(lcController) << "Clear cloud files...";
     m_models->cloudFiles()->clearFiles();
+}
+
+bool Self::createLocalRootFolder()
+{
+    if (!m_cloudFileSystem->checkPermissions()) {
+        return false;
+    }
+    if (m_cloudFileSystem->createDownloadsDir()) {
+        return true;
+    }
+    emit notificationCreated(tr("Failed to create local folder"), true);
+    return false;
 }
 
 void Self::openFile(const QVariant &proxyRow)

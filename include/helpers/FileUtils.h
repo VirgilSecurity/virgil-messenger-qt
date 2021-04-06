@@ -49,7 +49,7 @@ public:
 
     static QString findUniqueFileName(const QString &fileName);
 
-    static bool forceCreateDir(const QString &absolutePath);
+    static bool forceCreateDir(const QString &absolutePath, bool isFatal);
 
     static std::optional<QString> readTextFile(const QString &filePath);
 
