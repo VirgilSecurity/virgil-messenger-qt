@@ -65,9 +65,6 @@ Q_LOGGING_CATEGORY(lcSettings, "settings")
 Settings::Settings(QObject *parent)
     : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
 {
-
-    qCDebug(lcSettings) << "Settings are written to: " << fileName();
-
     if (deviceId().isEmpty()) {
         createDeviceId();
         removeGroup(kUsersGroup);
@@ -86,6 +83,7 @@ Settings::~Settings() { }
 
 void Settings::print()
 {
+    qCDebug(lcSettings) << "Settings filename:" << fileName();
     qCDebug(lcSettings) << "Device id:" << deviceId();
     qCDebug(lcSettings) << "Database dir:" << databaseDir().absolutePath();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
