@@ -51,9 +51,9 @@ VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile(), m_lo
 
 void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
 {
-#ifdef QT_DEBUG
+    //#ifdef QT_DEBUG
     consoleMessageHandler(type, context, message);
-#endif
+    //#endif
     fileMessageHandler(type, context, message);
 }
 
