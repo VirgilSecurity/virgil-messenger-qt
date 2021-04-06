@@ -47,7 +47,7 @@ include(customers)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.10.7")
+set(VS_TARGET_VERSION "3.10.8")
 set(VS_CORE_VERSION "0.2.1.82")
 set(VERSION_DATABASE_SCHEME "3")
 
