@@ -249,7 +249,7 @@ QDir Settings::thumbnailsDir() const
 QDir Settings::downloadsDir() const
 {
     if (!m_downloadsDir.exists()) {
-        FileUtils::forceCreateDir(m_downloadsDir.absolutePath(), true);
+        FileUtils::forceCreateDir(m_downloadsDir.absolutePath(), false);
     }
     return m_downloadsDir;
 }
