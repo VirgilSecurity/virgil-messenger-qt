@@ -153,7 +153,7 @@ void Self::stopUpdates(bool reset)
     m_timerId = 0;
 
     if (reset) {
-        emit lastActivityMissing(QChar(' '));
+        emit lastActivityMissing(QString());
     }
 }
 

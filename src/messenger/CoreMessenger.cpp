@@ -2292,16 +2292,7 @@ void Self::onProcessNetworkState(bool isOnline)
 // --------------------------------------------------------------------------
 void Self::setCurrentRecipient(const UserId &recipientId)
 {
-
-    if (recipientId.isValid()) {
-        auto user = findUserById(recipientId);
-        if (user) {
-            m_impl->lastActivityManager->setCurrentJid(userIdToJid(user->id()));
-            return;
-        }
-    }
-
-    m_impl->lastActivityManager->setCurrentJid(QString());
+    m_impl->lastActivityManager->setCurrentJid(recipientId.isValid() ? userIdToJid(recipientId) : QString());
 }
 
 // --------------------------------------------------------------------------
