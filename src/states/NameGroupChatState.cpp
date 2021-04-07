@@ -34,25 +34,7 @@
 
 #include "states/NameGroupChatState.h"
 
-#include "controllers/ChatsController.h"
-
 using namespace vm;
+using Self = NameGroupChatState;
 
-NameGroupChatState::NameGroupChatState(ChatsController *chatsController, QState *parent)
-    : OperationState(parent), m_chatsController(chatsController)
-{
-    connect(chatsController, &ChatsController::chatOpened, this, &NameGroupChatState::operationFinished);
-    connect(chatsController, &ChatsController::errorOccurred, this, &NameGroupChatState::operationErrorOccurred);
-    connect(this, &NameGroupChatState::createGroup, this, &NameGroupChatState::onCreateGroup);
-}
-
-void NameGroupChatState::setContacts(const Contacts &contacts)
-{
-    m_contacts = contacts;
-}
-
-void NameGroupChatState::onCreateGroup(const QString &name)
-{
-    emit operationStarted();
-    m_chatsController->createGroupChat(name, m_contacts);
-}
+Self::NameGroupChatState(QState *parent) : OperationState(parent) { }

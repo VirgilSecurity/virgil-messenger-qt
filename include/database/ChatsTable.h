@@ -38,6 +38,8 @@
 #include "core/DatabaseTable.h"
 #include "Chat.h"
 
+#include <QDateTime>
+
 namespace vm {
 class ChatsTable : public DatabaseTable
 {
@@ -47,16 +49,30 @@ public:
     explicit ChatsTable(Database *database);
 
 signals:
+    //
+    //  Control signals.
+    //--
     void fetch();
     void addChat(const ChatHandler &chat);
     void deleteChat(const ChatId &chatId);
+    void requestChatUnreadMessageCount(const ChatId &chatId);
+    void markMessagesAsRead(const ChatHandler &chat);
+    //--
 
-    void resetUnreadCount(const ChatHandler &chat);
-    void updateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
-    void resetLastMessage(const ChatId &chatId);
-
+    //
+    //  Info signals.
+    //--
     void errorOccurred(const QString &errorText);
     void fetched(ModifiableChats chats);
+    void chatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);
+    void lastUnreadMessageBeforeItWasRead(const MessageHandler &message);
+    //--
+
+    //
+    //  FIXME: Review and possible delete next 3 signals.
+    //
+    void updateLastMessage(const MessageHandler &message);
+    void resetLastMessage(const ChatId &chatId);
 
 private:
     bool create() override;
@@ -65,8 +81,11 @@ private:
     void onAddChat(const ChatHandler &chat);
     void onDeleteChat(const ChatId &chatId);
     void onResetUnreadCount(const ChatHandler &chat);
-    void onUpdateLastMessage(const MessageHandler &message, qsizetype unreadMessageCount);
+    void onUpdateLastMessage(const MessageHandler &message);
     void onResetLastMessage(const ChatId &chatId);
+    void onRequestChatUnreadMessageCount(const ChatId &chatId);
+    void onMarkMessagesAsRead(const ChatHandler &chat);
+    void onMarkMessagesAsReadBeforeDate(const ChatHandler &chat, const QDateTime &beforeDate);
 };
 } // namespace vm
 

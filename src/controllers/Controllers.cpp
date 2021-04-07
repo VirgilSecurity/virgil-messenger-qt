@@ -39,11 +39,16 @@
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/CloudFilesController.h"
+#include "controllers/DocumentInteractionController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
 #include "models/DiscoveredContactsModel.h"
 #include "models/Models.h"
+
+#if VS_IOS
+#    include "ios/IosDocumentInteractionController.h"
+#endif
 
 using namespace vm;
 
@@ -54,18 +59,27 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
       m_users(new UsersController(messenger, models, userDatabase, this)),
       m_chats(new ChatsController(messenger, models, userDatabase, this)),
       m_messages(new MessagesController(messenger, settings, models, userDatabase, this)),
-      m_cloudFiles(new CloudFilesController(messenger, models, userDatabase, this))
+      m_cloudFiles(new CloudFilesController(messenger, models, userDatabase, this)),
+      m_documentInteraction(createDocumentInteraction())
 {
     connect(m_attachments, &AttachmentsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_messages, &MessagesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_users, &UsersController::notificationCreated, this, &Controllers::notificationCreated);
+
+    connect(m_attachments, &AttachmentsController::openUrlRequested, m_documentInteraction,
+            &DocumentInteractionController::openUrl);
+    connect(m_cloudFiles, &CloudFilesController::openUrlRequested, m_documentInteraction,
+            &DocumentInteractionController::openUrl);
 
     //
     //  Queued connection is used here to give ChatsController a chance to setup database connections.
     //  TODO: find a better solution.
     //
     connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
+    connect(m_users, &UsersController::signedOut, m_chats, &ChatsController::clearChats);
+    connect(m_users, &UsersController::signedOut, m_cloudFiles, &CloudFilesController::clearFiles);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadMessages);
     connect(m_chats, &ChatsController::chatClosed, m_messages, &MessagesController::clearMessages);
 
@@ -74,6 +88,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");
     qRegisterMetaType<CloudFilesController *>("CloudFilesController*");
+    qRegisterMetaType<DocumentInteractionController *>("DocumentInteractionController*");
 }
 
 const AttachmentsController *Controllers::attachments() const
@@ -124,4 +139,23 @@ const CloudFilesController *Controllers::cloudFiles() const
 CloudFilesController *Controllers::cloudFiles()
 {
     return m_cloudFiles;
+}
+
+const DocumentInteractionController *Controllers::documentInteraction() const
+{
+    return m_documentInteraction;
+}
+
+DocumentInteractionController *Controllers::documentInteraction()
+{
+    return m_documentInteraction;
+}
+
+DocumentInteractionController *Controllers::createDocumentInteraction()
+{
+#if VS_IOS
+    return new IosDocumentInteractionController(this);
+#else
+    return new DocumentInteractionController(this);
+#endif
 }

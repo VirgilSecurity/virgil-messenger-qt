@@ -65,6 +65,21 @@ void Self::requestAll(const QString &roomJid)
     }
 }
 
+void Self::requestOwners(const QString &roomJid)
+{
+    QXmppMucItem item;
+    item.setAffiliation(QXmppMucItem::OwnerAffiliation);
+
+    QXmppMucAdminIq iq;
+    iq.setTo(roomJid);
+    iq.setType(QXmppIq::Type::Get);
+    iq.setItems({ item });
+
+    if (m_client && m_client->sendPacket(iq)) {
+        qCDebug(lcXmppRoomParticipantsManager) << "Requested owners of the group:" << roomJid;
+    }
+}
+
 bool Self::handleStanza(const QDomElement &element)
 {
     if (element.tagName() == "iq" && QXmppMucAdminIq::isMucAdminIq(element)) {

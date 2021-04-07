@@ -16,6 +16,7 @@ ModelListView {
         readonly property var model: models.cloudFiles
         readonly property var selection: model.selection
         readonly property var controller: controllers.cloudFiles
+        readonly property bool online: messenger.connectionStateString === "connected"
     }
 
     ListStatusButton {
@@ -84,6 +85,7 @@ ModelListView {
                 ContextMenuItem {
                     text: qsTr("Delete")
                     onTriggered: deleteCloudFilesDialog.open()
+                    enabled: d.online
                 }
             }
 

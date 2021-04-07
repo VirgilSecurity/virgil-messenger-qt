@@ -34,18 +34,24 @@
 
 #include "states/ChatListState.h"
 
-#include "controllers/ChatsController.h"
-#include "models/ChatsModel.h"
+#include "ChatsController.h"
+#include "ChatsModel.h"
+#include "Controllers.h"
+#include "Messenger.h"
+#include "UsersController.h"
+
+#include <QTimer>
 
 using namespace vm;
+using Self = ChatListState;
 
-ChatListState::ChatListState(ChatsController *chatsController, ChatsModel *chatsModel, QState *parent)
-    : QState(parent), m_chatsController(chatsController), m_chatsModel(chatsModel)
+Self::ChatListState(Controllers *controllers, ChatsModel *model, QState *parent)
+    : QState(parent), m_controllers(controllers), m_model(model)
 {
 }
 
-void ChatListState::onEntry(QEvent *)
+void Self::onEntry(QEvent *)
 {
-    m_chatsModel->clearFilter();
-    m_chatsController->closeChat();
+    m_model->clearFilter();
+    m_controllers->chats()->closeChat();
 }

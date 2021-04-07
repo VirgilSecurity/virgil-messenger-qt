@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,29 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/SignInState.h"
+#ifndef VM_EDIT_CHAT_INFO_STATE_H
+#define VM_EDIT_CHAT_INFO_STATE_H
 
-#include "Validator.h"
-#include "controllers/UsersController.h"
+#include "OperationState.h"
 
-using namespace vm;
+namespace vm {
+class ChatsController;
+class Messenger;
 
-SignInState::SignInState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent), m_usersController(usersController), m_validator(validator)
+class EditChatInfoState : public OperationState
 {
-    connect(usersController, &UsersController::signedIn, this, &SignInState::operationFinished);
-    connect(usersController, &UsersController::signInErrorOccured, this, &SignInState::operationErrorOccurred);
+    Q_OBJECT
 
-    connect(usersController, &UsersController::databaseErrorOccurred, [this](const auto &errorText) {
-        m_usersController->signOut();
-        emit operationErrorOccurred(errorText);
-    });
+public:
+    EditChatInfoState(Messenger *messenger, ChatsController *controller, QState *parent);
 
-    connect(this, &SignInState::signIn, this, &SignInState::processSignIn);
-}
+    Q_INVOKABLE void save(const QString &name);
 
-void SignInState::processSignIn(const QString &username)
-{
-    emit operationStarted();
-    m_usersController->signIn(username);
-}
+signals:
+    void editingFinished();
+
+private:
+    Messenger *m_messenger;
+    ChatsController *m_controller;
+};
+} // namespace vm
+
+#endif // VM_EDIT_CHAT_INFO_STATE_H

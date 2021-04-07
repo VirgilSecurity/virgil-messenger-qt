@@ -53,6 +53,15 @@ CloudFilesModel::CloudFilesModel(const Settings *settings, QObject *parent) : Li
     connect(selection(), &ListSelectionModel::selectedCountChanged, this, &CloudFilesModel::updateDescription);
 }
 
+void CloudFilesModel::clearFiles()
+{
+    beginResetModel();
+    m_files.clear();
+    endResetModel();
+    updateDescription();
+    qCDebug(lcModel) << "Cloud files cleared";
+}
+
 CloudFileHandler CloudFilesModel::file(const int proxyRow) const
 {
     return m_files[sourceIndex(proxyRow).row()];

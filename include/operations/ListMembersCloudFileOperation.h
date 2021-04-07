@@ -40,6 +40,10 @@
 #include "CloudFileRequestId.h"
 #include "Operation.h"
 
+#include <QPointer>
+
+#include <map>
+
 namespace vm {
 class CloudFileOperation;
 class UserDatabase;
@@ -47,24 +51,23 @@ class UserDatabase;
 class ListMembersCloudFileOperation : public Operation
 {
 public:
-    ListMembersCloudFileOperation(CloudFileOperation *parent, const CloudFileHandler &file,
-                                  const CloudFileHandler &parentFolder, UserDatabase *userDatabase);
+    ListMembersCloudFileOperation(CloudFileOperation *parent, CloudFileHandler file, CloudFileHandler parentFolder,
+                                  UserDatabase *userDatabase);
 
     void run() override;
 
 private:
-    void onListFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void onListFetched(const CloudFileRequestId &requestId, const CloudFileHandler &file, CloudFileMembers members);
     void onListFetchErrorOccured(CloudFileRequestId requestId, const QString &errorText);
-    void onContactsFetched(const Contacts &requestedContacts, const Contacts &fetchedContacts);
+    void onContactsFetched(quint64 requestId, MutableContacts fetchedContacts);
 
     CloudFileOperation *m_parent;
     CloudFileHandler m_file;
-    const CloudFileHandler m_parentFolder;
-    UserDatabase *m_userDatabase;
+    CloudFileHandler m_parentFolder;
+    QPointer<UserDatabase> m_userDatabase;
 
     CloudFileRequestId m_requestId;
-    CloudFileMembers m_members;
-    Contacts m_membersContacts;
+    std::map<UserId, CloudFileMemberHandler> m_members;
 };
 } // namespace vm
 

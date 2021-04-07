@@ -15,17 +15,18 @@ Page {
         id: d
 
         readonly property var manager: app.stateManager
-        readonly property bool isChatList: appState === manager.chatListState
-        readonly property bool isCloudFileList: appState === manager.cloudFileListState
-        readonly property int cloudFilesCount: models.cloudFiles.count
-        readonly property int cloudFilesSelectedCount: models.cloudFiles.selection.selectedCount
-        readonly property var cloudFolder: controllers.cloudFiles.currentFolder
+        readonly property bool online: messenger.connectionStateString === "connected"
 
+        readonly property bool isChatList: appState === manager.chatListState
         readonly property string chatsTitle: app.organizationDisplayName
         readonly property string chatsDescription: qsTr("%1 Server").arg(app.organizationDisplayName)
 
+        readonly property bool isCloudFileList: appState === manager.cloudFileListState
         readonly property string cloudFilesTitle: controllers.cloudFiles.displayPath
         readonly property string cloudFilesDescription: models.cloudFiles.description
+        readonly property int cloudFilesCount: models.cloudFiles.count
+        readonly property int cloudFilesSelectedCount: models.cloudFiles.selection.selectedCount
+        readonly property var cloudFolder: controllers.cloudFiles.currentFolder
     }
 
     background: Rectangle {
@@ -46,12 +47,14 @@ Page {
             text: qsTr("New chat")
             onTriggered: appState.requestNewChat()
             visible: d.isChatList
+            enabled: d.online
         }
 
         ContextMenuItem {
             text: qsTr("New group")
             onTriggered: appState.requestNewGroupChat()
             visible: d.isChatList
+            enabled: d.online
         }
 
         // Cloud file actions
@@ -60,18 +63,21 @@ Page {
             text: qsTr("Add files")
             onTriggered: attachmentPicker.open(AttachmentTypes.file, true)
             visible: d.isCloudFileList
+            enabled: d.online
         }
 
         ContextMenuItem {
             text: qsTr("New directory")
             onTriggered: createCloudFolderDialog.open()
             visible: d.isCloudFileList && !d.cloudFolder.isShared
+            enabled: d.online
         }
 
         ContextMenuItem {
             text: qsTr("Share")
             onTriggered: appState.requestSharingInfo();
             visible: d.isCloudFileList && d.cloudFolder.isShared
+            enabled: d.online
         }
 
         ContextMenuSeparator {
@@ -82,6 +88,7 @@ Page {
             text: qsTr("Refresh")
             onTriggered: controllers.cloudFiles.refresh()
             visible: d.isCloudFileList
+            enabled: d.online
         }
 
         ContextMenuSeparator {
@@ -111,6 +118,7 @@ Page {
             text: qsTr("Delete")
             onTriggered: deleteCloudFilesDialog.open()
             visible: d.isCloudFileList && d.cloudFilesSelectedCount
+            enabled: d.online
         }
     }
 

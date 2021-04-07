@@ -10,6 +10,7 @@
         <file>qml/pages/ChatInfoPage.qml</file>
         <file>qml/pages/CloudFileSharingPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
+        <file>qml/pages/EditChatInfoPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
         <file>qml/pages/MainListsPage.qml</file>
@@ -21,10 +22,8 @@
         <file>qml/pages/OperationPage.qml</file>
         <file>qml/pages/SelectContactsPage.qml</file>
         <file>qml/pages/SignInAsPage.qml</file>
-        <file>qml/pages/SignInPage.qml</file>
         <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
-        <file>qml/pages/SplashScreenPage.qml</file>
         <file>qml/pages/VerifyProfilePage.qml</file>
         <!-- Icons -->
         <file>qml/resources/icons/Arrow-Left.png</file>
@@ -201,7 +200,6 @@
         <file>resources/database/deleteCloudFilesByIds.sql</file>
         <file>resources/database/deleteCloudFilesByParentIds.sql</file>
         <file>resources/database/deleteGroupById.sql</file>
-        <file>resources/database/deleteGroupInvitationMessageByChatId.sql</file>
         <file>resources/database/deleteGroupMembersByGroupId.sql</file>
         <file>resources/database/deleteMessagesByChatId.sql</file>
         <file>resources/database/createGroups.sql</file>
@@ -211,8 +209,13 @@
         <file>resources/database/insertCloudFile.sql</file>
         <file>resources/database/insertMessage.sql</file>
         <file>resources/database/resetUnreadCount.sql</file>
+        <file>resources/database/setIncomingMessagesReadBeforeDate.sql</file>
+        <file>resources/database/setOutgoingMessagesReadBeforeDate.sql</file>
+        <file>resources/database/selectChatMessage.sql</file>
         <file>resources/database/selectChatMessages.sql</file>
         <file>resources/database/selectChats.sql</file>
+        <file>resources/database/selectUnreadMessageCount.sql</file>
+        <file>resources/database/selectLastUnreadMessage.sql</file>
         <file>resources/database/selectCloudFolderFiles.sql</file>
         <file>resources/database/selectNotSentMessages.sql</file>
         <file>resources/database/updateAttachmentDownloadStage.sql</file>
@@ -226,12 +229,15 @@
         <file>resources/database/updateCloudFolder.sql</file>
         <file>resources/database/updateDownloadedCloudFile.sql</file>
         <file>resources/database/updateLastMessage.sql</file>
-        <file>resources/database/updateMessageStage.sql</file>
-        <file>resources/database/updateMessageStage.sql</file>
+        <file>resources/database/updateIncomingMessageStage.sql</file>
+        <file>resources/database/updateOutgoingMessageStage.sql</file>
         <file>resources/database/insertGroup.sql</file>
+        <file>resources/database/selectGroups.sql</file>
+        <file>resources/database/updateGroupCache.sql</file>
+        <file>resources/database/updateGroupInvitation.sql</file>
+        <file>resources/database/updateGroupName.sql</file>
         <file>resources/database/insertGroupMember.sql</file>
-        <file>resources/database/selectGroupMembersByGroupId.sql</file>
-        <file>resources/database/selectGroupMembersByMemberId.sql</file>
+        <file>resources/database/selectGroupMembers.sql</file>
         <file>resources/database/updateGroupMemberAffiliation.sql</file>
         <file>resources/database/createContacts.sql</file>
         <file>resources/database/insertContact.sql</file>
@@ -250,5 +256,7 @@
         <file>resources/database/patches/version1/insertContactsFromChats.sql</file>
         <file>resources/database/patches/version1/migrateMessagesToVersion1.sql</file>
         <file>resources/database/patches/version2/addSharedGroupIdColumn.sql</file>
+        <file>resources/database/patches/version3/migrateChats.sql</file>
+        <file>resources/database/patches/version3/migrateGroups.sql</file>
     </qresource>
 </RCC>

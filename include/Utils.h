@@ -87,6 +87,8 @@ Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
 QUrl getContactAvatarUrl(const ContactHandler contact);
 
 QString contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email);
+
+QString displayUsername(const QString &username, const UserId &userId);
 } // namespace Utils
 } // namespace vm
 

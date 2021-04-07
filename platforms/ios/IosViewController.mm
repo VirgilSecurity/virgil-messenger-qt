@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,31 +32,27 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_SPLASHSCREENSTATE_H
-#define VM_SPLASHSCREENSTATE_H
+#include "ios/IosViewController.h"
 
-#include "SignInState.h"
-
-class Settings;
-
-namespace vm {
-class SplashScreenState : public SignInState
+@interface IosViewController ()
+@end
+@implementation IosViewController
+#pragma mark -
+#pragma mark View Life Cycle
+- (void)viewDidLoad
 {
-    Q_OBJECT
-
-public:
-    SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings, QState *parent);
-
-signals:
-    void userNotSelected();
-
-private:
-    void onEntry(QEvent *) override;
-    void trySignIn();
-    void hideNativeSplashScreen();
-
-    Settings *m_settings;
-};
-} // namespace vm
-
-#endif // VM_SPLASHSCREENSTATE_H
+    [super viewDidLoad];
+}
+#pragma mark -
+#pragma mark Document Interaction Controller Delegate Methods
+- (UIViewController*)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController*)controller
+{
+#pragma unused(controller)
+    return self;
+}
+- (void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController*)controller
+{
+#pragma unused(controller)
+    [self removeFromParentViewController];
+}
+@end

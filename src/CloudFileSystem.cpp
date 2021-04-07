@@ -210,8 +210,8 @@ CloudFileRequestId CloudFileSystem::fetchMembers(const CloudFileHandler &file)
             return;
         }
 
-        const auto members = std::get_if<CloudFileMembers>(&result);
-        emit membersFetched(requestId, file, *members);
+        auto members = std::get_if<CloudFileMembers>(&result);
+        emit membersFetched(requestId, file, std::move(*members));
     });
     return requestId;
 }

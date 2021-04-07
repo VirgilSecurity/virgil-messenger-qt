@@ -47,9 +47,9 @@ include(customers)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.9.1")
-set(VS_CORE_VERSION "0.2.1.73")
-set(VERSION_DATABASE_SCHEME "2")
+set(VS_TARGET_VERSION "3.10.7")
+set(VS_CORE_VERSION "0.2.1.82")
+set(VERSION_DATABASE_SCHEME "3")
 
 # ---------------------------------------------------------------------------
 # Code formatting
@@ -462,6 +462,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h
@@ -480,6 +481,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/CloudFilesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controllers.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/controllers/DocumentInteractionController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/MessagesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/UsersController.h
         # Helpers
@@ -496,6 +498,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileListState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileSharingState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/EditChatInfoState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/EditProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatInfoState.h
@@ -509,10 +512,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NameGroupChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignUpState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/SplashScreenState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/StartState.h
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/include/database/core/Database.h
@@ -533,6 +534,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/UserDatabaseMigration.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version1/PatchContacts.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchChats.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchGroups.h
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
         ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
@@ -604,6 +607,8 @@ target_sources(${VS_TARGET_NAME}
         # MacOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
         # IOS
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.h>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosViewController.h>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
         # Android
@@ -675,6 +680,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp
@@ -690,6 +696,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/ChatsController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/CloudFilesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controllers.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/controllers/DocumentInteractionController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/MessagesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/UsersController.cpp
         # Helpers
@@ -702,6 +709,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/EditChatInfoState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/EditProfileState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/VerifyProfileState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatInfoState.cpp
@@ -716,10 +724,9 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/SplashScreenState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/StartState.cpp
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/Database.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/DatabaseTable.cpp
@@ -739,6 +746,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/UserDatabaseMigration.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version1/PatchContacts.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchChats.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchGroups.cpp
         # Logging
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
@@ -814,6 +823,8 @@ target_sources(${VS_TARGET_NAME}
         # IOS
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.mm>
+        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosViewController.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
         # Android
@@ -943,6 +954,15 @@ target_compile_options(${VS_TARGET_NAME}
         INTERFACE
         -Wno-multichar
         )
+
+#
+#  Generate .dSYM file for all configurations and strip them from the release.
+#
+if (CMAKE_GENERATOR STREQUAL "Xcode")
+  set_xcode_property(${VS_TARGET_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS "YES")
+  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=MinSizeRel] "YES")
+  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=Release] "YES")
+endif()
 
 # ---------------------------------------------------------------------------
 #   Additional debug parameters

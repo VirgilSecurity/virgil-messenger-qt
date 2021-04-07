@@ -84,6 +84,10 @@ void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
             qCDebug(lcDiscoveryManager) << "Carbon manager was not enabled (failed to send packet)";
         }
     }
+
+    for (const auto &feature : info.features()) {
+        qCDebug(lcDiscoveryManager) << "Discovered XMPP feature:" << feature;
+    }
 }
 
 void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)

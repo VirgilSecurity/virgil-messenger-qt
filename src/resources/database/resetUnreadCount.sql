@@ -1,3 +1,3 @@
-UPDATE chats
-SET unreadMessageCount = 0
-WHERE id = :id
+UPDATE messages
+SET stage = 'read'
+WHERE chatId = :id AND NOT isOutgoing AND stage = 'decrypted';

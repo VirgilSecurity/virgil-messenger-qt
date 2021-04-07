@@ -38,6 +38,8 @@
 #include "core/Database.h"
 #include "Message.h"
 #include "Chat.h"
+#include "Group.h"
+#include "GroupMember.h"
 #include "GroupUpdate.h"
 
 #include <QDir>
@@ -86,12 +88,11 @@ signals:
     void open(const QString &username);
     void close();
 
-    void writeMessage(const MessageHandler &message, qsizetype unreadCount = 0);
+    void writeMessage(const MessageHandler &message);
     void updateMessage(const MessageUpdate &messageUpdate);
     void writeChatAndLastMessage(const ChatHandler &chat);
-    void resetUnreadCount(const ChatHandler &chat);
+    void writeGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers);
     void deleteNewGroupChat(const ChatId &chatId);
-    void deleteGroupChatInvitation(const ChatId &chatId);
 
     void updateGroup(const GroupUpdate &groupUpdate);
 
@@ -105,12 +106,11 @@ private:
     void onOpen(const QString &username);
     void onClose();
 
-    void onWriteMessage(const MessageHandler &message, qsizetype unreadCount);
+    void onWriteMessage(const MessageHandler &message);
     void onUpdateMessage(const MessageUpdate &messageUpdate);
     void onWriteChatAndLastMessage(const ChatHandler &chat);
-    void onResetUnreadCount(const ChatHandler &chat);
+    void onWriteGroupChat(const ChatHandler &chat, const GroupHandler &group, const GroupMembers &groupMembers);
     void onDeleteNewGroupChat(const ChatId &chatId);
-    void onDeleteGroupChatInvitation(const ChatId &chatId);
 
     void onUpdateGroup(const GroupUpdate &groupUpdate);
 

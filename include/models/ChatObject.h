@@ -58,19 +58,14 @@ class ChatObject : public QObject
 public:
     ChatObject(Messenger *messenger, QObject *parent);
 
-    void setChat(const ChatHandler &chat);
+    void setChat(const ModifiableChatHandler &chat);
     ChatHandler chat() const;
 
     QString title() const;
     bool isGroup() const;
 
-    void setGroupInvitationOwnerId(const UserId &ownerId);
-    UserId groupInvitationOwnerId() const;
-
     void setGroupMembers(const GroupMembers &groupMembers);
     GroupMembers selectedGroupMembers() const;
-
-    UserId groupOwnerId() const;
 
     void updateGroup(const GroupUpdate &groupUpdate);
 
@@ -86,10 +81,9 @@ private:
     void setLastActivityText(const QString &text);
 
     QPointer<Messenger> m_messenger;
-    ChatHandler m_chat;
+    ModifiableChatHandler m_chat;
     GroupMembersModel *m_groupMembersModel;
     QString m_lastActivityText;
-    UserId m_groupInvitationOwnerId;
     bool m_userIsOwner = false;
     bool m_userCanEdit = false;
 };

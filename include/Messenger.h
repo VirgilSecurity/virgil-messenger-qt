@@ -64,8 +64,10 @@ public:
     virtual ~Messenger() noexcept = default;
 
     //
-    //  Status.
+    //  Return true if Internet connection is fine.
     //
+    bool isNetworkOnline() const noexcept;
+
     //
     //  Return true if messenger has Internet connection with all services.
     //
@@ -110,24 +112,31 @@ public:
 
     //
     //  Group chats.
+    //--
 
-    //
     //  Create a new group chats.
     //  If success - signal 'groupChatCreated' is emitted.
     //  If fail - signal 'groupChatCreateFailed' is emitted.
+    //  Note, this function is running concurrently.
     //
-    void createGroupChat(const GroupHandler &group);
+    void createGroupChat(const QString &groupName, const Contacts &contacts);
 
     //
-    //  Join existent group chat when online to be able receive messages.
+    //  Load existing group chats to be able send messages and if online then run groups synchronization.
     //
-    void joinGroupChats(const GroupMembers &groupsWithMe);
+    void loadGroupChats(const Groups &groups);
 
     //
     //  Group invitations
     //
     void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
     void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    //--
+
+    //
+    //  Set group info
+    //
+    void setGroupInfo(const GroupId &groupId, const QString &name);
 
     //
     //  Helpers.
@@ -193,16 +202,24 @@ signals:
     //--
     //  Group chats.
     //
-    void groupChatCreated(const GroupId &chatId);
+    void groupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers);
     void groupChatCreateFailed(const GroupId &chatId, const QString &errorText);
     void updateGroup(const GroupUpdate &groupUpdate);
+    void newGroupChatLoaded(const GroupHandler &group);
     //--
 
     //--
     // Users.
     //
     void userWasFound(const UserHandler &user);
+    void updateContact(const ContactUpdate &update);
     //--
+
+    //
+    //  Message history control.
+    // --
+    void sendMessageStatusDisplayed(const MessageHandler &message);
+    // --
 
 private slots:
     void onPushNotificationTokenUpdate();

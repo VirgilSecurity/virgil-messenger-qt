@@ -162,11 +162,6 @@ Self::operator QSqlDatabase() const
     return m_qtDatabase;
 }
 
-bool Self::create()
-{
-    return true;
-}
-
 bool Self::readVersion()
 {
     auto query = createQuery();
@@ -193,4 +188,18 @@ bool Self::writeVersion()
     m_version = m_latestVersion;
     qCDebug(lcDatabase) << "Database version was updated:" << m_latestVersion;
     return true;
+}
+
+qsizetype Self::rowsChangedCount() const
+{
+
+    auto rowsChangedQuery = this->createQuery();
+
+    rowsChangedQuery.exec("SELECT changes() as rowsChangedCount;");
+    if (rowsChangedQuery.next()) {
+        const auto rowsChangedCount = rowsChangedQuery.value("rowsChangedCount").value<qsizetype>();
+        return rowsChangedCount;
+    }
+
+    return 0;
 }

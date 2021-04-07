@@ -20,7 +20,7 @@ Page {
     Form {
         Avatar {
             Layout.alignment: Qt.AlignHCenter
-            diameter: 80
+            diameter: Theme.bigAvatarDiameter
             nickname: controllers.users.currentUsername
         }
 

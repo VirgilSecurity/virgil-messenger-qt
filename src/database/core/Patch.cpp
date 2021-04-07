@@ -42,5 +42,5 @@ Patch::Patch(const Patch::Version &version) : m_version(version) { }
 
 bool Patch::isOutdated(Database *database) const
 {
-    return m_version < database->version();
+    return m_version <= database->version();
 }

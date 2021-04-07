@@ -57,6 +57,7 @@ public:
 
     CloudFileOperation(Messenger *messenger, CloudFolderUpdateWatcher *watcher, QObject *parent);
 
+    Messenger *messenger();
     Settings *settings();
     CloudFileSystem *cloudFileSystem();
     FileLoader *fileLoader();

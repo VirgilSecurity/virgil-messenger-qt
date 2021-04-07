@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,46 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "states/SplashScreenState.h"
+#include "patches/version3/PatchGroups.h"
 
-#include <QTimer>
-
-#include "Settings.h"
-#include "android/VSQAndroid.h"
+#include "core/DatabaseUtils.h"
 
 using namespace vm;
+using namespace version3;
 
-SplashScreenState::SplashScreenState(UsersController *usersController, Validator *validator, Settings *settings,
-                                     QState *parent)
-    : SignInState(usersController, validator, parent), m_settings(settings)
-{
-}
+using Self = PatchGroups;
 
-void SplashScreenState::trySignIn()
+Self::PatchGroups() : Patch(3) { }
+
+bool Self::apply(Database *database)
 {
-    hideNativeSplashScreen();
-    const auto username = m_settings->lastSignedInUser();
-    if (username.isEmpty()) {
-        emit userNotSelected();
-    } else {
-        signIn(username);
+    const QLatin1String versionPath("patches/version3/");
+
+    if (!DatabaseUtils::readExecQueries(database, versionPath + "migrateGroups")) {
+        return false;
     }
-}
 
-void SplashScreenState::onEntry(QEvent *)
-{
-    // Schedule sign-in
-#if VS_ANDROID
-    const auto interval = 100;
-#else
-    const auto interval = 1000;
-#endif
-    QTimer::singleShot(interval, this, &SplashScreenState::trySignIn);
-}
-
-void SplashScreenState::hideNativeSplashScreen()
-{
-#if VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
+    return true;
 }

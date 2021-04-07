@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,31 +32,12 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_SIGNINSTATE_H
-#define VM_SIGNINSTATE_H
+#ifndef IOS_VIEW_CONTROLLER_H
+#define IOS_VIEW_CONTROLLER_H
 
-#include "OperationState.h"
+#import <UIKit/UIKit.h>
 
-namespace vm {
-class UsersController;
-class Validator;
+@interface IosViewController : UIViewController <UIDocumentInteractionControllerDelegate>
+@end
 
-class SignInState : public OperationState
-{
-    Q_OBJECT
-
-public:
-    SignInState(UsersController *usersController, Validator *validator, QState *parent);
-
-signals:
-    void signIn(const QString &username);
-
-private:
-    void processSignIn(const QString &username);
-
-    UsersController *m_usersController;
-    Validator *m_validator;
-};
-} // namespace vm
-
-#endif // VM_SIGNINSTATE_H
+#endif // IOS_VIEW_CONTROLLER_H

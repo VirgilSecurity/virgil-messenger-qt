@@ -92,7 +92,7 @@ void Self::open(const QString &messageId)
             emit openPreviewRequested(url);
         } else {
             qCDebug(lcController) << "Opening of file:" << url.fileName();
-            FileUtils::openUrl(url);
+            emit openUrlRequested(url);
         }
     });
 }

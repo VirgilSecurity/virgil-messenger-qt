@@ -62,6 +62,7 @@ public:
 
     CloudFilesModel *model();
     void switchToRootFolder();
+    void clearFiles();
 
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
@@ -77,6 +78,8 @@ public:
     Q_INVOKABLE void removeSelectedMembers();
 
 signals:
+    void openUrlRequested(const QUrl &url);
+
     void updateCloudFiles(const CloudFilesUpdate &update);
 
     void notificationCreated(const QString &notification, const bool error) const;
@@ -90,12 +93,14 @@ private:
     using FoldersHierarchy = ModifiableCloudFiles;
 
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
+    void refreshIfOnline();
 
     QString displayPath() const;
     bool isRoot() const;
     ModifiableCloudFileHandler rootFolder() const;
     CloudFileHandler parentFolder() const;
 
+    void onOnlineListingFailed();
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<Messenger> m_messenger;
@@ -107,6 +112,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;
     bool m_isListUpdating = false;
+    bool m_onlineRefreshNeeded = false;
 };
 } // namespace vm
 

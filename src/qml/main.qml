@@ -130,7 +130,7 @@ ApplicationWindow {
         crashReporter.reportErrorOccurred.connect(showPopupError)
 
         Platform.detect()
-        app.stateManager.setUiState()
+        app.stateManager.startState.requestUi()
     }
 
     onActiveFocusItemChanged: {

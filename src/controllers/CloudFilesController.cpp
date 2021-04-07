@@ -74,9 +74,12 @@ Self::CloudFilesController(Messenger *messenger, Models *models, UserDatabase *u
 
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
 
+    // Messenger connections
+    connect(messenger, &Messenger::onlineStatusChanged, this, &Self::refreshIfOnline);
     // Queue connections
     auto queue = models->cloudFilesQueue();
     connect(queue, &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(queue, &CloudFilesQueue::onlineListingFailed, this, &Self::onOnlineListingFailed);
     connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue,
             &CloudFilesQueue::interruptFileOperation);
     // Cloud file system connections
@@ -105,6 +108,12 @@ void Self::switchToRootFolder()
     switchToHierarchy({ rootFolder() });
 }
 
+void Self::clearFiles()
+{
+    qCDebug(lcController) << "Clear cloud files...";
+    m_models->cloudFiles()->clearFiles();
+}
+
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());
@@ -123,7 +132,7 @@ void Self::openFile(const QVariant &proxyRow)
     }
 
     if (!needDownload) {
-        FileUtils::openUrl(FileUtils::localFileToUrl(localPath));
+        emit openUrlRequested(FileUtils::localFileToUrl(localPath));
     } else {
         m_models->cloudFilesQueue()->pushDownloadFile(cloudFile, m_hierarchy.back(), [this]() {
             emit notificationCreated(tr("Cloud file was downloaded"), false);
@@ -208,7 +217,15 @@ void Self::removeSelectedMembers()
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_requestedHierarchy = hierarchy;
+    m_onlineRefreshNeeded = false;
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
+}
+
+void Self::refreshIfOnline()
+{
+    if (m_onlineRefreshNeeded && m_messenger->isOnline()) {
+        refresh();
+    }
 }
 
 QString Self::displayPath() const
@@ -234,6 +251,11 @@ CloudFileHandler Self::parentFolder() const
 {
     const auto size = m_hierarchy.size();
     return (size < 2) ? CloudFileHandler() : m_hierarchy[size - 2];
+}
+
+void Self::onOnlineListingFailed()
+{
+    m_onlineRefreshNeeded = true;
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)

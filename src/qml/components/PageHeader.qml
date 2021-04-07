@@ -12,11 +12,16 @@ Control {
 
     property alias title: headerTitle.title
     property alias description: headerTitle.description
+
     property alias titleHorizontalAlignment: headerTitle.horizontalAlignment
+    property alias showSeparator: headerBackground.showSeparator
+    property alias titleClickable: headerTitle.clickable
+
+    property alias rightControl: rightControlLoader.sourceComponent
     property alias contextMenu: menuButton.contextMenu
     property alias contextMenuVisible: menuButton.visible
-    property alias showSeparator: headerBackground.showSeparator
-    property alias rightControl: rightControlLoader.sourceComponent
+
+    signal titleClicked()
 
     background: HeaderBackground {
         id: headerBackground
@@ -42,6 +47,8 @@ Control {
             id: headerTitle
             Layout.fillWidth: true
             Layout.leftMargin: Theme.smallMargin
+
+            onClicked: root.titleClicked()
         }
 
         ImageButton {

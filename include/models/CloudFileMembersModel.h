@@ -53,16 +53,19 @@ public:
     CloudFileMembersModel(Messenger *messenger, QObject *parent);
 
     void setMembers(const CloudFileMembers &members);
-    CloudFileMembers members() const;
 
-    CloudFileMembers selectedMembers() const;
+    [[nodiscard]] CloudFileMembers members() const;
+
+    [[nodiscard]] CloudFileMemberHandler findMemberById(const UserId &memberId) const;
+
+    [[nodiscard]] CloudFileMembers selectedMembers() const;
 
 signals:
     void isReadOnlyChanged(bool isReadOnly);
     void isOwnedByUserChanged(bool isOwned);
 
 private:
-    QVariant data(const QModelIndex &index, int role) const override;
+    [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
 
     QPointer<Messenger> m_messenger;
     CloudFileMembers m_members;

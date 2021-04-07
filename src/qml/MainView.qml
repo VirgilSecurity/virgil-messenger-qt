@@ -60,19 +60,15 @@ Control {
             }
         }
 
-        function openSplashScreenPage() {
-            stackView.push(page("SplashScreen"), StackView.Immediate)
-        }
-
         function openAccountSelectionPage() {
-            if ([manager.signUpState, manager.signInState].includes(manager.previousState)) {
+            if (manager.signUpState === manager.previousState) {
                 return
             }
             stackView.push(page("AccountSelection"), StackView.Immediate)
         }
 
         function openMainPage() {
-            if ([manager.splashScreenState, manager.accountSelectionState,
+            if ([manager.startState, manager.accountSelectionState,
                  manager.signUpState, manager.downloadKeyState, manager.cloudFileListState].includes(manager.previousState)) {
                 stackView.clear()
                 stackView.push(page("Main"))
@@ -94,13 +90,13 @@ Control {
         }
 
         function openAddNewGroupChatPage() {
-            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
-                return
-            }
             stackView.push(page("NewGroupChat"))
         }
 
         function openNameGroupChatPage() {
+            if (![manager.chatListState, manager.cloudFileListState].includes(manager.previousState)) {
+                return
+            }
             stackView.push(page("NameGroupChat"))
         }
 
@@ -108,8 +104,8 @@ Control {
             if ([manager.attachmentPreviewState, manager.chatInfoState].includes(manager.previousState)) {
                 return
             }
-            const replace = [manager.newChatState, manager.nameGroupChatState, manager.downloadKeyState].includes(manager.previousState)
-            if (manager.previousState === manager.nameGroupChatState) {
+            const replace = [manager.newChatState, manager.newGroupChatState, manager.downloadKeyState].includes(manager.previousState)
+            if (manager.previousState === manager.newGroupChatState) {
                 stackView.pop()
             }
             var push = replace ? stackView.replace : stackView.push
@@ -117,9 +113,13 @@ Control {
         }
 
         function openChatInfoPage() {
-            if (manager.previousState !== manager.addGroupChatMembersState) {
+            if (![manager.addGroupChatMembersState, manager.editChatInfoState].includes(manager.previousState)) {
                 stackView.push(page("ChatInfo"))
             }
+        }
+
+        function openEditChatInfoPage() {
+            stackView.push(page("EditChatInfo"))
         }
 
         function openAddGroupChatMembersPage() {
@@ -190,7 +190,6 @@ Control {
 
     Component.onCompleted: {
         manager.goBack.connect(d.goBack)
-        manager.splashScreenState.entered.connect(d.openSplashScreenPage)
         manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
         manager.chatListState.entered.connect(d.openMainPage)
         manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
@@ -199,6 +198,7 @@ Control {
         manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
         manager.chatState.entered.connect(d.openChatPage)
         manager.chatInfoState.entered.connect(d.openChatInfoPage)
+        manager.editChatInfoState.entered.connect(d.openEditChatInfoPage)
         manager.addGroupChatMembersState.entered.connect(d.openAddGroupChatMembersPage)
         manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
         manager.backupKeyState.entered.connect(d.openBackupKeyPage)

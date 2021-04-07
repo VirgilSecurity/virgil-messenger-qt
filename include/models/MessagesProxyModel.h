@@ -37,19 +37,27 @@
 
 #include "ListProxyModel.h"
 
+#include <QPointer>
+
 namespace vm {
 class MessagesModel;
+class Messenger;
 
 class MessagesProxyModel : public ListProxyModel
 {
     Q_OBJECT
 
 public:
-    explicit MessagesProxyModel(MessagesModel *model);
+    MessagesProxyModel(Messenger *messenger, MessagesModel *model);
+
+    QModelIndex getNeighbourIndex(int row, int offset) const;
+    QModelIndex getFirstIndex() const;
+    QModelIndex getLastIndex() const;
 
 private:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
+    QPointer<Messenger> m_messenger;
     MessagesModel *m_model;
 };
 } // namespace vm

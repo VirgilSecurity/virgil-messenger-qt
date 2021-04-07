@@ -35,6 +35,8 @@
 #ifndef VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 #define VM_MESSAGE_CONTENT_GROUP_INVITATION_H
 
+#include "UserId.h"
+
 #include <QString>
 #include <QJsonObject>
 
@@ -49,7 +51,12 @@ class MessageContentGroupInvitation
 public:
     MessageContentGroupInvitation() = default;
 
-    explicit MessageContentGroupInvitation(QString title, QString helloText = {});
+    explicit MessageContentGroupInvitation(UserId superOwnerId, QString title, QString helloText = {});
+
+    //
+    //  Return identifier of owner that has unique ownership for a group.
+    //
+    UserId superOwnerId() const;
 
     //
     //  Return group title.
@@ -67,11 +74,12 @@ public:
     void writeJson(QJsonObject &json) const;
 
     //
-    //  restore object from JSON.
+    //  Restore object from JSON.
     //
     bool readJson(const QJsonObject &json);
 
 private:
+    UserId m_superOwnerId;
     QString m_title;
     QString m_helloText;
 };

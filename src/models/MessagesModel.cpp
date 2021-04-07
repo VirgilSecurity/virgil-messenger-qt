@@ -36,6 +36,7 @@
 
 #include "FileUtils.h"
 #include "MessagesProxyModel.h"
+#include "Messenger.h"
 #include "Model.h"
 #include "Utils.h"
 
@@ -44,11 +45,11 @@
 using namespace vm;
 using Self = MessagesModel;
 
-Self::MessagesModel(QObject *parent) : ListModel(parent, false)
+Self::MessagesModel(Messenger *messenger, QObject *parent) : ListModel(parent, false), m_messenger(messenger)
 {
     qRegisterMetaType<MessagesModel *>("MessagesModel*");
-
-    setProxy(new MessagesProxyModel(this));
+    m_proxy = new MessagesProxyModel(messenger, this);
+    setProxy(m_proxy);
 }
 
 ChatHandler Self::chat() const
@@ -62,16 +63,21 @@ void Self::setChat(ChatHandler chat)
     m_currentChat = std::move(chat);
 }
 
-void Self::setMessages(ModifiableMessages messages)
+void Self::addMessages(ModifiableMessages messages)
 {
-    qCDebug(lcModel) << "Set messages to the messages model";
-    beginResetModel();
-    m_messages = std::move(messages);
-    endResetModel();
+    qCDebug(lcModel) << "Add messages to the messages model. Count" << messages.size();
+    if (messages.empty()) {
+        return;
+    }
 
-    if (auto invitation = findIncomingInvitation()) {
-        const auto &message = m_messages.front();
-        emit groupInvitationReceived(message->senderId(), message->senderUsername(), invitation->helloText());
+    const auto count = rowCount();
+    beginInsertRows(QModelIndex(), count, count + messages.size() - 1);
+    m_messages.insert(m_messages.end(), messages.begin(), messages.end());
+    endInsertRows();
+
+    if (auto message = findIncomingInvitationMessage()) {
+        const auto displayUsername = Utils::displayUsername(message->senderUsername(), message->senderId());
+        emit groupInvitationReceived(displayUsername, message);
     }
 }
 
@@ -87,16 +93,9 @@ void Self::addMessage(ModifiableMessageHandler message)
     }
 }
 
-void Self::deleteMessage(const int row)
-{
-    beginRemoveRows(QModelIndex(), row, row);
-    m_messages.erase(m_messages.begin() + row);
-    endRemoveRows();
-}
-
 MessageHandler Self::getMessage(const int row) const
 {
-    return m_messages[row];
+    return m_messages.at(row);
 }
 
 void Self::clearChat()
@@ -110,25 +109,25 @@ void Self::clearChat()
 
 bool Self::updateMessage(const MessageUpdate &messageUpdate)
 {
-    const auto messageId = MessageUpdateGetMessageId(messageUpdate);
-
-    const auto messageRow = findRowById(messageId);
-    if (!messageRow) {
+    const auto messageIndex = findIndexById(MessageUpdateGetMessageId(messageUpdate));
+    if (!messageIndex.isValid()) {
         return false;
     }
 
-    const auto row = *messageRow;
-    m_messages[row]->applyUpdate(messageUpdate);
+    m_messages[messageIndex.row()]->applyUpdate(messageUpdate);
 
     const auto roles = rolesFromMessageUpdate(messageUpdate);
-    invalidateRow(row, roles);
+    invalidateRow(messageIndex.row(), roles);
     return true;
 }
 
-void Self::acceptGroupInvitation()
+void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
-    if (findIncomingInvitation()) {
-        deleteMessage(0); // Invitation is always first
+    if (const auto upd = std::get_if<GroupInvitationUpdate>(&groupUpdate)) {
+        if (findIncomingInvitationMessage()) {
+            m_currentChat->group()->setInvitationStatus(upd->invitationStatus);
+            m_proxy->invalidate();
+        }
     }
 }
 
@@ -136,17 +135,16 @@ ModifiableMessageHandler Self::findById(const MessageId &messageId) const
 {
     const auto messageIt = std::find_if(std::rbegin(m_messages), std::rend(m_messages),
                                         [&messageId](auto message) { return message->id() == messageId; });
-
     if (messageIt != std::rend(m_messages)) {
         return *messageIt;
     }
-
     return nullptr;
 }
 
 QString MessagesModel::lastMessageSenderId() const
 {
-    return m_messages.empty() ? QString() : m_messages.back()->senderId();
+    const auto messageIndex = m_proxy->getLastIndex();
+    return messageIndex.isValid() ? getMessage(messageIndex.row())->senderId() : QString();
 }
 
 int Self::rowCount(const QModelIndex &parent) const
@@ -157,8 +155,12 @@ int Self::rowCount(const QModelIndex &parent) const
 
 QVariant Self::data(const QModelIndex &index, int role) const
 {
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
     const auto row = index.row();
-    const auto message = m_messages[row];
+    const auto message = m_messages.at(row);
     const auto attachment = message->contentIsAttachment() ? message->contentAsAttachment() : nullptr;
 
     switch (role) {
@@ -184,14 +186,18 @@ QVariant Self::data(const QModelIndex &index, int role) const
         return message->status() == Message::Status::Broken;
 
     case BodyRole: {
+        QString text;
         if (auto textContent = std::get_if<MessageContentText>(&message->content())) {
-            return textContent->text().split('\n').join("<br/>");
+            text = textContent->text();
+        } else if (auto groupInvitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
+            if (groupInvitation->superOwnerId() == m_messenger->currentUser()->id()) {
+                text = tr("Invitation sent to %1")
+                               .arg(Utils::displayUsername(message->recipientUsername(), message->recipientId()));
+            } else {
+                text = tr("Invited by %1").arg(Utils::displayUsername(message->senderUsername(), message->senderId()));
+            }
         }
-
-        if (std::holds_alternative<MessageContentGroupInvitation>(message->content())) {
-            throw std::logic_error("Group invitation must be filtered");
-        }
-        return QString();
+        return text.split('\n').join("<br/>");
     }
 
     case AttachmentIdRole: {
@@ -296,22 +302,22 @@ QVariant Self::data(const QModelIndex &index, int role) const
     }
 
     case AttachmentFileExistsRole: {
-        return attachment ? FileUtils::fileExists(attachment->localPath()) : false;
+        return attachment && FileUtils::fileExists(attachment->localPath());
     }
 
     case FirstInRowRole: {
-        const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
+        const auto prevMessage = getNeighbourMessage(row, -1);
         return !prevMessage || prevMessage->senderId() != message->senderId()
                 || prevMessage->createdAt().addSecs(5 * 60) <= message->createdAt();
     }
 
     case InRowRole: {
-        const auto nextMessage = (row + 1 == rowCount()) ? nullptr : m_messages[row + 1];
+        const auto nextMessage = getNeighbourMessage(row, 1);
         return nextMessage && message->senderId() == nextMessage->senderId();
     }
 
     case FirstInSectionRole: {
-        const auto prevMessage = (row == 0) ? nullptr : m_messages[row - 1];
+        const auto prevMessage = getNeighbourMessage(row, -1);
         return !prevMessage || prevMessage->createdAt().date() != message->createdAt().date();
     }
 
@@ -352,16 +358,22 @@ QHash<int, QByteArray> Self::roleNames() const
              { FirstInSectionRole, "firstInSection" } };
 }
 
-std::optional<int> Self::findRowById(const MessageId &messageId) const
+QModelIndex Self::findIndexById(const MessageId &messageId) const
 {
     auto it = std::find_if(std::rbegin(m_messages), std::rend(m_messages),
                            [&messageId](auto message) { return message->id() == messageId; });
-
     if (it != std::rend(m_messages)) {
-        return std::distance(std::begin(m_messages), it.base()) - 1;
+        return index(std::distance(std::begin(m_messages), it.base()) - 1);
     }
+    return QModelIndex();
+}
 
-    return std::nullopt;
+MessageHandler Self::getNeighbourMessage(int row, int offset) const
+{
+    if (const auto index = m_proxy->getNeighbourIndex(row, offset); index.isValid()) {
+        return getMessage(index.row());
+    }
+    return MessageHandler();
 }
 
 void Self::invalidateRow(const int row, const QVector<int> &roles)
@@ -371,11 +383,11 @@ void Self::invalidateRow(const int row, const QVector<int> &roles)
 
     // Invalidate neighbour rows
     if (roles.isEmpty() || roles.contains(StatusIconRole)) {
-        if (row > 0) {
-            invalidateModel(index(row - 1), { StatusIconRole, IsBrokenRole, InRowRole });
+        if (const auto prevIndex = m_proxy->getNeighbourIndex(row, -1); prevIndex.isValid()) {
+            invalidateModel(prevIndex, { StatusIconRole, IsBrokenRole, InRowRole });
         }
-        if (row < rowCount() - 1) {
-            invalidateModel(index(row + 1), { FirstInRowRole });
+        if (const auto nextIndex = m_proxy->getNeighbourIndex(row, 1); nextIndex.isValid()) {
+            invalidateModel(nextIndex, { FirstInRowRole });
         }
     }
 }
@@ -385,21 +397,23 @@ void Self::invalidateModel(const QModelIndex &index, const QVector<int> &roles)
     emit dataChanged(index, index, roles);
 }
 
-const MessageContentGroupInvitation *Self::findIncomingInvitation() const
+MessageHandler Self::findIncomingInvitationMessage() const
 {
+    if (!chat() || !chat()->group() || chat()->group()->invitationStatus() != GroupInvitationStatus::Invited) {
+        return nullptr;
+    }
     if (m_messages.empty()) {
         return nullptr;
     }
-    const auto message = m_messages.front();
+    const auto message = getMessage(0);
     if (!message->isIncoming()) {
         return nullptr;
     }
-    return std::get_if<MessageContentGroupInvitation>(&message->content());
+    return std::holds_alternative<MessageContentGroupInvitation>(message->content()) ? message : nullptr;
 }
 
 QVector<int> Self::rolesFromMessageUpdate(const MessageUpdate &messageUpdate)
 {
-
     if (std::holds_alternative<IncomingMessageStageUpdate>(messageUpdate)
         || std::holds_alternative<OutgoingMessageStageUpdate>(messageUpdate)) {
         return { AttachmentIsLoadingRole, StatusIconRole, IsBrokenRole, InRowRole };
@@ -440,7 +454,7 @@ QString Self::statusIconPath(MessageHandler message)
         if (message->isOutgoing()) {
             // TODO(fpohtmeh): implement smarter check?
             if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
-                return path.arg("M-Read"); // TODO(fpohtmeh): should be "M-Delivered"
+                return path.arg("M-Delivered"); // TODO(fpohtmeh): should be "M-Delivered"
             } else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
                 return path.arg("M-Read");
             }

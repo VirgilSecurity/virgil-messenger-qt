@@ -65,8 +65,6 @@ public:
 
     static QString fileMimeType(const QString &filePath);
 
-    static bool openUrl(const QUrl &url);
-
     static bool isValidUrl(const QUrl &url);
 
     static QString urlToLocalFile(const QUrl &url);
