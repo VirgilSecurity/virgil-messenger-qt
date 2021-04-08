@@ -29,7 +29,13 @@ Rectangle {
             }
 
             PropertyChanges {
+                target: closeButton
+                visible: true
+            }
+
+            PropertyChanges {
                 target: searchField
+                visible: true
                 text: ""
             }
 

@@ -6,6 +6,12 @@ import "../components"
 import "../theme"
 
 Page {
+    QtObject {
+        id: d
+        readonly property var manager: app.stateManager
+        readonly property bool isChatList: d.manager.currentState === manager.chatListState
+    }
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }
@@ -19,9 +25,18 @@ Page {
             Layout.fillHeight: true
         }
 
-        MainListsPage {
+        StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.leftMargin: Theme.smallMargin
+            Layout.rightMargin: Theme.smallMargin
+            currentIndex: d.isChatList ? 0 : 1
+
+            ChatListPage {
+            }
+
+            CloudFileListPage {
+            }
         }
     }
 }

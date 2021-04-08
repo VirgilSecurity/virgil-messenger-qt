@@ -102,8 +102,7 @@ ToolBar {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: Theme.margin
-            rightMargin: Theme.smallMargin
+            leftMargin: Theme.smallMargin
         }
         height: searchId.recommendedHeight
 

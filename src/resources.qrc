@@ -6,14 +6,15 @@
         <file>qml/pages/AddCloudFolderMembersPage.qml</file>
         <file>qml/pages/AddGroupChatMembersPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
+        <file>qml/pages/ChatListPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/ChatInfoPage.qml</file>
+        <file>qml/pages/CloudFileListPage.qml</file>
         <file>qml/pages/CloudFileSharingPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditChatInfoPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
         <file>qml/pages/MainPage.qml</file>
-        <file>qml/pages/MainListsPage.qml</file>
         <file>qml/pages/MultiSelectContactsPage.qml</file>
         <file>qml/pages/NameGroupChatPage.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
