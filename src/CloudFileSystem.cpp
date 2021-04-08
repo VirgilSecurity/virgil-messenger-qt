@@ -41,6 +41,7 @@
 #include "Messenger.h"
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
 #include "android/VSQAndroid.h"
 
 Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs")
@@ -71,7 +72,7 @@ void CloudFileSystem::signOut()
 
 bool CloudFileSystem::checkPermissions()
 {
-#ifdef VS_ANDROID
+#if VS_ANDROID
     if (!VSQAndroid::checkWriteExternalStoragePermission()) {
         return false;
     }
