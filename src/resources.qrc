@@ -7,6 +7,7 @@
         <file>qml/pages/AddGroupChatMembersPage.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
         <file>qml/pages/ChatListPage.qml</file>
+        <file>qml/pages/ChatStackPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/ChatInfoPage.qml</file>
         <file>qml/pages/CloudFileListPage.qml</file>

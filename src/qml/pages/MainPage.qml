@@ -9,7 +9,15 @@ Page {
     QtObject {
         id: d
         readonly property var manager: app.stateManager
-        readonly property bool isChatList: d.manager.currentState === manager.chatListState
+
+        function updateStackIndex(state) {
+            if (state === manager.chatListState) {
+                stackLayout.currentIndex = 0
+            }
+            else if (state === manager.cloudFileListState) {
+                stackLayout.currentIndex = 1
+            }
+        }
     }
 
     background: Rectangle {
@@ -26,17 +34,24 @@ Page {
         }
 
         StackLayout {
+            id: stackLayout
+            clip: true
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: Theme.smallMargin
-            Layout.rightMargin: Theme.smallMargin
-            currentIndex: d.isChatList ? 0 : 1
 
-            ChatListPage {
+            ChatStackPage {
             }
 
             CloudFileListPage {
             }
+        }
+    }
+
+    Connections {
+        target: d.manager
+
+        function onCurrentStateChanged(state) {
+            d.updateStackIndex(state)
         }
     }
 }

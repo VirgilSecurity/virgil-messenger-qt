@@ -10,7 +10,6 @@ Control {
     id: mainView
 
     property var attachmentPreview: undefined
-    readonly property var manager: app.stateManager
 
     ColumnLayout {
         anchors {
@@ -37,6 +36,7 @@ Control {
 
     QtObject {
         id: d
+        readonly property var manager: app.stateManager
 
         function page(name) {
             return "./pages/%1Page.qml".arg(name)
@@ -101,15 +101,13 @@ Control {
         }
 
         function openChatPage() {
-            if ([manager.attachmentPreviewState, manager.chatInfoState].includes(manager.previousState)) {
-                return
+            // TODO(fpohtmeh): improve this code
+            if ([manager.newChatState, manager.newGroupChatState, manager.downloadKeyState].includes(manager.previousState)) {
+                stackView.pop()
             }
-            const replace = [manager.newChatState, manager.newGroupChatState, manager.downloadKeyState].includes(manager.previousState)
             if (manager.previousState === manager.newGroupChatState) {
                 stackView.pop()
             }
-            var push = replace ? stackView.replace : stackView.push
-            push(page("Chat"), StackView.Transition)
         }
 
         function openChatInfoPage() {
@@ -186,30 +184,32 @@ Control {
                 stackView.push(page("CloudFileSharing"))
             }
         }
+
+        function setupConnections() {
+            manager.goBack.connect(goBack)
+            manager.accountSelectionState.entered.connect(openAccountSelectionPage)
+            manager.chatListState.entered.connect(openMainPage)
+            manager.chatState.entered.connect(openChatPage)
+            manager.accountSettingsState.entered.connect(openAccountSettingsPage)
+            manager.newChatState.entered.connect(openAddNewChatPage)
+            manager.newGroupChatState.entered.connect(openAddNewGroupChatPage)
+            manager.nameGroupChatState.entered.connect(openNameGroupChatPage)
+            manager.chatInfoState.entered.connect(openChatInfoPage)
+            manager.editChatInfoState.entered.connect(openEditChatInfoPage)
+            manager.addGroupChatMembersState.entered.connect(openAddGroupChatMembersPage)
+            manager.attachmentPreviewState.entered.connect(showAttachmentPreview)
+            manager.backupKeyState.entered.connect(openBackupKeyPage)
+            manager.editProfileState.entered.connect(openEditProfilePage)
+            manager.verifyProfileState.entered.connect(openVerifyProfilePage)
+            manager.signInAsState.entered.connect(openSignInAsPage)
+            manager.signInUsernameState.entered.connect(openSignInUsernamePage)
+            manager.signUpState.entered.connect(openSignUpPage)
+            manager.downloadKeyState.entered.connect(openDownloadKeyPage)
+            manager.newCloudFolderMembersState.entered.connect(openNewCloudFolderMembersPage)
+            manager.addCloudFolderMembersState.entered.connect(openAddCloudFolderMembersPage)
+            manager.cloudFileSharingState.entered.connect(openCloudFileSharingPage)
+        }
     }
 
-    Component.onCompleted: {
-        manager.goBack.connect(d.goBack)
-        manager.accountSelectionState.entered.connect(d.openAccountSelectionPage)
-        manager.chatListState.entered.connect(d.openMainPage)
-        manager.accountSettingsState.entered.connect(d.openAccountSettingsPage)
-        manager.newChatState.entered.connect(d.openAddNewChatPage)
-        manager.newGroupChatState.entered.connect(d.openAddNewGroupChatPage)
-        manager.nameGroupChatState.entered.connect(d.openNameGroupChatPage)
-        manager.chatState.entered.connect(d.openChatPage)
-        manager.chatInfoState.entered.connect(d.openChatInfoPage)
-        manager.editChatInfoState.entered.connect(d.openEditChatInfoPage)
-        manager.addGroupChatMembersState.entered.connect(d.openAddGroupChatMembersPage)
-        manager.attachmentPreviewState.entered.connect(d.showAttachmentPreview)
-        manager.backupKeyState.entered.connect(d.openBackupKeyPage)
-        manager.editProfileState.entered.connect(d.openEditProfilePage)
-        manager.verifyProfileState.entered.connect(d.openVerifyProfilePage)
-        manager.signInAsState.entered.connect(d.openSignInAsPage)
-        manager.signInUsernameState.entered.connect(d.openSignInUsernamePage)
-        manager.signUpState.entered.connect(d.openSignUpPage)
-        manager.downloadKeyState.entered.connect(d.openDownloadKeyPage)
-        manager.newCloudFolderMembersState.entered.connect(d.openNewCloudFolderMembersPage)
-        manager.addCloudFolderMembersState.entered.connect(d.openAddCloudFolderMembersPage)
-        manager.cloudFileSharingState.entered.connect(d.openCloudFileSharingPage)
-    }
+    Component.onCompleted: d.setupConnections()
 }
