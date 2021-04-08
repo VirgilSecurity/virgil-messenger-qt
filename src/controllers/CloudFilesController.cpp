@@ -114,6 +114,18 @@ void Self::clearFiles()
     m_models->cloudFiles()->clearFiles();
 }
 
+bool Self::createLocalRootFolder()
+{
+    if (!m_cloudFileSystem->checkPermissions()) {
+        return false;
+    }
+    if (m_cloudFileSystem->createDownloadsDir()) {
+        return true;
+    }
+    emit notificationCreated(tr("Failed to create local folder"), true);
+    return false;
+}
+
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());
@@ -221,9 +233,9 @@ void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
 }
 
-void Self::refreshIfOnline()
+void Self::refreshIfOnline(bool isOnline)
 {
-    if (m_onlineRefreshNeeded && m_messenger->isOnline()) {
+    if (m_onlineRefreshNeeded && isOnline) {
         refresh();
     }
 }

@@ -61,6 +61,9 @@ public:
     void signIn();
     void signOut();
 
+    bool checkPermissions();
+    bool createDownloadsDir();
+
     CloudFileRequestId fetchList(const CloudFileHandler &parentFolder);
     CloudFileRequestId createFile(const QString &filePath, const CloudFileHandler &parentFolder);
     CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder,

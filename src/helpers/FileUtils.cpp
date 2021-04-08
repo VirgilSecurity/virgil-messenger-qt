@@ -105,7 +105,7 @@ QString Self::urlToLocalFile(const QUrl &url)
 #endif
 }
 
-bool Self::forceCreateDir(const QString &absolutePath)
+bool Self::forceCreateDir(const QString &absolutePath, bool isFatal)
 {
     const QFileInfo info(absolutePath);
     if (info.exists()) {
@@ -118,7 +118,11 @@ bool Self::forceCreateDir(const QString &absolutePath)
     if (QDir().mkpath(absolutePath)) {
         return true;
     }
-    qFatal("Failed to create directory: %s", qPrintable(absolutePath));
+    if (isFatal) {
+        qFatal("Failed to create directory: %s", qPrintable(absolutePath));
+    } else {
+        qWarning(lcFileUtils()) << "Failed to create directory:" << absolutePath;
+    }
     return false;
 }
 

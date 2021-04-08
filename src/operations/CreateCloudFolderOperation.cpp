@@ -75,7 +75,7 @@ void CreateCloudFolderOperation::run()
 void CreateCloudFolderOperation::onCreated(const CloudFileRequestId requestId, const ModifiableCloudFileHandler &folder)
 {
     if (m_requestId == requestId) {
-        FileUtils::forceCreateDir(folder->localPath());
+        FileUtils::forceCreateDir(folder->localPath(), false);
 
         CreateCloudFilesUpdate update;
         update.parentFolder = m_parentFolder;

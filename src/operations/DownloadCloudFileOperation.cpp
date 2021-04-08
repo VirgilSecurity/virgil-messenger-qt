@@ -162,5 +162,5 @@ void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::S
 
 bool DownloadCloudFileOperation::createLocalDir()
 {
-    return FileUtils::forceCreateDir(m_parentFolder->localPath());
+    return FileUtils::forceCreateDir(m_parentFolder->localPath(), false);
 }
