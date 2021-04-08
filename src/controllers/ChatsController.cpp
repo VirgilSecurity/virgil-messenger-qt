@@ -189,6 +189,10 @@ void Self::openChat(const ModifiableChatHandler &chat)
         m_userDatabase->chatsTable()->markMessagesAsRead(chat);
     }
     m_chatObject->setChat(chat);
+    if (chat->type() == Chat::Type::Personal) {
+        const UserId userId(chat->id());
+        m_messenger->setCurrentRecipient(userId);
+    }
     emit chatOpened(chat);
 }
 
@@ -200,6 +204,7 @@ void Self::openChat(const QString &chatId)
 void Self::closeChat()
 {
     m_chatObject->setChat(ModifiableChatHandler());
+    m_messenger->setCurrentRecipient(UserId());
     emit chatClosed();
 }
 

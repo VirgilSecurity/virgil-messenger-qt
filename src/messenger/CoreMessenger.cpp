@@ -268,7 +268,8 @@ public:
     using QueryParamTo = GroupId;
     std::map<QueryId, QueryParamTo> historySyncQueryParams;
 
-    VSQNetworkAnalyzer *networkAnalyzer;
+    QPointer<VSQNetworkAnalyzer> networkAnalyzer;
+    QPointer<Settings> settings;
 
     std::unique_ptr<QXmppClient> xmpp;
     std::unique_ptr<VSQDiscoveryManager> discoveryManager;
@@ -347,8 +348,7 @@ struct RegisterMetaTypesOnce
 // --------------------------------------------------------------------------
 // Main implementation.
 // --------------------------------------------------------------------------
-Self::CoreMessenger(Settings *settings, QObject *parent)
-    : QObject(parent), m_impl(std::make_unique<Self::Impl>()), m_settings(settings)
+Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_impl(std::make_unique<Self::Impl>())
 {
 
     //
@@ -383,6 +383,9 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     //  Configure Network Analyzer.
     //
     m_impl->networkAnalyzer = new VSQNetworkAnalyzer(nullptr); // will be moved to the thread
+    m_impl->settings = settings;
+    m_impl->lastActivityManager = new VSQLastActivityManager(settings);
+
     connect(m_impl->networkAnalyzer, &VSQNetworkAnalyzer::connectedChanged, this, &Self::onProcessNetworkState);
 }
 
@@ -475,7 +478,6 @@ void Self::onResetXmppConfiguration()
     m_impl->xmppCarbonManager = new QXmppCarbonManager();
     m_impl->xmppUploadManager = new QXmppUploadRequestManager();
     m_impl->xmppGroupChatManager = new QXmppMucManager();
-    m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
     m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
     m_impl->xmppMucSubManager = new XmppMucSubManager();
     m_impl->xmppMamManager = new QXmppMamManager();
@@ -697,7 +699,7 @@ Self::Result Self::saveCurrentUserInfo()
 
     const auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
     const auto username = vsc_str_to_qstring(vssq_messenger_user_username(user));
-    m_settings->setUserCredential(username, credentials);
+    m_impl->settings->setUserCredential(username, credentials);
 
     //
     //  Save info.
@@ -711,7 +713,7 @@ Self::Result Self::saveCurrentUserInfo()
     }
 
     const auto userInfo = vsc_str_to_qstring(vssc_json_object_as_str(userJson.get()));
-    m_settings->setUserInfo(username, userInfo);
+    m_impl->settings->setUserInfo(username, userInfo);
 
     return Self::Result::Success;
 }
@@ -733,7 +735,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
         }
 
         qCInfo(lcCoreMessenger) << "Load user credentials";
-        auto credentialsString = m_settings->userCredential(username).toStdString();
+        auto credentialsString = m_impl->settings->userCredential(username).toStdString();
         if (credentialsString.empty()) {
             qCWarning(lcCoreMessenger) << "User credentials are not found locally";
             return Self::Result::Error_NoCred;
@@ -751,7 +753,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_ImportCredentials;
         }
 
-        const auto userInfo = m_settings->userInfo(username);
+        const auto userInfo = m_impl->settings->userInfo(username);
         if (!userInfo.isEmpty()) {
             //
             //  Fast sign-in.
@@ -893,7 +895,8 @@ QString Self::currentUserJid() const
 {
     auto user = vssq_messenger_user(m_impl->messenger.get());
     vsc_str_t userIdentity = vssq_messenger_user_identity(user);
-    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
+    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/"
+            + m_impl->settings->deviceId();
 }
 
 UserId Self::userIdFromJid(const QString &jid) const
@@ -904,7 +907,7 @@ UserId Self::userIdFromJid(const QString &jid) const
 QString Self::userIdToJid(const UserId &userId) const
 {
     if (userId == currentUser()->id()) {
-        return userId + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
+        return userId + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_impl->settings->deviceId();
     } else {
         return userId + "@" + CustomerEnv::xmppServiceDomain();
     }
@@ -2289,16 +2292,7 @@ void Self::onProcessNetworkState(bool isOnline)
 // --------------------------------------------------------------------------
 void Self::setCurrentRecipient(const UserId &recipientId)
 {
-
-    if (recipientId.isValid()) {
-        auto user = findUserById(recipientId);
-        if (user) {
-            m_impl->lastActivityManager->setCurrentJid(userIdToJid(user->id()));
-            return;
-        }
-    }
-
-    m_impl->lastActivityManager->setCurrentJid(QString());
+    m_impl->lastActivityManager->setCurrentJid(recipientId.isValid() ? userIdToJid(recipientId) : QString());
 }
 
 // --------------------------------------------------------------------------
@@ -3436,7 +3430,7 @@ void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResu
     if (!complete) {
         QXmppResultSetQuery resultSetQuery;
         resultSetQuery.setAfter(resultSetReply.last());
-        const auto lastSyncDate = m_settings->chatHistoryLastSyncDate(QString(groupId));
+        const auto lastSyncDate = m_impl->settings->chatHistoryLastSyncDate(QString(groupId));
         const auto toJid = groupId.isValid() ? groupIdToJid(groupId) : QString();
         const auto syncQueryId =
                 m_impl->xmppMamManager->retrieveArchivedMessages(toJid, {}, {}, lastSyncDate, {}, resultSetQuery);
@@ -3444,7 +3438,7 @@ void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResu
 
     } else {
         m_impl->historySyncQueryParams.erase(queryParamIt);
-        m_settings->setChatHistoryLastSyncDate(QString(groupId));
+        m_impl->settings->setChatHistoryLastSyncDate(QString(groupId));
     }
 }
 
@@ -3487,7 +3481,7 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
 void Self::onSyncPrivateChatsHistory()
 {
     qCInfo(lcCoreMessenger) << "Start loading private chats history";
-    const auto lastSyncDate = m_settings->chatHistoryLastSyncDate();
+    const auto lastSyncDate = m_impl->settings->chatHistoryLastSyncDate();
     const auto chatSyncQueryId = m_impl->xmppMamManager->retrieveArchivedMessages({}, {}, {}, lastSyncDate);
     m_impl->historySyncQueryParams[chatSyncQueryId] = GroupId();
 }
@@ -3495,7 +3489,7 @@ void Self::onSyncPrivateChatsHistory()
 void Self::onSyncGroupChatHistory(const GroupId &groupId)
 {
     qCInfo(lcCoreMessenger) << "Start loading group chat history for group:" << groupId;
-    const auto lastSyncDate = m_settings->chatHistoryLastSyncDate(QString(groupId));
+    const auto lastSyncDate = m_impl->settings->chatHistoryLastSyncDate(QString(groupId));
     const auto groupSyncQueryId =
             m_impl->xmppMamManager->retrieveArchivedMessages(groupIdToJid(groupId), {}, {}, lastSyncDate);
     m_impl->historySyncQueryParams[groupSyncQueryId] = groupId;

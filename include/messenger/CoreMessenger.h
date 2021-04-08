@@ -439,7 +439,6 @@ private:
 private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
-    QPointer<Settings> m_settings;
 };
 } // namespace vm
 
