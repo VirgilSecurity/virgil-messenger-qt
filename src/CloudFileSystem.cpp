@@ -73,11 +73,10 @@ void CloudFileSystem::signOut()
 bool CloudFileSystem::checkPermissions()
 {
 #if VS_ANDROID
-    if (!VSQAndroid::checkWriteExternalStoragePermission()) {
-        return false;
-    }
-#endif
+    return VSQAndroid::checkWriteExternalStoragePermission();
+#else
     return true;
+#endif
 }
 
 bool CloudFileSystem::createDownloadsDir()
