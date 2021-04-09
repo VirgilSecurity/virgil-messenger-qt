@@ -10,8 +10,13 @@ Item {
     QtObject {
         id: d
         readonly property var manager: app.stateManager
-        readonly property bool isLandscapeMode: Platform.isDesktop && width >= 540
         readonly property bool isChatOpened: !controllers.chats.current.isNull
+
+        readonly property real listMinimumWidth: 240
+        readonly property real listMaximumWidth: 400
+        readonly property real chatMinimumWidth: 500
+        readonly property real splitHandleSize: 4
+        readonly property bool isLandscapeMode: Platform.isDesktop && width >= listMinimumWidth + splitHandleSize + chatMinimumWidth
 
         function onCurrentStateChanged(state) {
             if (state === manager.chatState) {
@@ -36,27 +41,39 @@ Item {
         visible: !d.isLandscapeMode
     }
 
-    RowLayout {
+    SplitView {
+        id: splitView
         anchors.fill: parent
         visible: d.isLandscapeMode
 
+        handle: Rectangle {
+            implicitWidth: d.splitHandleSize
+            implicitHeight: d.splitHandleSize
+            color: Theme.chatBackgroundColor
+        }
+
         ChatListPage {
-            Layout.fillHeight: true
-            Layout.preferredWidth: 240
+            SplitView.fillHeight: true
+            SplitView.fillWidth: false
+            SplitView.preferredWidth: d.listMinimumWidth
+            SplitView.minimumWidth: d.listMinimumWidth
+            SplitView.maximumWidth: Math.min(d.listMaximumWidth, splitView.width - d.chatMinimumWidth - d.splitHandleSize)
         }
 
         ChatPage {
             visible: d.isChatOpened
             showBackButton: false
-            Layout.fillHeight: true
-            Layout.fillWidth: true
+            SplitView.minimumWidth: d.chatMinimumWidth
+            SplitView.fillHeight: true
+            SplitView.fillWidth: true
         }
 
         Rectangle {
-            color: Theme.chatBackgroundColor
             visible: !d.isChatOpened
-            Layout.fillHeight: true
-            Layout.fillWidth: true
+            color: Theme.chatBackgroundColor
+            SplitView.minimumWidth: d.chatMinimumWidth
+            SplitView.fillHeight: true
+            SplitView.fillWidth: true
         }
     }
 
