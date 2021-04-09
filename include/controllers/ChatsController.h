@@ -98,7 +98,7 @@ signals:
 
 private:
     void setupTableConnections();
-    void setCurrentChat(ChatHandler chat);
+    void setCurrentChat(ModifiableChatHandler chat);
 
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);

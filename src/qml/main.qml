@@ -13,6 +13,7 @@ import "theme"
 ApplicationWindow {
     id: root
 
+    property alias window: root
     property alias mainView: mainView
 
     visible: true

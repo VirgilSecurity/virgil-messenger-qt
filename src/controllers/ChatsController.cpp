@@ -188,7 +188,7 @@ void Self::openChat(const ModifiableChatHandler &chat)
     if (chat->unreadMessageCount() > 0) {
         m_userDatabase->chatsTable()->markMessagesAsRead(chat);
     }
-    m_chatObject->setChat(chat);
+    setCurrentChat(chat);
     emit chatOpened(chat);
 }
 
@@ -199,7 +199,7 @@ void Self::openChat(const QString &chatId)
 
 void Self::closeChat()
 {
-    m_chatObject->setChat(ModifiableChatHandler());
+    setCurrentChat(ModifiableChatHandler());
     emit chatClosed();
 }
 
@@ -222,6 +222,12 @@ void Self::setupTableConnections()
 
     // TODO: Move to an appropriate place.
     connect(m_messenger, &Messenger::updateContact, m_userDatabase->contactsTable(), &ContactsTable::updateContact);
+}
+
+void Self::setCurrentChat(ModifiableChatHandler chat)
+{
+    m_chatObject->setChat(chat);
+    m_models->chats()->selectChatOnly(chat);
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)

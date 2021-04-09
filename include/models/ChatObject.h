@@ -54,6 +54,7 @@ class ChatObject : public QObject
     Q_PROPERTY(GroupMembersModel *groupMembers MEMBER m_groupMembersModel CONSTANT)
     Q_PROPERTY(bool userIsOwner MEMBER m_userIsOwner NOTIFY userIsOwnerChanged)
     Q_PROPERTY(bool userCanEdit MEMBER m_userCanEdit NOTIFY userCanEditChanged)
+    Q_PROPERTY(bool isNull READ isNull NOTIFY isNullChanged)
 
 public:
     ChatObject(Messenger *messenger, QObject *parent);
@@ -77,8 +78,11 @@ signals:
     void userIsOwnerChanged(bool isOwner);
     void userCanEditChanged(bool canEdit);
 
+    void isNullChanged(bool isNull);
+
 private:
     void setLastActivityText(const QString &text);
+    bool isNull() const;
 
     QPointer<Messenger> m_messenger;
     ModifiableChatHandler m_chat;

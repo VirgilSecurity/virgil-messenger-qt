@@ -24,7 +24,7 @@ Popup {
     QtObject {
         id: d
         readonly property real radius: 10
-        readonly property real popupImplicitWidth: Math.min(420, mainView.parent.width * 0.8) // TODO(fpohtmeh): remove trick with mainView
+        readonly property real popupImplicitWidth: Math.min(420, window.width * 0.8)
     }
 
     enter: Transition {

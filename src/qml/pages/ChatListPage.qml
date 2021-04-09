@@ -10,7 +10,8 @@ Rectangle {
     QtObject {
         id: d
 
-        readonly property var chatListState: app.stateManager.chatListState
+        readonly property var manager: app.stateManager
+        readonly property var chatListState: manager.chatListState
         readonly property bool online: messenger.connectionStateString === "connected"
     }
 
@@ -47,6 +48,7 @@ Rectangle {
             anchors.fill: parent
 
             onChatSelected: controllers.chats.openChat(chatId)
+            onChatDeselected: d.manager.goBack()
         }
     }
 }
