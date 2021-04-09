@@ -70,7 +70,7 @@ public:
     void createChatWithUserId(const UserId &userId);
     void createGroupChat(const QString &groupName, const Contacts &contacts);
 
-    void openChat(const ModifiableChatHandler &chat);
+    void openChat(const ModifiableChatHandler &chat, bool isNew);
     Q_INVOKABLE void openChat(const QString &chatId); // can be used within QML only
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
@@ -88,8 +88,7 @@ signals:
     void notificationCreated(const QString &notification, const bool error);
 
     void chatsLoaded();
-    void chatOpened(const ChatHandler &chat);
-    void chatCreated(const ChatHandler &chat);
+    void chatOpened(const ChatHandler &chat, bool isNew);
     void chatClosed();
 
     void createChatWithUser(const UserHandler &user, QPrivateSignal);

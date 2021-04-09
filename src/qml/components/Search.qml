@@ -89,6 +89,20 @@ Rectangle {
         }
     ]
 
+    QtObject {
+        id: d
+
+        function closeOrClear() {
+            if (root.closeable) {
+                root.state = "closed"
+                root.closed()
+            }
+            else {
+                searchField.text = ""
+            }
+        }
+    }
+
     TextField {
         id: searchField
 
@@ -108,13 +122,7 @@ Rectangle {
 
         Keys.onPressed: {
             if (isSearchOpen && (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)) {
-                if (root.closeable) {
-                    root.state = "closed"
-                }
-                else {
-                    searchField.text = ""
-                }
-
+                d.closeOrClear()
                 event.accepted = true;
             }
             else if (isSearchOpen && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)) {
@@ -148,18 +156,9 @@ Rectangle {
         }
         image: "Close"
 
-        onClicked: {
-            if (root.closeable) {
-                root.closed()
-            }
-            else {
-                searchField.text = ""
-            }
-
-        }
+        onClicked: d.closeOrClear()
     }
 
-    function clear() {
-        searchField.text = ""
-    }
+    function clear() { searchField.text = "" }
+    function close() { d.closeOrClear() }
 }

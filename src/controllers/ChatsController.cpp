@@ -182,19 +182,19 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
     m_messenger->createGroupChat(groupName, contacts);
 }
 
-void Self::openChat(const ModifiableChatHandler &chat)
+void Self::openChat(const ModifiableChatHandler &chat, bool isNew)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
     if (chat->unreadMessageCount() > 0) {
         m_userDatabase->chatsTable()->markMessagesAsRead(chat);
     }
     setCurrentChat(chat);
-    emit chatOpened(chat);
+    emit chatOpened(chat, isNew);
 }
 
 void Self::openChat(const QString &chatId)
 {
-    openChat(m_models->chats()->findChat(ChatId(chatId)));
+    openChat(m_models->chats()->findChat(ChatId(chatId)), false);
 }
 
 void Self::closeChat()
@@ -239,7 +239,7 @@ void Self::onCreateChatWithUser(const UserHandler &user)
     newChat->setTitle(user->username().isEmpty() ? user->id() : user->username());
     m_models->chats()->addChat(newChat);
     m_userDatabase->chatsTable()->addChat(newChat);
-    openChat(newChat);
+    openChat(newChat, true);
 }
 
 void Self::onChatsLoaded(ModifiableChats chats)
@@ -259,9 +259,7 @@ void Self::onGroupChatCreated(const GroupHandler &group, const GroupMembers &gro
     newChat->setTitle(group->name());
     m_models->chats()->addChat(newChat);
     m_userDatabase->writeGroupChat(newChat, group, groupMembers);
-    openChat(newChat);
-
-    emit chatCreated(newChat);
+    openChat(newChat, true);
 }
 
 void Self::onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText)

@@ -98,9 +98,9 @@ public:
     void setChat(ChatHandler chat);
 
     //
-    //  Add messages to the current chat.
+    //  Set messages for the current chat.
     //
-    void addMessages(ModifiableMessages messages);
+    void setMessages(ModifiableMessages messages);
 
     //
     //  Add message to the current chat if ids match, otherwise - ignore.
@@ -140,6 +140,7 @@ public:
 signals:
     void pictureIconNotFound(const MessageId &messageId) const;
     void messageAdding(); // TODO(fpohtmeh): remove
+    void messagesReset();
     void groupInvitationReceived(const QString &ownerUsername, const MessageHandler &message);
 
 private:

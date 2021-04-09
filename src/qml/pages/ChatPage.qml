@@ -13,12 +13,11 @@ Page {
     id: chatPage
 
     readonly property var appState: app.stateManager.chatState
-    property real chatListViewHeight: 0
+    property alias showBackButton: pageHeader.showBackButton
 
     QtObject {
         id: d
         readonly property var chat: controllers.chats.current
-        readonly property real listSpacing: 5
     }
 
     background: Rectangle {
@@ -26,6 +25,7 @@ Page {
     }
 
     header: PageHeader {
+        id: pageHeader
         title: d.chat.title
         description: d.chat.lastActivityText
         showSeparator: !groupInvitationDialog.visible
@@ -43,7 +43,7 @@ Page {
     }
 
     footer: ChatMessageInput {
-        id: footerControl
+        id: messageInput
         visible: !groupInvitationDialog.visible
     }
 
@@ -79,8 +79,25 @@ Page {
         }
     }
 
+    // TODO(fpohtmeh): implement without timer
+    Timer {
+        id: focusInputTimer
+        interval: 10
+        onTriggered: messageInput.setFocus()
+    }
+
     Component.onCompleted: {
         appState.messageSent.connect(messageSentAudio.play)
+    }
+
+    onVisibleChanged: {
+        focusInputTimer.running = Platform.isDesktop && visible
+    }
+
+    Connections {
+        target: models.messages
+
+        function onMessagesReset() { messageInput.clear() }
     }
 }
 

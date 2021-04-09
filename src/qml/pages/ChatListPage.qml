@@ -16,6 +16,8 @@ Rectangle {
     }
 
     Page {
+        id: page
+
         anchors.fill: parent
         anchors.leftMargin: Theme.smallMargin
         anchors.rightMargin: Theme.smallMargin
@@ -44,7 +46,7 @@ Rectangle {
         }
 
         ChatListView {
-            searchHeader: header
+            searchHeader: page.header
             anchors.fill: parent
 
             onChatSelected: controllers.chats.openChat(chatId)

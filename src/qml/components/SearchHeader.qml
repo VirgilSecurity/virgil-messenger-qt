@@ -152,13 +152,7 @@ ToolBar {
                     id: searchId
                     anchors.fill: parent
                     visible: true
-                    onStateChanged: {
-                        toolbarId.state = searchId.state
-                    }
-
-                    onClosed: {
-                        searchId.state = "closed"
-                    }
+                    onStateChanged: { toolbarId.state = searchId.state }
                 }
             }
 
@@ -183,4 +177,6 @@ ToolBar {
             }
         }
     }
+
+    function closeSearch() { searchId.close() }
 }

@@ -133,8 +133,4 @@ ApplicationWindow {
         Platform.detect()
         app.stateManager.startState.requestUi()
     }
-
-    onActiveFocusItemChanged: {
-//        console.log(activeFocusItem, activeFocusItem ? activeFocusItem.objectName : undefined)
-    }
 }

@@ -17,7 +17,7 @@ Item {
             if (state === manager.chatState) {
                 const states = [manager.chatListState, manager.newChatState, manager.newGroupChatState, manager.downloadKeyState]
                 if (states.includes(manager.previousState)) {
-                    stackView.push(chatComponent, StackView.Transition)
+                    stackView.push("ChatPage.qml", StackView.Transition)
                 }
             }
         }
@@ -29,20 +29,10 @@ Item {
         }
     }
 
-    Component {
-        id: chatListComponent
-        ChatListPage {}
-    }
-
-    Component {
-        id: chatComponent
-        ChatPage {}
-    }
-
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: chatListComponent
+        initialItem: "ChatListPage.qml"
         visible: !d.isLandscapeMode
     }
 
@@ -50,15 +40,14 @@ Item {
         anchors.fill: parent
         visible: d.isLandscapeMode
 
-        Loader {
-            sourceComponent: chatListComponent
+        ChatListPage {
             Layout.fillHeight: true
             Layout.preferredWidth: 240
         }
 
-        Loader {
-            sourceComponent: chatComponent
+        ChatPage {
             visible: d.isChatOpened
+            showBackButton: false
             Layout.fillHeight: true
             Layout.fillWidth: true
         }

@@ -76,7 +76,7 @@ Control {
         }
 
         function openAccountSettingsPage() {
-            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.cloudFileListState, manager.chatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("AccountSettings"), StackView.Transition)

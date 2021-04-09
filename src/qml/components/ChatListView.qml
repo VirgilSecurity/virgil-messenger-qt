@@ -6,21 +6,21 @@ import "../theme"
 
 ModelListView {
     id: root
-    model: d.model.proxy
+    model: models.chats.proxy
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
 
     signal chatSelected(string chatId)
     signal chatDeselected(string chatId)
 
-    QtObject {
-        id: d
-        readonly property var model: models.chats
-    }
-
     delegate: ChatListDelegate {
         width: root.width
-        onSelectItem: model.isSelected ? root.chatDeselected(model.id) : root.chatSelected(model.id)
+        onSelectItem: {
+            model.isSelected ? root.chatDeselected(model.id) : root.chatSelected(model.id)
+            if (root.searchHeader) {
+                root.searchHeader.closeSearch()
+            }
+        }
     }
 
     onPlaceholderClicked: appState.requestNewChat()
