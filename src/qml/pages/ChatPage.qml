@@ -27,8 +27,10 @@ Page {
 
     header: PageHeader {
         title: d.chat.title
-        description: d.chat.lastActivityText
+        description: (!d.chat.isGroup && !d.chat.lastActivityText) ? " " : d.chat.lastActivityText
         showSeparator: !groupInvitationDialog.visible
+        titleClickable: true
+
         contextMenuVisible: !groupInvitationDialog.visible
         contextMenu: ContextMenu {
             ContextMenuItem {
@@ -36,6 +38,8 @@ Page {
                 onTriggered: appState.requestInfo()
             }
         }
+
+        onTitleClicked: appState.requestInfo()
     }
 
     footer: ChatMessageInput {

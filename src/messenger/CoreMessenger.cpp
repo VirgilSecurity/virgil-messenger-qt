@@ -262,14 +262,14 @@ public:
     std::map<GroupId, GroupImplHandler> groups;
     std::mutex groupsMutex;
 
-    bool isPrivateChatsSynced = false;
-    bool isGroupChatsSynced = false;
+    std::map<GroupId, QString> groupRenameRequests;
 
     using QueryId = QString;
     using QueryParamTo = GroupId;
     std::map<QueryId, QueryParamTo> historySyncQueryParams;
 
-    VSQNetworkAnalyzer *networkAnalyzer;
+    QPointer<VSQNetworkAnalyzer> networkAnalyzer;
+    QPointer<Settings> settings;
 
     std::unique_ptr<QXmppClient> xmpp;
     std::unique_ptr<VSQDiscoveryManager> discoveryManager;
@@ -348,8 +348,7 @@ struct RegisterMetaTypesOnce
 // --------------------------------------------------------------------------
 // Main implementation.
 // --------------------------------------------------------------------------
-Self::CoreMessenger(Settings *settings, QObject *parent)
-    : QObject(parent), m_impl(std::make_unique<Self::Impl>()), m_settings(settings)
+Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_impl(std::make_unique<Self::Impl>())
 {
 
     //
@@ -362,6 +361,9 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
     connect(this, &Self::sendMessageStatusDisplayed, this, &Self::onSendMessageStatusDisplayed);
+    connect(this, &Self::renameGroupChat, this, &Self::onRenameGroupChat);
+    connect(this, &Self::groupChatCreated, this, &Self::onGroupChatCreated);
+    connect(this, &Self::groupChatCreateFailed, this, &Self::onGroupChatCreateFailed);
 
     connect(this, &Self::resetXmppConfiguration, this, &Self::onResetXmppConfiguration);
     connect(this, &Self::reconnectXmppServerIfNeeded, this, &Self::onReconnectXmppServerIfNeeded);
@@ -381,6 +383,9 @@ Self::CoreMessenger(Settings *settings, QObject *parent)
     //  Configure Network Analyzer.
     //
     m_impl->networkAnalyzer = new VSQNetworkAnalyzer(nullptr); // will be moved to the thread
+    m_impl->settings = settings;
+    m_impl->lastActivityManager = new VSQLastActivityManager(settings);
+
     connect(m_impl->networkAnalyzer, &VSQNetworkAnalyzer::connectedChanged, this, &Self::onProcessNetworkState);
 }
 
@@ -445,6 +450,21 @@ Self::Result Self::resetCommKitConfiguration()
 
 void Self::onResetXmppConfiguration()
 {
+    if (m_impl->xmpp) {
+        //
+        //  TODO: Make more reliable approach, see slot onCleanupXmppMucRooms() for details.
+        //
+        if (nullptr == m_impl->xmppGroupChatManager) {
+            m_impl->xmppGroupChatManager = new QXmppMucManager();
+            m_impl->xmpp->addExtension(m_impl->xmppGroupChatManager);
+
+            connect(m_impl->xmppGroupChatManager, &QXmppMucManager::invitationReceived, this,
+                    &Self::xmppOnMucInvitationReceived);
+
+            connect(m_impl->xmppGroupChatManager, &QXmppMucManager::roomAdded, this, &Self::xmppOnMucRoomAdded);
+        }
+        return;
+    }
 
     qCDebug(lcCoreMessenger) << "Reset XMPP configuration";
 
@@ -458,7 +478,6 @@ void Self::onResetXmppConfiguration()
     m_impl->xmppCarbonManager = new QXmppCarbonManager();
     m_impl->xmppUploadManager = new QXmppUploadRequestManager();
     m_impl->xmppGroupChatManager = new QXmppMucManager();
-    m_impl->lastActivityManager = new VSQLastActivityManager(m_settings);
     m_impl->xmppRoomParticipantsManager = new XmppRoomParticipantsManager();
     m_impl->xmppMucSubManager = new XmppMucSubManager();
     m_impl->xmppMamManager = new QXmppMamManager();
@@ -520,9 +539,13 @@ void Self::onResetXmppConfiguration()
     connect(m_impl->xmpp.get(), &QXmppClient::disconnected, this, &Self::xmppOnDisconnected);
     connect(m_impl->xmpp.get(), &QXmppClient::stateChanged, this, &Self::xmppOnStateChanged);
     connect(m_impl->xmpp.get(), &QXmppClient::error, this, &Self::xmppOnError);
+    connect(m_impl->xmpp.get(), &QXmppClient::sslErrors, this, &Self::xmppOnSslErrors);
+
+    //
+    //
+    //
     connect(m_impl->xmpp.get(), &QXmppClient::presenceReceived, this, &Self::xmppOnPresenceReceived);
     connect(m_impl->xmpp.get(), &QXmppClient::iqReceived, this, &Self::xmppOnIqReceived);
-    connect(m_impl->xmpp.get(), &QXmppClient::sslErrors, this, &Self::xmppOnSslErrors);
     connect(m_impl->xmpp.get(), &QXmppClient::messageReceived, this, &Self::xmppOnMessageReceived);
 
     //
@@ -676,7 +699,7 @@ Self::Result Self::saveCurrentUserInfo()
 
     const auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
     const auto username = vsc_str_to_qstring(vssq_messenger_user_username(user));
-    m_settings->setUserCredential(username, credentials);
+    m_impl->settings->setUserCredential(username, credentials);
 
     //
     //  Save info.
@@ -690,7 +713,7 @@ Self::Result Self::saveCurrentUserInfo()
     }
 
     const auto userInfo = vsc_str_to_qstring(vssc_json_object_as_str(userJson.get()));
-    m_settings->setUserInfo(username, userInfo);
+    m_impl->settings->setUserInfo(username, userInfo);
 
     return Self::Result::Success;
 }
@@ -701,6 +724,8 @@ Self::Result Self::saveCurrentUserInfo()
 QFuture<Self::Result> Self::signIn(const QString &username)
 {
     return QtConcurrent::run([this, username = username]() -> Result {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         qCInfo(lcCoreMessenger) << "Trying to sign in user";
 
         auto result = resetCommKitConfiguration();
@@ -710,7 +735,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
         }
 
         qCInfo(lcCoreMessenger) << "Load user credentials";
-        auto credentialsString = m_settings->userCredential(username).toStdString();
+        auto credentialsString = m_impl->settings->userCredential(username).toStdString();
         if (credentialsString.empty()) {
             qCWarning(lcCoreMessenger) << "User credentials are not found locally";
             return Self::Result::Error_NoCred;
@@ -728,7 +753,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_ImportCredentials;
         }
 
-        const auto userInfo = m_settings->userInfo(username);
+        const auto userInfo = m_impl->settings->userInfo(username);
         if (!userInfo.isEmpty()) {
             //
             //  Fast sign-in.
@@ -761,8 +786,6 @@ QFuture<Self::Result> Self::signIn(const QString &username)
         if (!isNetworkOnline()) {
             return Self::Result::Error_Offline;
         }
-
-        std::scoped_lock<std::mutex> _(m_impl->authMutex);
 
         qCInfo(lcCoreMessenger) << "Authenticate user";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
@@ -872,7 +895,8 @@ QString Self::currentUserJid() const
 {
     auto user = vssq_messenger_user(m_impl->messenger.get());
     vsc_str_t userIdentity = vssq_messenger_user_identity(user);
-    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
+    return vsc_str_to_qstring(userIdentity) + "@" + CustomerEnv::xmppServiceDomain() + "/"
+            + m_impl->settings->deviceId();
 }
 
 UserId Self::userIdFromJid(const QString &jid) const
@@ -883,7 +907,7 @@ UserId Self::userIdFromJid(const QString &jid) const
 QString Self::userIdToJid(const UserId &userId) const
 {
     if (userId == currentUser()->id()) {
-        return userId + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_settings->deviceId();
+        return userId + "@" + CustomerEnv::xmppServiceDomain() + "/" + m_impl->settings->deviceId();
     } else {
         return userId + "@" + CustomerEnv::xmppServiceDomain();
     }
@@ -1018,10 +1042,15 @@ void Self::authenticate()
     Q_ASSERT(isSignedIn());
 
     QtConcurrent::run([this] {
+        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+
         vssq_error_t error;
         vssq_error_reset(&error);
 
-        std::scoped_lock<std::mutex> _(m_impl->authMutex);
+        if (!m_impl->messenger) {
+            qCWarning(lcCoreMessenger) << "Try to authenticate when signed out";
+            return;
+        }
 
         qCInfo(lcCoreMessenger) << "Authenticate user";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
@@ -1066,12 +1095,8 @@ void Self::connectXmppServer()
     config.setPassword(xmppPass);
     config.setAutoReconnectionEnabled(false);
     config.setAutoAcceptSubscriptions(true);
-    if (nullptr == m_impl->xmpp) {
-        //
-        //  Configure QXMPP.
-        //
-        resetXmppConfiguration();
-    }
+
+    resetXmppConfiguration();
 
     qCDebug(lcCoreMessenger) << "Connecting to XMPP server...";
     m_impl->xmpp->connectToServer(config);
@@ -1106,9 +1131,16 @@ void Self::onCleanupXmppMucRooms()
 
     for (auto xmppRoom : m_impl->xmppGroupChatManager->rooms()) {
         xmppRoom->leave("Signed out");
-        disconnect(xmppRoom);
-        xmppRoom->deleteLater();
+        delete xmppRoom;
     }
+
+    //
+    //  Old rooms manager should be completely replaced, because after sign-out and then sign-in
+    //  the old rooms are iterated and contains dangling pointers, that leads to a crash.
+    //  TODO: Make more reliable approach.
+    //
+    m_impl->xmpp->removeExtension(m_impl->xmppGroupChatManager);
+    m_impl->xmppGroupChatManager = nullptr;
 }
 
 void Self::onCleanupCommKitMessenger()
@@ -2125,10 +2157,9 @@ void Self::xmppOnConnected()
         } else {
             qCDebug(lcCoreMessenger) << "Re-join XMPP room:" << xmppRoom->jid();
             if (xmppRoom->join()) {
-                qCDebug(lcCoreMessenger) << "Send request to join XMPP room:" << xmppRoom->jid();
+                qCDebug(lcCoreMessenger) << "Sent request to join XMPP room:" << xmppRoom->jid();
             } else {
-                qCDebug(lcCoreMessenger) << "Failed to join to XMPP room:" << xmppRoom->jid();
-                ;
+                qCDebug(lcCoreMessenger) << "Failed to sent request to join XMPP room:" << xmppRoom->jid();
             }
         }
     }
@@ -2261,16 +2292,7 @@ void Self::onProcessNetworkState(bool isOnline)
 // --------------------------------------------------------------------------
 void Self::setCurrentRecipient(const UserId &recipientId)
 {
-
-    if (recipientId.isValid()) {
-        auto user = findUserById(recipientId);
-        if (user) {
-            m_impl->lastActivityManager->setCurrentJid(userIdToJid(user->id()));
-            return;
-        }
-    }
-
-    m_impl->lastActivityManager->setCurrentJid(QString());
+    m_impl->lastActivityManager->setCurrentJid(recipientId.isValid() ? userIdToJid(recipientId) : QString());
 }
 
 // --------------------------------------------------------------------------
@@ -2694,6 +2716,49 @@ void Self::onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOw
     }
 }
 
+void Self::onRenameGroupChat(const GroupId &groupId, const QString &groupName)
+{
+    Q_ASSERT(!groupName.isEmpty());
+
+    if (!isOnline()) {
+        qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- no connection";
+        return;
+    }
+
+    if (!isGroupCached(groupId)) {
+        qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- group is not loaded";
+        return;
+    }
+
+    m_impl->groupRenameRequests[groupId] = groupName;
+    if (!xmppRequestRoomConfiguration(groupIdToJid(groupId))) {
+        qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- failed to send XMPP request";
+        m_impl->groupRenameRequests.erase(groupId);
+    }
+}
+
+void Self::onGroupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers)
+{
+    //
+    //  Reconnect room signals as group was created.
+    //
+    for (auto room : m_impl->xmppGroupChatManager->rooms()) {
+        const auto roomGroupId = groupIdFromJid(room->jid());
+        if (group->id() == roomGroupId) {
+            room->disconnect();
+            connectXmppRoomSignals(room);
+            break;
+        }
+    }
+}
+
+void Self::onGroupChatCreateFailed(const GroupId &chatId, CoreMessengerStatus errorStatus)
+{
+    //
+    //  TODO: Remove CommKit group if it was created.
+    //
+}
+
 void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &members)
 {
     qCInfo(lcCoreMessenger) << "Trying to create group chat within XMPP server";
@@ -2714,12 +2779,7 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
         //  Request Room Configuration to Create Reserved Room.
         //  This is required to set a room name.
         //
-        QXmppMucOwnerIq requestConfigurationIq;
-        requestConfigurationIq.setFrom(currentUserJid());
-        requestConfigurationIq.setTo(room->jid());
-        requestConfigurationIq.setType(QXmppIq::Type::Get);
-
-        if (!m_impl->xmpp->sendPacket(requestConfigurationIq)) {
+        if (!xmppRequestRoomConfiguration(room->jid())) {
             emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
         }
     });
@@ -2730,26 +2790,7 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                 qCDebug(lcCoreMessengerXMPP).noquote()
                         << "Got an initial room configuration:" << toXmlString(configuration);
 
-                QXmppMucOwnerIq acceptIq;
-                acceptIq.setFrom(currentUserJid());
-                acceptIq.setTo(room->jid());
-                acceptIq.setType(QXmppIq::Type::Set);
-
-                QXmppDataForm submitForm;
-                submitForm.setType(QXmppDataForm::Type::Submit);
-
-                using Field = QXmppDataForm::Field::Type;
-
-                QList<QXmppDataForm::Field> configFields {
-                    { Field::HiddenField, "FORM_TYPE", "http://jabber.org/protocol/muc#roomconfig" },
-                    { Field::TextSingleField, "muc#roomconfig_roomname", group->name() },
-                };
-
-                submitForm.setFields(configFields);
-
-                acceptIq.setForm(submitForm);
-
-                if (!m_impl->xmpp->sendPacket(acceptIq)) {
+                if (!xmppSendRoomConfiguration(room->jid(), group->name())) {
                     emit groupChatCreateFailed(group->id(), CoreMessengerStatus::Error_CreateGroup_XmppConfigFailed);
                     return;
                 }
@@ -2759,6 +2800,18 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                 //  Note, errors are not handled.
                 //
                 emit groupChatCreated(group, members);
+
+                //
+                //  Subscribe to Muc/Sub events.
+                //
+                m_impl->xmppMucSubManager->subscribe(
+                        {
+                                XmppMucSubEvent::Messages,
+                                XmppMucSubEvent::Affiliations,
+                                XmppMucSubEvent::Subscribers,
+                                XmppMucSubEvent::Presence,
+                        },
+                        room->jid(), currentUser()->id());
 
                 //
                 //  Add group members to the room.
@@ -2805,8 +2858,8 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                     invitationMessage->setRecipientId(memberId);
                     // TODO: Review next line to pass display name when search by email and contact will be added.
                     invitationMessage->setRecipientUsername(member->contact()->username());
-                    invitationMessage->setContent(MessageContentGroupInvitation {
-                            currentUser()->id(), group->name(), GroupInvitationStatus::Invited, "Hello!" });
+                    invitationMessage->setContent(
+                            MessageContentGroupInvitation { currentUser()->id(), group->name(), "Hello!" });
                     invitationMessage->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(group->id()));
                     invitationMessage->setCreatedNow();
 
@@ -3032,14 +3085,36 @@ void Self::xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &r
 
 void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 {
-
     qCDebug(lcCoreMessenger) << "Connecting room signals:" << room->jid();
 
-    connect(room, &QXmppMucRoom::allowedActionsChanged,
-            [room](QXmppMucRoom::Actions actions) { qCDebug(lcCoreMessenger) << "---> allowedActionsChanged:"; });
-
-    connect(room, &QXmppMucRoom::configurationReceived, [room](const QXmppDataForm &configuration) {
+    connect(room, &QXmppMucRoom::configurationReceived, [this, room](const QXmppDataForm &configuration) {
         qCDebug(lcCoreMessengerXMPP).noquote() << "Room configuration received:" << toXmlString(configuration);
+        //
+        //  For now only group name can be changed.
+        //
+        const auto groupId = groupIdFromJid(room->jid());
+
+        //
+        //  Find the group new name and remove it from the cache.
+        //
+        const auto groupName = [this, &groupId]() {
+            const auto it = m_impl->groupRenameRequests.find(groupId);
+            auto result = it != m_impl->groupRenameRequests.cend() ? it->second : QString();
+            m_impl->groupRenameRequests.erase(groupId);
+            return result;
+        }();
+
+        if (groupName.isEmpty()) {
+            qCCritical(lcCoreMessenger) << "Failed to rename group" << groupId << "- group name was not cached";
+            return;
+        }
+
+        if (xmppSendRoomConfiguration(room->jid(), groupName)) {
+            emit updateGroup(GroupNameUpdate { groupId, groupName });
+
+        } else {
+            qCWarning(lcCoreMessenger) << "Failed to rename group" << groupId << "- failed to send configuration";
+        }
     });
 
     connect(room, &QXmppMucRoom::error, [room](const QXmppStanza::Error &error) {
@@ -3071,42 +3146,6 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 
         emit updateGroup(GroupNameUpdate { groupId, name });
     });
-
-    //
-    //  TODO: Replace this events with MUC/Sub events.
-    //
-    connect(room, &QXmppMucRoom::kicked,
-            [room](const QString &jid, const QString &reason) { qCDebug(lcCoreMessenger) << "---> kicked:"; });
-
-    connect(room, &QXmppMucRoom::isJoinedChanged,
-            [room]() { qCDebug(lcCoreMessenger) << "---> isJoinedChanged:" << room->isJoined(); });
-
-    connect(room, &QXmppMucRoom::left, [room]() { qCDebug(lcCoreMessenger) << "---> left:"; });
-
-    connect(room, &QXmppMucRoom::nickNameChanged,
-            [room](const QString &nickName) { qCDebug(lcCoreMessenger) << "---> nickNameChanged:" << nickName; });
-
-    connect(room, &QXmppMucRoom::participantAdded,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantAdded:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantChanged,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantChanged:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantRemoved,
-            [room](const QString &jid) { qCDebug(lcCoreMessenger) << "---> participantRemoved:" << jid; });
-
-    connect(room, &QXmppMucRoom::participantsChanged,
-            [room]() { qCDebug(lcCoreMessenger) << "---> participantsChanged"; });
-
-    connect(room, &QXmppMucRoom::permissionsReceived, [room](const QList<QXmppMucItem> &permissions) {
-        qCDebug(lcCoreMessenger) << "Room permissions received:" << room->jid();
-        for (const auto &permission : permissions) {
-            qCDebug(lcCoreMessengerXMPP).noquote() << "Room permission:" << toXmlString(permission);
-        }
-    });
-
-    connect(room, &QXmppMucRoom::subjectChanged,
-            [room](const QString &subject) { qCDebug(lcCoreMessenger) << "---> subjectChanged:" << subject; });
 }
 
 CoreMessengerStatus Self::loadGroup(const GroupId &groupId, const UserId &superOwnerId, bool emitNewGroup)
@@ -3304,6 +3343,44 @@ std::variant<CoreMessengerStatus, QByteArray> Self::decryptGroupMessage(const Gr
     return mapStatus(status);
 }
 
+bool Self::xmppRequestRoomConfiguration(const QString &roomJid)
+{
+    Q_ASSERT(m_impl->xmpp);
+
+    QXmppMucOwnerIq requestConfigurationIq;
+    requestConfigurationIq.setFrom(currentUserJid());
+    requestConfigurationIq.setTo(roomJid);
+    requestConfigurationIq.setType(QXmppIq::Type::Get);
+
+    return m_impl->xmpp->sendPacket(requestConfigurationIq);
+}
+
+bool Self::xmppSendRoomConfiguration(const QString &roomJid, const QString &roomName)
+{
+    Q_ASSERT(m_impl->xmpp);
+
+    QXmppMucOwnerIq acceptIq;
+    acceptIq.setFrom(currentUserJid());
+    acceptIq.setTo(roomJid);
+    acceptIq.setType(QXmppIq::Type::Set);
+
+    QXmppDataForm submitForm;
+    submitForm.setType(QXmppDataForm::Type::Submit);
+
+    using Field = QXmppDataForm::Field::Type;
+
+    QList<QXmppDataForm::Field> configFields {
+        { Field::HiddenField, "FORM_TYPE", "http://jabber.org/protocol/muc#roomconfig" },
+        { Field::TextSingleField, "muc#roomconfig_roomname", roomName },
+    };
+
+    submitForm.setFields(configFields);
+
+    acceptIq.setForm(submitForm);
+
+    return m_impl->xmpp->sendPacket(acceptIq);
+}
+
 // --------------------------------------------------------------------------
 //  Message History (MAM).
 // --------------------------------------------------------------------------
@@ -3353,7 +3430,7 @@ void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResu
     if (!complete) {
         QXmppResultSetQuery resultSetQuery;
         resultSetQuery.setAfter(resultSetReply.last());
-        const auto lastSyncDate = m_settings->chatHistoryLastSyncDate(QString(groupId));
+        const auto lastSyncDate = m_impl->settings->chatHistoryLastSyncDate(QString(groupId));
         const auto toJid = groupId.isValid() ? groupIdToJid(groupId) : QString();
         const auto syncQueryId =
                 m_impl->xmppMamManager->retrieveArchivedMessages(toJid, {}, {}, lastSyncDate, {}, resultSetQuery);
@@ -3361,7 +3438,7 @@ void Self::xmppOnArchivedResultsRecieved(const QString &queryId, const QXmppResu
 
     } else {
         m_impl->historySyncQueryParams.erase(queryParamIt);
-        m_settings->setChatHistoryLastSyncDate(QString(groupId));
+        m_impl->settings->setChatHistoryLastSyncDate(QString(groupId));
     }
 }
 
@@ -3404,7 +3481,7 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
 void Self::onSyncPrivateChatsHistory()
 {
     qCInfo(lcCoreMessenger) << "Start loading private chats history";
-    const auto lastSyncDate = m_settings->chatHistoryLastSyncDate();
+    const auto lastSyncDate = m_impl->settings->chatHistoryLastSyncDate();
     const auto chatSyncQueryId = m_impl->xmppMamManager->retrieveArchivedMessages({}, {}, {}, lastSyncDate);
     m_impl->historySyncQueryParams[chatSyncQueryId] = GroupId();
 }
@@ -3412,7 +3489,7 @@ void Self::onSyncPrivateChatsHistory()
 void Self::onSyncGroupChatHistory(const GroupId &groupId)
 {
     qCInfo(lcCoreMessenger) << "Start loading group chat history for group:" << groupId;
-    const auto lastSyncDate = m_settings->chatHistoryLastSyncDate(QString(groupId));
+    const auto lastSyncDate = m_impl->settings->chatHistoryLastSyncDate(QString(groupId));
     const auto groupSyncQueryId =
             m_impl->xmppMamManager->retrieveArchivedMessages(groupIdToJid(groupId), {}, {}, lastSyncDate);
     m_impl->historySyncQueryParams[groupSyncQueryId] = groupId;

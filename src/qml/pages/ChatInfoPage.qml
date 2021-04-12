@@ -2,9 +2,9 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "../theme"
 import "../components"
 import "../components/Dialogs"
+import "../theme"
 
 Page {
     readonly property var appState: app.stateManager.chatInfoState
@@ -13,6 +13,7 @@ Page {
         id: d
         readonly property var chat: controllers.chats.current
         readonly property var model: chat.groupMembers
+        readonly property bool editableMembership: false
     }
 
     background: Rectangle {
@@ -25,9 +26,15 @@ Page {
         contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
         contextMenu: ContextMenu {
             ContextMenuItem {
+                text: d.chat.isGroup ? qsTr("Edit group") : qsTr("Edit chat")
+                visible: d.chat.isGroup && d.chat.userCanEdit
+                onTriggered: appState.editRequested()
+            }
+
+            ContextMenuItem {
                 id: addMembersItem
                 text: qsTr("Add members")
-                visible: d.chat.isGroup && d.chat.userCanEdit
+                visible: d.chat.isGroup && d.chat.userCanEdit && d.editableMembership
                 onTriggered: appState.addMembersRequested()
             }
 
@@ -38,14 +45,14 @@ Page {
             ContextMenuItem {
                 id: removeMembersItem
                 text: qsTr("Remove members")
-                visible: d.chat.isGroup && d.model.selection.hasSelection
+                visible: d.chat.isGroup && d.model.selection.hasSelection && d.editableMembership
                 onTriggered: removeParticipantsDialog.open()
             }
 
             ContextMenuItem {
                 id: leaveGroupItem
                 text: qsTr("Leave group")
-                visible: d.chat.isGroup && !d.chat.userIsOwner
+                visible: d.chat.isGroup && !d.chat.userIsOwner && d.editableMembership
                 onTriggered: controllers.chats.leaveGroup()
             }
         }
@@ -72,6 +79,8 @@ Page {
             HeaderTitle {
                 title: d.chat.title
                 description: d.chat.isGroup ? qsTr("%1 members").arg(d.model.count) : d.chat.lastActivityText
+                clickable: d.chat.isGroup && d.chat.userCanEdit
+                onClicked: appState.editRequested()
             }
         }
 
@@ -82,7 +91,15 @@ Page {
             ContactsListView {
                 readonly property var tabTitle: qsTr("Participants")
                 model: d.model.proxy
-                selectionModel: d.chat.isGroup && d.chat.userCanEdit ? d.model.selection : null
+                selectionModel: d.chat.isGroup && d.chat.userCanEdit && d.editableMembership ? d.model.selection : null
+                itemContextMenu: ContextMenu {
+                    dropdown: true
+
+                    ContextMenuItem {
+                        text: qsTr("Remove member")
+                        onTriggered: removeParticipantsDialog.open()
+                    }
+                }
             }
         }
 

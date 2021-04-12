@@ -120,15 +120,6 @@ void Self::initialize()
     QLoggingCategory::setFilterRules("core-messenger-xmpp.debug=false");
 #endif
 
-    // Platforms
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
-
-#if (VS_WINDOWS)
-    WindowsPlatform::prepare();
-#endif
-
 #if (VSQ_WEBDRIVER_DEBUG)
     wd_setup(argc, argv);
 #endif
@@ -169,8 +160,14 @@ int Self::run(const QString &basePath, VSQLogging *logging)
 
     reloadQml();
 
-#if VS_ANDROID
+    // Platforms
+#if (VS_ANDROID)
+    VSQAndroid::prepare();
     notifications::android::FirebaseListener::instance().init();
+#endif
+
+#if (VS_WINDOWS)
+    WindowsPlatform::prepare();
 #endif
 
     const auto result = QGuiApplication::instance()->exec();

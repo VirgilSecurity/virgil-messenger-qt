@@ -49,6 +49,7 @@ public:
 
 signals:
     void addMembersRequested();
+    void editRequested();
 
 private:
     void onEntry(QEvent *event) override;

@@ -49,6 +49,7 @@
 #include "CloudFileListState.h"
 #include "CloudFileSharingState.h"
 #include "DownloadKeyState.h"
+#include "EditChatInfoState.h"
 #include "EditProfileState.h"
 #include "NewChatState.h"
 #include "NewCloudFolderMembersState.h"
@@ -74,6 +75,7 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(AddGroupChatMembersState *addGroupChatMembersState MEMBER m_addGroupChatMembersState CONSTANT)
     Q_PROPERTY(AttachmentPreviewState *attachmentPreviewState MEMBER m_attachmentPreviewState CONSTANT)
     Q_PROPERTY(BackupKeyState *backupKeyState MEMBER m_backupKeyState CONSTANT)
+    Q_PROPERTY(EditChatInfoState *editChatInfoState MEMBER m_editChatInfoState CONSTANT)
     Q_PROPERTY(EditProfileState *editProfileState MEMBER m_editProfileState CONSTANT)
     Q_PROPERTY(VerifyProfileState *verifyProfileState MEMBER m_verifyProfileState CONSTANT)
     Q_PROPERTY(ChatInfoState *chatInfoState MEMBER m_chatInfoState CONSTANT)
@@ -125,6 +127,8 @@ private:
     void setCurrentState(QState *state);
     void setPreviousState(QState *state);
 
+    void checkCloudFileList();
+
     Messenger *m_messenger;
     Controllers *m_controllers;
     Validator *m_validator;
@@ -136,6 +140,7 @@ private:
     AddGroupChatMembersState *m_addGroupChatMembersState;
     AttachmentPreviewState *m_attachmentPreviewState;
     BackupKeyState *m_backupKeyState;
+    EditChatInfoState *m_editChatInfoState;
     EditProfileState *m_editProfileState;
     VerifyProfileState *m_verifyProfileState;
     ChatInfoState *m_chatInfoState;

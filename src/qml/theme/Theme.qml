@@ -46,6 +46,7 @@ Item {
     readonly property real avatarHeight: 40
     readonly property real avatarWidth: avatarHeight
     readonly property real avatarRadius: avatarWidth / 2
+    readonly property real bigAvatarDiameter: 80
 
     readonly property real headerHeight: 60
     readonly property real formMaximumWidth: 260

@@ -34,6 +34,7 @@
 
 #include "database/ChatsTable.h"
 
+#include "GroupsTable.h"
 #include "Utils.h"
 #include "database/core/Database.h"
 #include "database/core/DatabaseUtils.h"
@@ -87,6 +88,8 @@ void ChatsTable::onFetch()
             chat->setCreatedAt(QDateTime::fromTime_t(createdAt));
             chat->setLastMessage(lastMessage);
             chat->setUnreadMessageCount(unreadMessageCount);
+
+            chat->setGroup(GroupsTable::readGroup(*query, QLatin1String("group")));
 
             chats.emplace_back(std::move(chat));
         }

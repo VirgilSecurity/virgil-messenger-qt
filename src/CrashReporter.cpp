@@ -74,7 +74,9 @@ void Self::checkAppCrash()
 
 bool Self::sendLogFiles(const QString &details)
 {
-    qCDebug(lcCrashReporter) << "Details:" << (details.isEmpty() ? QLatin1String("not specified") : details);
+    if (!details.isEmpty()) {
+        qCInfo(lcCrashReporter) << "----->" << details << "<-----";
+    }
     qCDebug(lcCrashReporter) << "Collecting of logs...";
 
     const auto logsDir = m_settings->logsDir();
@@ -86,9 +88,10 @@ bool Self::sendLogFiles(const QString &details)
     qCDebug(lcCrashReporter) << "Lookup logs within directory: " << logsDir.absolutePath();
 
     QByteArray fileData;
-    QDirIterator fileIterator(logsDir.absolutePath(), QStringList() << "VirgilMessenger*.log");
-    while (fileIterator.hasNext()) {
-        QFile readFile(fileIterator.next());
+    const auto fileInfos =
+            logsDir.entryInfoList(QStringList() << "VirgilMessenger*.log", QDir::NoFilter, QDir::Name | QDir::Reversed);
+    for (auto &fileInfo : fileInfos) {
+        QFile readFile(fileInfo.filePath());
         if (readFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCDebug(lcCrashReporter) << "Read file:" << readFile.fileName();
             fileData.append(readFile.readAll());
@@ -100,7 +103,7 @@ bool Self::sendLogFiles(const QString &details)
     auto endpointUrl = m_coreMessenger->getCrashReportEndpointUrl();
     auto authHeaderValue = m_coreMessenger->getAuthHeaderVaue();
 
-    qCDebug(lcCrashReporter) << "Send crash report to the endpoint: " << endpointUrl;
+    qCDebug(lcCrashReporter) << "Send crash report to the endpoint: " << endpointUrl << "size:" << fileData.size();
     qCDebug(lcCrashReporter) << "Messenger Backend auth header value: " << authHeaderValue;
 
     QNetworkRequest request(endpointUrl);

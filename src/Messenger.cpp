@@ -361,10 +361,15 @@ void Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwne
     m_coreMessenger->acceptGroupInvitation(groupId, groupOwnerId);
 }
 
-void Messenger::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
+void Self::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
 {
 
     m_coreMessenger->rejectGroupInvitation(groupId, groupOwnerId);
+}
+
+void Self::setGroupInfo(const GroupId &groupId, const QString &name)
+{
+    m_coreMessenger->renameGroupChat(groupId, name);
 }
 
 void Self::onPushNotificationTokenUpdate()

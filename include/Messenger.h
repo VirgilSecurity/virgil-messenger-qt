@@ -134,6 +134,11 @@ public:
     //--
 
     //
+    //  Set group info
+    //
+    void setGroupInfo(const GroupId &groupId, const QString &name);
+
+    //
     //  Helpers.
     //
     void setApplicationActive(bool active);
@@ -146,7 +151,6 @@ public:
 
     QString connectionStateString() const noexcept;
 
-public slots:
     void setCurrentRecipient(const UserId &recipientId);
 
     bool subscribeToUser(const UserId &contactId);

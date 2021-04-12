@@ -32,57 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_GROUPS_TABLE_H
-#define VM_GROUPS_TABLE_H
+#ifndef VM_EDIT_CHAT_INFO_STATE_H
+#define VM_EDIT_CHAT_INFO_STATE_H
 
-#include "core/DatabaseTable.h"
-#include "GroupUpdate.h"
-#include "Chat.h"
-#include "Group.h"
-
-#include <QString>
-
-class QSqlQuery;
+#include "OperationState.h"
 
 namespace vm {
-class GroupsTable : public DatabaseTable
+class ChatsController;
+class Messenger;
+
+class EditChatInfoState : public OperationState
 {
     Q_OBJECT
 
 public:
-    explicit GroupsTable(Database *database);
+    EditChatInfoState(Messenger *messenger, ChatsController *controller, QState *parent);
 
-    static GroupHandler readGroup(const QSqlQuery &query, const QString &preffix = QString());
+    Q_INVOKABLE void save(const QString &name);
 
 signals:
-    //
-    //  Control signals.
-    //
-    void add(const GroupHandler &group);
-    void fetch();
-    void updateGroup(const GroupUpdate &groupUpdate);
-    void deleteGroup(const GroupId &groupId);
-
-    //
-    //  Notification signals.
-    //
-    void fetched(const Groups &groups);
-    void added(const GroupHandler &group);
-    void errorOccurred(const QString &errorText);
+    void editingFinished();
 
 private:
-    void onAdd(const GroupHandler &group);
-    void onFetch();
-    void onUpdateGroup(const GroupUpdate &groupUpdate);
-    void onDeleteGroup(const GroupId &groupId);
-
-    void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
-    void updateGroupName(const GroupId &groupId, const QString &name);
-    void updateGroupCache(const GroupId &groupId, const QString &cache);
-    void updateGroupInvitation(const GroupId &groupId, GroupInvitationStatus status);
-
-    bool create() override;
+    Messenger *m_messenger;
+    ChatsController *m_controller;
 };
 } // namespace vm
 
-#endif // VM_GROUPS_TABLE_H
+#endif // VM_EDIT_CHAT_INFO_STATE_H

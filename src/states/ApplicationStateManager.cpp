@@ -37,6 +37,7 @@
 #include "Messenger.h"
 #include "controllers/Controllers.h"
 #include "controllers/ChatsController.h"
+#include "controllers/CloudFilesController.h"
 #include "controllers/UsersController.h"
 #include "models/Models.h"
 
@@ -62,6 +63,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
               new AddGroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),
       m_attachmentPreviewState(new AttachmentPreviewState(this)),
       m_backupKeyState(new BackupKeyState(m_messenger, this)),
+      m_editChatInfoState(new EditChatInfoState(m_messenger, controllers->chats(), this)),
       m_editProfileState(new EditProfileState(controllers->users(), this)),
       m_verifyProfileState(new VerifyProfileState(this)),
       m_chatInfoState(new ChatInfoState(controllers->chats(), this)),
@@ -73,8 +75,8 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
       m_newCloudFolderMembersState(
               new NewCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
-      m_newGroupChatState(new NewGroupChatState(models->discoveredContacts(), this)),
-      m_nameGroupChatState(new NameGroupChatState(controllers->chats(), this)),
+      m_newGroupChatState(new NewGroupChatState(controllers->chats(), models->discoveredContacts(), this)),
+      m_nameGroupChatState(new NameGroupChatState(this)),
       m_signInAsState(new SignInAsState(this)),
       m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this)),
       m_signUpState(new SignUpState(controllers->users(), validator, this)),
@@ -97,6 +99,7 @@ void Self::registerStatesMetaTypes()
     qRegisterMetaType<AddGroupChatMembersState *>("AddGroupChatMembersState*");
     qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
     qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
+    qRegisterMetaType<EditChatInfoState *>("EditChatInfoState*");
     qRegisterMetaType<EditProfileState *>("EditProfileState*");
     qRegisterMetaType<VerifyProfileState *>("VerifyProfileState*");
     qRegisterMetaType<ChatInfoState *>("ChatInfoState*");
@@ -129,8 +132,7 @@ void Self::addTransitions()
     // NOTE: Queued connection is a workaround for working state transition
     connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()),
             Qt::QueuedConnection);
-    connect(this, &Self::openCloudFileList, this, std::bind(&Self::cloudFileListRequested, this, QPrivateSignal()),
-            Qt::QueuedConnection);
+    connect(this, &Self::openCloudFileList, this, &Self::checkCloudFileList, Qt::QueuedConnection);
 
     m_startState->addTransition(m_startState, &StartState::chatListRequested, m_chatListState);
     m_startState->addTransition(m_startState, &StartState::accountSelectionRequested, m_accountSelectionState);
@@ -146,16 +148,15 @@ void Self::addTransitions()
     m_chatListState->addTransition(users, &UsersController::signInErrorOccured, m_accountSelectionState);
     addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
-    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_newGroupChatState);
+    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_nameGroupChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
     m_chatListState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
 
-    addTwoSideTransition(m_newGroupChatState, m_newGroupChatState, &NewGroupChatState::contactsSelected,
-                         m_nameGroupChatState);
-    connect(m_newGroupChatState, &NewGroupChatState::contactsSelected, m_nameGroupChatState,
-            &NameGroupChatState::setContacts);
+    addTwoSideTransition(m_nameGroupChatState, m_nameGroupChatState, &NameGroupChatState::groupNamed,
+                         m_newGroupChatState);
+    connect(m_nameGroupChatState, &NameGroupChatState::groupNamed, m_newGroupChatState, &NewGroupChatState::setName);
 
-    m_nameGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
+    m_newGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 
     addTwoSideTransition(m_cloudFileListState, users, &UsersController::accountSettingsRequested,
                          m_accountSettingsState);
@@ -198,8 +199,11 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested,
                          m_addGroupChatMembersState);
+    addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::editRequested, m_editChatInfoState);
     connect(m_addGroupChatMembersState, &AddGroupChatMembersState::contactsSelected, this,
             &ApplicationStateManager::goBack);
+
+    connect(m_editChatInfoState, &EditChatInfoState::editingFinished, this, &Self::goBack);
 
     m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
 
@@ -222,4 +226,11 @@ void Self::setPreviousState(QState *state)
 {
     m_previousState = state;
     emit previousStateChanged(state);
+}
+
+void Self::checkCloudFileList()
+{
+    if (m_controllers->cloudFiles()->createLocalRootFolder()) {
+        emit cloudFileListRequested(QPrivateSignal());
+    }
 }

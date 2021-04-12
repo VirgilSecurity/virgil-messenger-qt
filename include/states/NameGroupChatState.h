@@ -35,30 +35,19 @@
 #ifndef VM_NAMEGROUPCHATSTATE_H
 #define VM_NAMEGROUPCHATSTATE_H
 
-#include "Contact.h"
-#include "GroupId.h"
 #include "OperationState.h"
 
 namespace vm {
-class ChatsController;
 
 class NameGroupChatState : public OperationState
 {
     Q_OBJECT
 
 public:
-    NameGroupChatState(ChatsController *chatsController, QState *parent);
-
-    void setContacts(const Contacts &contacts);
+    explicit NameGroupChatState(QState *parent);
 
 signals:
-    void createGroup(const QString &name);
-
-private:
-    void onCreateGroup(const QString &name);
-
-    ChatsController *m_chatsController;
-    Contacts m_contacts;
+    void groupNamed(const QString &name);
 };
 } // namespace vm
 

@@ -133,6 +133,7 @@ signals:
     //--
     void acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
     void rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    void renameGroupChat(const GroupId &groupId, const QString &groupName);
 
     void groupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers);
     void groupChatCreateFailed(const GroupId &chatId, CoreMessengerStatus errorStatus);
@@ -357,6 +358,12 @@ private:
     bool isXmppConnecting() const noexcept;
     bool isXmppDisconnected() const noexcept;
 
+    //
+    //  XMPP helpers.
+    //
+    bool xmppRequestRoomConfiguration(const QString &roomJid);
+    bool xmppSendRoomConfiguration(const QString &roomJid, const QString &roomName);
+
 private slots:
     void onActivate();
     void onDeactivate();
@@ -413,6 +420,9 @@ private slots:
 
     void onAcceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
     void onRejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId);
+    void onRenameGroupChat(const GroupId &groupId, const QString &groupName);
+    void onGroupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers);
+    void onGroupChatCreateFailed(const GroupId &chatId, CoreMessengerStatus errorStatus);
 
     void onProcessNetworkState(bool online);
     void onLogConnectionStateChanged(CoreMessenger::ConnectionState state);
@@ -429,7 +439,6 @@ private:
 private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
-    QPointer<Settings> m_settings;
 };
 } // namespace vm
 

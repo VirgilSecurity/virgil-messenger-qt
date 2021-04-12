@@ -157,15 +157,22 @@ void Self::onDatabaseListFetched(const CloudFileHandler &parentFolder, const Mod
 
     m_cachedFiles = cloudFiles;
 
+    // Always update local paths
+    const QDir parentDir(parentFolder->localPath());
+    for (auto &cloudFile : m_cachedFiles) {
+        cloudFile->setLocalPath(parentDir.filePath(cloudFile->name()));
+    }
+
     CachedListCloudFolderUpdate update;
     update.parentFolder = parentFolder;
-    update.files = cloudFiles;
+    update.files = m_cachedFiles;
     m_parent->updateCloudFiles(update);
 
     if (m_parent->messenger()->isOnline()) {
         m_requestId = m_parent->cloudFileSystem()->fetchList(m_parentFolder);
     } else {
         qCDebug(lcOperation) << "Network is offline";
+        emit onlineListingFailed();
         fail();
     }
 }
@@ -178,5 +185,6 @@ bool Self::fileIdLess(const ModifiableCloudFileHandler &lhs, const ModifiableClo
 bool Self::fileUpdated(const ModifiableCloudFileHandler &lhs, const ModifiableCloudFileHandler &rhs)
 {
     // NOTE(fpohtmeh): compare localPath because it changes after reinstall (IOS)
+    // TODO(fpohtmeh): revert localPath comparision once we remove DB column for it
     return lhs->updatedAt() < rhs->updatedAt() || lhs->localPath() != rhs->localPath();
 }
