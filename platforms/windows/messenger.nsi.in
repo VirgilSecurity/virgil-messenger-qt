@@ -1,6 +1,8 @@
 ;--------------------------------
 ;General
 
+!include "MUI2.nsh"
+
 !define APPNAME "@PROJECT_NAME@"
 !define COMPANYNAME "@VS_ORGANIZATION_NAME@"
 !define DESCRIPTION "@VS_APPLICATION_DISPLAY_NAME@"
