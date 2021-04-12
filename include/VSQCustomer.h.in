@@ -57,7 +57,6 @@ namespace Customer
     static const QString kSecurityApplicationGroupIdentifier = "@SECURITY_APPLICATION_GROUP_IDENTIFIER@";
 
     static const QString kWinSparklURL = "@WIN_SU_FEED_URL@";
-    static const QString kWinSparklPublicKey = "@WIN_SU_PUBLIC_ED_KEY@";
 }
 
 #endif // VSQ_CUSTOMER_H

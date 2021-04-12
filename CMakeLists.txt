@@ -823,6 +823,7 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/windows/VSQWindows.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/winsparkle.qrc>
         # MACOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>

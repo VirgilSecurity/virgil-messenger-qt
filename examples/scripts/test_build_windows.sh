@@ -9,7 +9,7 @@ pushd ${PROJECT_FOLDER}
   mkdir -p build 
 
   pushd build
-   cmake -DVS_PLATFORM="windows" -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw64.cmake ..
+   cmake -DVS_PLATFORM="windows" -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw64.cmake -DVS_WINSPARKE_KEY="${HOME}/keys/windows/dsa_priv.pem" ..
    make -j10
    make deploy
   popd

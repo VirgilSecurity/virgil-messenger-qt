@@ -76,6 +76,7 @@ else()
     # ***********************************************************************************
     elseif(VS_PLATFORM STREQUAL "windows")
        list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/windows/messenger.nsi.in=${CMAKE_BINARY_DIR}/messenger.nsi")
+       list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/windows/appcast.xml.in=${CMAKE_BINARY_DIR}/appcast.xml")
     endif()
 endif()
 
