@@ -66,9 +66,6 @@ Q_LOGGING_CATEGORY(lcSettings, "settings")
 Settings::Settings(QObject *parent)
     : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
 {
-
-    qCDebug(lcSettings) << "Settings are written to: " << fileName();
-
     if (deviceId().isEmpty()) {
         createDeviceId();
         removeGroup(kUsersGroup);
@@ -87,6 +84,7 @@ Settings::~Settings() { }
 
 void Settings::print()
 {
+    qCDebug(lcSettings) << "Settings filename:" << fileName();
     qCDebug(lcSettings) << "Device id:" << deviceId();
     qCDebug(lcSettings) << "Database dir:" << databaseDir().absolutePath();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
@@ -223,7 +221,7 @@ QDir Settings::logsDir()
 QDir Settings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
-        FileUtils::forceCreateDir(m_databaseDir.absolutePath());
+        FileUtils::forceCreateDir(m_databaseDir.absolutePath(), true);
     }
     return m_databaseDir;
 }
@@ -236,7 +234,7 @@ quint64 Settings::attachmentMaxFileSize() const
 QDir Settings::attachmentCacheDir() const
 {
     if (!m_attachmentCacheDir.exists()) {
-        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath(), true);
     }
     return m_attachmentCacheDir;
 }
@@ -244,7 +242,7 @@ QDir Settings::attachmentCacheDir() const
 QDir Settings::thumbnailsDir() const
 {
     if (!m_thumbnaisDir.exists()) {
-        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
+        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath(), true);
     }
     return m_thumbnaisDir;
 }
@@ -252,7 +250,7 @@ QDir Settings::thumbnailsDir() const
 QDir Settings::downloadsDir() const
 {
     if (!m_downloadsDir.exists()) {
-        FileUtils::forceCreateDir(m_downloadsDir.absolutePath());
+        FileUtils::forceCreateDir(m_downloadsDir.absolutePath(), false);
     }
     return m_downloadsDir;
 }
@@ -260,9 +258,6 @@ QDir Settings::downloadsDir() const
 QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
 {
     const QDir dir = m_downloadsDir.filePath(QLatin1String("VirgilCloudFiles/") + userName);
-    if (!dir.exists()) {
-        FileUtils::forceCreateDir(dir.absolutePath());
-    }
     qCDebug(lcSettings) << "Cloud files dir:" << dir.absolutePath();
     return dir;
 }
@@ -270,7 +265,7 @@ QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
 QDir Settings::cloudFilesCacheDir() const
 {
     if (!m_cloudFilesCacheDir.exists()) {
-        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath(), true);
     }
     return m_cloudFilesCacheDir;
 }

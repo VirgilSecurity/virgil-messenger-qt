@@ -228,6 +228,12 @@ void Self::setCurrentChat(ModifiableChatHandler chat)
 {
     m_chatObject->setChat(chat);
     m_models->chats()->selectChatOnly(chat);
+    // Set current recipient
+    if (!chat) {
+        m_messenger->setCurrentRecipient(UserId());
+    } else if (chat->type() == Chat::Type::Personal) {
+        m_messenger->setCurrentRecipient(UserId(chat->id()));
+    }
 }
 
 void Self::onCreateChatWithUser(const UserHandler &user)
