@@ -173,7 +173,7 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
 {
     if (!m_messenger) {
         qCWarning(lcController) << "Messenger was not initialized";
-        emit errorOccurred(tr("Group con not be created"));
+        emit errorOccurred(tr("Group can not be created"));
     }
 
     //
@@ -185,7 +185,7 @@ void ChatsController::createGroupChat(const QString &groupName, const Contacts &
 void Self::openChat(const ModifiableChatHandler &chat, bool isNew)
 {
     qCDebug(lcController) << "Opening chat with id: " << chat->id();
-    if (chat->unreadMessageCount() > 0) {
+    if (!isNew && chat->unreadMessageCount() > 0) {
         m_userDatabase->chatsTable()->markMessagesAsRead(chat);
     }
     setCurrentChat(chat);

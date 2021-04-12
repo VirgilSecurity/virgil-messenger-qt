@@ -96,10 +96,14 @@ MessageHandler Self::getMessage(const int row) const
 
 void Self::clearChat()
 {
+    m_currentChat = nullptr;
+}
+
+void Self::clearMessages()
+{
     qCDebug(lcModel) << "Clear all messages";
     beginResetModel();
     m_messages.clear();
-    m_currentChat = nullptr;
     endResetModel();
     emit messagesReset();
 }

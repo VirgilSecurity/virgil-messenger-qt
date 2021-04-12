@@ -197,6 +197,10 @@ void Self::addTransitions()
 
     m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
 
+    addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewChat,
+                         m_newChatState); // TODO(fpohtmeh): don't use signal from another state
+    addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewGroupChat,
+                         m_nameGroupChatState); // TODO(fpohtmeh): don't use signal from another state
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestInfo, m_chatInfoState);

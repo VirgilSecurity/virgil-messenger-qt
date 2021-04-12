@@ -83,7 +83,7 @@ Control {
         }
 
         function openAddNewChatPage() {
-            if (![manager.chatListState, manager.cloudFileListState, manager.newChatState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.chatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("NewChat"))
@@ -94,7 +94,7 @@ Control {
         }
 
         function openNameGroupChatPage() {
-            if (![manager.chatListState, manager.cloudFileListState].includes(manager.previousState)) {
+            if (![manager.chatListState, manager.chatState].includes(manager.previousState)) {
                 return
             }
             stackView.push(page("NameGroupChat"))

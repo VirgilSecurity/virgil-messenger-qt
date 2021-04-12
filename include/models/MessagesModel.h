@@ -118,6 +118,11 @@ public:
     void clearChat();
 
     //
+    //  Clear messages
+    //
+    void clearMessages();
+
+    //
     // Update message. Returns false if message had the same status.
     //
     bool updateMessage(const MessageUpdate &messageUpdate);

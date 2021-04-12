@@ -77,7 +77,7 @@ void Self::loadMessages(const ChatHandler &chat, bool isNewChat)
 {
     m_models->messages()->setChat(chat);
     if (isNewChat) {
-        m_models->messages()->clearChat();
+        m_models->messages()->clearMessages();
     } else {
         m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
     }
@@ -85,7 +85,9 @@ void Self::loadMessages(const ChatHandler &chat, bool isNewChat)
 
 void Self::clearMessages()
 {
-    m_models->messages()->clearChat();
+    auto messages = m_models->messages();
+    messages->clearChat();
+    messages->clearMessages();
 }
 
 void Self::sendTextMessage(const QString &body)
