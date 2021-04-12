@@ -12,6 +12,7 @@ Item {
         readonly property var manager: app.stateManager
         readonly property bool isChatOpened: !controllers.chats.current.isNull
 
+        readonly property real listPrefferedWidth: settings.chatListLandscapeWidth ? settings.chatListLandscapeWidth : listMinimumWidth
         readonly property real listMinimumWidth: 240
         readonly property real listMaximumWidth: 400
         readonly property real chatMinimumWidth: 500
@@ -53,11 +54,14 @@ Item {
         }
 
         ChatListPage {
+            id: chatListLandscape
             SplitView.fillHeight: true
             SplitView.fillWidth: false
-            SplitView.preferredWidth: d.listMinimumWidth
+            SplitView.preferredWidth: d.listPrefferedWidth
             SplitView.minimumWidth: d.listMinimumWidth
             SplitView.maximumWidth: Math.min(d.listMaximumWidth, splitView.width - d.chatMinimumWidth - d.splitHandleSize)
+
+            Component.onDestruction: settings.chatListLandscapeWidth = chatListLandscape.width
         }
 
         ChatPage {

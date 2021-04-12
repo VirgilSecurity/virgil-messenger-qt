@@ -52,6 +52,7 @@ static const QString kDeviceId = "DeviceId";
 
 static const QString kLastSessionGroup = "LastSession";
 static const QString kWindowGeometryId = "WindowGeometry";
+static const QString kChatListLandscapeWidth = "ChatListLandscapeWidth";
 static const QString kSessionId = "SessionId";
 static const QString kSignedInUsername = "SignedInUsername";
 
@@ -308,6 +309,17 @@ QRect Settings::windowGeometry() const
 void Settings::setWindowGeometry(const QRect &geometry)
 {
     setGroupValue(kLastSessionGroup, kWindowGeometryId, geometry);
+    sync();
+}
+
+int Settings::chatListLandscapeWidth()
+{
+    return groupValue(kLastSessionGroup, kChatListLandscapeWidth).toInt();
+}
+
+void Settings::setChatListLandscapeWidth(int width)
+{
+    setGroupValue(kLastSessionGroup, kChatListLandscapeWidth, width);
     sync();
 }
 
