@@ -49,7 +49,7 @@ include(customers)
 # ---------------------------------------------------------------------------
 set(VERSIONMAJOR "3")
 set(VERSIONMINOR "10")
-set(VERSIONBUILD "0")
+set(VERSIONBUILD "10")
 set(VS_TARGET_VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}")
 set(VS_CORE_VERSION "0.2.1.82")
 set(VERSION_DATABASE_SCHEME "3")
