@@ -15,7 +15,7 @@
 
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}"
 Name "${APPNAME} ${VERSION}"
-OutFile "${APPNAME}-${VERSION}.exe"
+OutFile "${APPNAME}-installer-${VERSION}.exe"
 InstallDir "$LOCALAPPDATA\${COMPANYNAME}\${APPNAME}"
 InstallDirRegKey HKCU "Software\${COMPANYNAME}\${APPNAME}" "install"
 RequestExecutionLevel user
