@@ -105,6 +105,7 @@ elseif (VS_PLATFORM STREQUAL "windows")
             -qmlDir ${PROJECT_SOURCE_DIR}/src/qml
             -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist
             -qmake ${QT_QMAKE_EXECUTABLE} clear
+            COMMAND cp -f "${VS_CUSTOMER_DIR}/platforms/windows/Logo.ico" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist"
             VERBATIM)
 
 elseif (VS_PLATFORM STREQUAL "macos")
