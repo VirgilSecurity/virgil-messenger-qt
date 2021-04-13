@@ -88,7 +88,7 @@ Self::VSQApplication()
 #if VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
 #elif VS_WINDOWS
-    VSQWindows::instance().startUpdatesTimer();
+    //VSQWindows::instance().startUpdatesTimer();
 #endif
 }
 
@@ -189,7 +189,7 @@ void Self::checkUpdates()
 #if VS_MACOS
     VSQMacos::instance().checkUpdates();
 #elif VS_WINDOWS
-    VSQWindows::instance().checkUpdates();
+    //VSQWindows::instance().checkUpdates();
 #endif
 }
 
