@@ -10,6 +10,7 @@
             <enclosure url="@WIN_SU_FILE_URL@"
                        sparkle:dsaSignature="{{ DSA_SIGN }}"
                        sparkle:version="@VS_TARGET_VERSION@"
+                       sparkle:installerArguments="/S"
                        length="0"
                        type="application/octet-stream" />
         </item>
