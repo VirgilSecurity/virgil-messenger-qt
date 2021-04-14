@@ -40,6 +40,7 @@
 #    include <QObject>
 #    include <QTimer>
 #    include "helpers/VSQSingleton.h"
+#    include <winsparkle.h>
 
 class VSQWindows : public QObject, public VSQSingleton<VSQWindows>
 {
@@ -55,7 +56,6 @@ public slots:
 private:
     QTimer *m_updateTimer = nullptr;
     const int kUpdateCheckMinutes = 5;
-
     void _WinSparkle_init() const;
     void _deleteTimer();
 };

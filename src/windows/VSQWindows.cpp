@@ -35,7 +35,6 @@
 #if VS_WINDOWS
 
 #    include <QtCore>
-#    include <winsparkle.h>
 #    include "windows/VSQWindows.h"
 #    include "VSQCustomer.h"
 #    include "CustomerEnv.h"
