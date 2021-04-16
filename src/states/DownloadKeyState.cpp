@@ -43,11 +43,10 @@ DownloadKeyState::DownloadKeyState(UsersController *usersController, QState *par
 {
     connect(usersController, &UsersController::signedIn, this, &DownloadKeyState::operationFinished);
     connect(usersController, &UsersController::downloadKeyFailed, this, &DownloadKeyState::operationErrorOccurred);
-    connect(this, &DownloadKeyState::downloadKey, this, &DownloadKeyState::processDownloadKey);
 }
 
-void DownloadKeyState::processDownloadKey(const QString &password)
+void DownloadKeyState::downloadKey(const QString &username, const QString &password)
 {
     emit operationStarted();
-    m_usersController->downloadKey(m_usersController->nextUsername(), password);
+    m_usersController->downloadKey(username, password);
 }

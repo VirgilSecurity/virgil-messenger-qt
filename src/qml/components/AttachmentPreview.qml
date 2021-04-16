@@ -1,17 +1,16 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 import "../theme"
 
 Rectangle {
-    id: attachmentPreview
-    onVisibleChanged: showAnimation.restart()
+    id: root
     color: "black"
     opacity: 0
+    visible: false
 
     Image {
         id: imagePreview
-        source: app.stateManager.attachmentPreviewState.url
         anchors.fill: parent
         fillMode: Image.PreserveAspectFit
         autoTransform: true
@@ -26,41 +25,46 @@ Rectangle {
         }
         image: "Close"
 
-        onClicked: {
-            hideAnimation.restart()
-            goBackTimer.restart()
-        }
+        onClicked: root.closePreview()
     }
 
     MouseArea {
         acceptedButtons: Qt.AllButtons
         anchors.fill: parent
-        onClicked: {
-            hideAnimation.restart()
-            goBackTimer.restart()
-        }
 
+        onClicked: root.closePreview()
         onWheel: wheel.accepted = true
-    }
-
-    Timer {
-        id: goBackTimer
-        running: false
-        repeat: false
-        interval: Theme.shortAnimationDuration
-        onTriggered: {
-            app.stateManager.goBack()
-        }
     }
 
     ParallelAnimation {
         id: showAnimation
         NumberAnimation { target: attachmentPreview; property: "opacity"; from: 0; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
         NumberAnimation { target: imagePreview; property: "scale"; from: 0.5; to: 1; duration: Theme.animationDuration; easing.type: Easing.OutCubic}
+
+        onStarted: root.visible = true
     }
 
     ParallelAnimation {
         id: hideAnimation
         NumberAnimation { target: attachmentPreview; property: "opacity"; to: 0; duration: Theme.shortAnimationDuration; easing.type: Easing.OutCubic}
+
+        onFinished: root.visible = false
     }
+
+    function openPreview(url) {
+        imagePreview.source = url
+        showAnimation.restart()
+    }
+
+    function closePreview() { hideAnimation.restart() }
+
+    function navigateBack(transition) {
+        if (visible) {
+            closePreview()
+            return true
+        }
+        return false
+    }
+
+    Component.onCompleted: controllers.attachments.openPreviewRequested.connect(openPreview)
 }

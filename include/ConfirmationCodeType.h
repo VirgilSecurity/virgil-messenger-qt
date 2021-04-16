@@ -36,7 +36,7 @@
 #define VM_CONFIRMATIONCODETYPE_H
 
 namespace vm {
-enum class ConfirmationCodeType { PhoneNumber, Email };
-}
+enum ConfirmationCodeType { PhoneNumber, Email };
+} // namespace vm
 
 #endif // VM_CONFIRMATIONCODETYPE_H

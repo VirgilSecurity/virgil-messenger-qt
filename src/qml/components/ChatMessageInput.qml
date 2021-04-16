@@ -19,7 +19,6 @@ Control {
     QtObject {
         id: d
 
-        readonly property var manager: app.stateManager
         readonly property string messageText: (messageField.text + messageField.preeditText).trim()
 
         function sendTextMessage() {
@@ -28,23 +27,6 @@ Control {
                 messageField.clear()
                 controllers.messages.sendTextMessage(text)
             }
-        }
-
-        function sendFileMessage(attachmentUrl, attachmentType) {
-            if (attachmentType === AttachmentTypes.picture) {
-                controllers.messages.sendPictureMessage(attachmentUrl, attachmentType)
-            }
-            else {
-                controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
-            }
-        }
-
-        function onAttachmentPicked(fileUrls, attachmentType) {
-            if (manager.currentState !== manager.chatState) {
-                return;
-            }
-            const url = fileUrls[fileUrls.length - 1]
-            d.sendFileMessage(url, attachmentType)
         }
     }
 
@@ -137,7 +119,7 @@ Control {
                         if (text.length > maximumLength) {
                             stateSaver(function() {
                                 text = previousText
-                                showPopupInform("Message length limit: %1".arg(maximumLength))
+                                notificationPopup.showInform("Message length limit: %1".arg(maximumLength))
                             }, previousText.length - text.length)
                         }
                         previousText = text
@@ -201,22 +183,15 @@ Control {
         }
     }
 
-    Connections {
-        target: attachmentPicker
-
-        function onPicked(fileUrls, attachmentType) { d.onAttachmentPicked(fileUrls, attachmentType) }
-    }
-
     Component.onCompleted: {
         if (Platform.isDesktop) {
             setFocus();
         }
-        if (Platform.isIos) {
+        else if (Platform.isIos) {
             app.keyboardEventFilter.install(messageField)
         }
     }
 
     function clear() { messageField.clear() }
-
     function setFocus() { messageField.forceActiveFocus() }
 }

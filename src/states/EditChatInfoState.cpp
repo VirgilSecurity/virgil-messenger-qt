@@ -49,5 +49,5 @@ void Self::save(const QString &name)
 {
     const GroupId groupId(m_controller->currentChat()->id());
     m_messenger->setGroupInfo(groupId, name);
-    emit editingFinished();
+    emit saved();
 }

@@ -79,10 +79,9 @@ public:
     Q_INVOKABLE void acceptGroupInvitation(const MessageHandler &invitationMessage);
     Q_INVOKABLE void rejectGroupInvitation(const MessageHandler &invitationMessage);
 
-    void loadGroupMembers();
-    void addMembers(const Contacts &contacts);
+    Q_INVOKABLE void loadGroupMembers();
+    Q_INVOKABLE void addMembers(const Contacts &contacts);
     Q_INVOKABLE void removeSelectedMembers();
-    Q_INVOKABLE void leaveGroup();
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
@@ -96,6 +95,7 @@ signals:
     void createChatWithUser(const UserHandler &user, QPrivateSignal);
 
     void groupInvitationRejected();
+    void groupMembersAdded();
 
 private:
     void setupTableConnections();

@@ -51,7 +51,7 @@ public:
     Q_INVOKABLE void save(const QString &name);
 
 signals:
-    void editingFinished();
+    void saved();
 
 private:
     Messenger *m_messenger;

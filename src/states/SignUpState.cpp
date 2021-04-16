@@ -44,17 +44,11 @@ SignUpState::SignUpState(UsersController *usersController, Validator *validator,
 {
     connect(usersController, &UsersController::signedIn, this, &SignUpState::operationFinished);
     connect(usersController, &UsersController::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
-
-    connect(usersController, &UsersController::databaseErrorOccurred, [this](const auto &errorText) {
-        m_usersController->signOut();
-        emit operationErrorOccurred(errorText);
-    });
-
-    connect(this, &SignUpState::signUp, this, &SignUpState::processSignUp);
 }
 
-void SignUpState::processSignUp(const QString &username)
+void SignUpState::signUp(const QString &username)
 {
+    // TODO(fpohtmeh): move everything into users controller?
     QString errorText;
     const auto validUsername = m_validator->validatedUsername(username, &errorText);
 

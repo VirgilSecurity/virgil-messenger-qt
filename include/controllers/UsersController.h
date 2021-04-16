@@ -48,28 +48,24 @@ namespace vm {
 class Models;
 class UserDatabase;
 
+// TODO(fpohtmeh): remove users controller?
 class UsersController : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
     Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
-    Q_PROPERTY(QString nextUsername READ nextUsername NOTIFY nextUsernameChanged)
 
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    void signIn(const QString &username);
-    void signUp(const QString &username);
-
+    Q_INVOKABLE void signIn(const QString &username);
+    Q_INVOKABLE void signUp(const QString &username);
     Q_INVOKABLE void signOut();
-    Q_INVOKABLE void requestAccountSettings(const QString &username);
 
     void downloadKey(const QString &username, const QString &password);
 
     QString currentUserId() const;
     QString currentUsername() const;
-    void setNextUsername(const QString &username);
-    QString nextUsername() const;
 
 signals:
     void signedIn(const QString &username);
@@ -78,14 +74,10 @@ signals:
     void signUpErrorOccured(const QString &errorText);
     void downloadKeyFailed(const QString &errorText);
 
-    void databaseErrorOccurred(const QString &errorText);
     void notificationCreated(const QString &notification, const bool error) const;
-
-    void accountSettingsRequested(const QString &username);
 
     void currentUserIdChanged(const QString &userId);
     void currentUsernameChanged(const QString &username);
-    void nextUsernameChanged(const QString &username);
 
 private:
     void onSignedIn(const QString &username);
@@ -99,7 +91,6 @@ private:
 private:
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
-    QString m_nextUsername;
 };
 } // namespace vm
 

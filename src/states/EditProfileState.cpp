@@ -82,7 +82,7 @@ bool EditProfileState::isPhoneNumberConfirmed() const
     return m_isPhoneNumberConfirmed;
 }
 
-void EditProfileState::setIsPhoneNumberConfirmed(const bool confirmed)
+void EditProfileState::setIsPhoneNumberConfirmed(bool confirmed)
 {
     if (m_isPhoneNumberConfirmed == confirmed) {
         return;
@@ -96,7 +96,7 @@ bool EditProfileState::isEmailConfirmed() const
     return m_isEmailConfirmed;
 }
 
-void EditProfileState::setIsEmailConfirmed(const bool confirmed)
+void EditProfileState::setIsEmailConfirmed(bool confirmed)
 {
     if (m_isEmailConfirmed == confirmed) {
         return;
@@ -117,18 +117,4 @@ void EditProfileState::setAvatarUrl(const QUrl &avatarUrl)
     }
     m_avatarUrl = avatarUrl;
     emit avatarUrlChanged(avatarUrl);
-}
-
-void EditProfileState::processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified)
-{
-    switch (codeType) {
-    case ConfirmationCodeType::PhoneNumber:
-        setIsPhoneNumberConfirmed(isVerified);
-        break;
-    case ConfirmationCodeType::Email:
-        setIsEmailConfirmed(isVerified);
-        break;
-    default:
-        break;
-    }
 }

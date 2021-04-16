@@ -48,12 +48,9 @@ class SignUpState : public OperationState
 public:
     SignUpState(UsersController *usersController, Validator *validator, QState *parent);
 
-signals:
-    void signUp(const QString &username);
+    Q_INVOKABLE void signUp(const QString &username);
 
 private:
-    void processSignUp(const QString &username);
-
     UsersController *m_usersController;
     Validator *m_validator;
 };

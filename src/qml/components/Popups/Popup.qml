@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 import "../../theme"
 
@@ -14,8 +14,9 @@ Item {
 
     readonly property int defaultMargins: 20
 
-    width: root.width
-    height: root.height
+    width: window.width
+    height: window.height
+    z: Theme.overlayZ
 
     Item {
         id: popupInner

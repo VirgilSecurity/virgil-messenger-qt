@@ -1,30 +1,37 @@
 <RCC>
     <qresource prefix="/">
         <!-- Pages -->
-        <file>qml/pages/AccountSelectionPage.qml</file>
-        <file>qml/pages/AccountSettingsPage.qml</file>
-        <file>qml/pages/AddCloudFolderMembersPage.qml</file>
-        <file>qml/pages/AddGroupChatMembersPage.qml</file>
+        <file>qml/pages/AccountSelectionOptionsPage.qml</file>
+        <file>qml/pages/AccountSelectionPages.qml</file>
+        <file>qml/pages/AccountSettingsMainPage.qml</file>
+        <file>qml/pages/AccountSettingsPages.qml</file>
         <file>qml/pages/BackupKeyPage.qml</file>
+        <file>qml/pages/ChatInfoMainPage.qml</file>
+        <file>qml/pages/ChatInfoPages.qml</file>
         <file>qml/pages/ChatListPage.qml</file>
-        <file>qml/pages/ChatStackPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
-        <file>qml/pages/ChatInfoPage.qml</file>
+        <file>qml/pages/ChatPages.qml</file>
+        <file>qml/pages/ChatSplitView.qml</file>
+        <file>qml/pages/ChatStackView.qml</file>
+        <file>qml/pages/CloudFileInfoMainPage.qml</file>
+        <file>qml/pages/CloudFileInfoPages.qml</file>
         <file>qml/pages/CloudFileListPage.qml</file>
-        <file>qml/pages/CloudFileSharingPage.qml</file>
+        <file>qml/pages/CloudFolderMembersPage.qml</file>
         <file>qml/pages/DownloadKeyPage.qml</file>
         <file>qml/pages/EditChatInfoPage.qml</file>
         <file>qml/pages/EditProfilePage.qml</file>
+        <file>qml/pages/GroupChatNamePage.qml</file>
+        <file>qml/pages/GroupChatMembersPage.qml</file>
         <file>qml/pages/MainPage.qml</file>
+        <file>qml/pages/MainStackView.qml</file>
         <file>qml/pages/MultiSelectContactsPage.qml</file>
-        <file>qml/pages/NameGroupChatPage.qml</file>
+        <file>qml/pages/NavigationStackView.qml</file>
         <file>qml/pages/NewChatPage.qml</file>
-        <file>qml/pages/NewCloudFolderMembersPage.qml</file>
-        <file>qml/pages/NewGroupChatPage.qml</file>
+        <file>qml/pages/NewGroupChatPages.qml</file>
         <file>qml/pages/OperationPage.qml</file>
+        <file>qml/pages/RestoreAccountOptionsPage.qml</file>
+        <file>qml/pages/RestoreAccountUsernamePage.qml</file>
         <file>qml/pages/SelectContactsPage.qml</file>
-        <file>qml/pages/SignInAsPage.qml</file>
-        <file>qml/pages/SignInUsernamePage.qml</file>
         <file>qml/pages/SignUpPage.qml</file>
         <file>qml/pages/VerifyProfilePage.qml</file>
         <!-- Icons -->
@@ -133,6 +140,7 @@
         <file>qml/components/FlowView.qml</file>
         <file>qml/components/CommonHelpers/TextInCircle.qml</file>
         <file>qml/components/Popups/Popup.qml</file>
+        <file>qml/components/Popups/NotificationPopup.qml</file>
         <file>qml/components/LineProgressBar.qml</file>
         <file>qml/components/AccountSelection.qml</file>
         <file>qml/components/MessagesList.qml</file>
@@ -188,6 +196,7 @@
         <file>qml/components/RectangleTracker.qml</file>
         <!-- Base -->
         <file>qml/base/AttachmentTypes.qml</file>
+        <file>qml/base/ConfirmationCodeTypes.qml</file>
         <file>qml/base/Platform.qml</file>
         <file>qml/base/qmldir</file>
         <!-- Theme -->
