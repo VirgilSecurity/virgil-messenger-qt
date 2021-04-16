@@ -6,16 +6,18 @@ import "../components"
 import "../theme"
 
 OperationPage {
+    id: root
+
     appState: app.stateManager.editChatInfoState
+
+    signal saved()
 
     QtObject {
         id: d
         readonly property var chat: controllers.chats.current
     }
 
-    header: Header {
-        title: qsTr("Edit group")
-    }
+    header: Header { title: qsTr("Edit group") }
 
     Form {
         id: form
@@ -35,9 +37,11 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            onClicked: appState.save(groupNameInput.text)
+            onClicked: root.appState.save(groupNameInput.text)
             text: qsTr("Save")
             enabled: groupNameInput.text && groupNameInput.text !== d.chat.title
         }
     }
+
+    Component.onCompleted: appState.saved.connect(saved)
 }

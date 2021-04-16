@@ -114,7 +114,7 @@ ToolBar {
             }
             image: "Arrow-Left"
             width: showBackButton ? searchId.recommendedHeight : 0
-            onClicked: app.stateManager.goBack()
+            onClicked: window.navigateBack()
         }
 
         Item {

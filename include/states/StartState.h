@@ -35,30 +35,28 @@
 #ifndef VM_STARTSTATE_H
 #define VM_STARTSTATE_H
 
-#include "State.h"
+#include <QState>
 
 class Settings;
 
 namespace vm {
 class UsersController;
 
-class StartState : public State
+class StartState : public QState
 {
     Q_OBJECT
 
 public:
     StartState(UsersController *controller, Settings *settings, QState *parent);
 
-signals:
-    void requestUi();
+    Q_INVOKABLE void requestUi();
 
+signals:
     void chatListRequested();
     void accountSelectionRequested();
 
 private:
     void hideNativeSplashScreen();
-
-    void onRequestUi();
 
     UsersController *m_controller;
     Settings *m_settings;

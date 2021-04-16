@@ -6,30 +6,41 @@ import "../components"
 import "../theme"
 
 Control {
+    id: root
+
+    readonly property alias buttonIndex: d.buttonIndex
+
+    signal chatListRequested()
+    signal cloudFileListRequested()
+    signal accountSettingsRequested()
+
     background: Rectangle {
         color: Theme.mainBackgroundColor
     }
 
-    readonly property bool isCloudFileList: app.stateManager.currentState === app.stateManager.cloudFileListState
-    readonly property int defaultMargin: 9
+    QtObject {
+        id: d
+        property int buttonIndex: 0 // chat list
+        readonly property var button: buttonIndex === 0 ? chatListButton : cloudFileListButton
+
+        Component.onCompleted: controllers.cloudFiles.permissionsChecked.connect(root.cloudFileListRequested)
+    }
 
     Rectangle {
         x: 0
-        y: button.y - defaultMargin
+        y: d.button.y - Theme.smallMargin
         width: parent.width
-        height: button.height + 2 * defaultMargin
+        height: d.button.height + 2 * Theme.smallMargin
         color: Theme.contactsBackgroundColor
-
-        readonly property var button: isCloudFileList ? cloudFileListButton : chatListButton
     }
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 2 * defaultMargin
+        spacing: 2 * Theme.smallMargin
 
         ImageButton {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: defaultMargin
+            Layout.topMargin: Theme.smallMargin
             image: "Menu"
 
             onClicked: contextMenu.open()
@@ -40,7 +51,7 @@ Control {
 
                 Action {
                     text: qsTr("Settings")
-                    onTriggered: controllers.users.requestAccountSettings(controllers.users.currentUsername)
+                    onTriggered: root.accountSettingsRequested()
                 }
 
                 ContextMenuSeparator {
@@ -56,7 +67,7 @@ Control {
         SidebarButton {
             id: chatListButton
             Layout.alignment: Qt.AlignHCenter
-            onClicked: app.stateManager.openChatList()
+            onClicked: root.chatListRequested()
         }
 
         SidebarButton {
@@ -64,7 +75,7 @@ Control {
             Layout.alignment: Qt.AlignHCenter
             imageSize: 32
             imageSource: "../resources/icons/File-Manager.png"
-            onClicked: app.stateManager.openCloudFileList()
+            onClicked: controllers.cloudFiles.checkPermissions()
         }
 
         ImageButton {
@@ -76,5 +87,8 @@ Control {
             Layout.fillHeight: true
         }
     }
+
+    onChatListRequested: d.buttonIndex = 0
+    onCloudFileListRequested: d.buttonIndex = 1
 }
 

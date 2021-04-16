@@ -1,7 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
 import QtMultimedia 5.15
 
 import "../base"
@@ -10,10 +8,12 @@ import "../components"
 import "../components/Dialogs"
 
 Page {
-    id: chatPage
+    id: root
 
     readonly property var appState: app.stateManager.chatState
     property alias showBackButton: pageHeader.showBackButton
+
+    signal infoRequested()
 
     QtObject {
         id: d
@@ -35,11 +35,11 @@ Page {
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-                onTriggered: appState.requestInfo()
+                onTriggered: root.infoRequested()
             }
         }
 
-        onTitleClicked: appState.requestInfo()
+        onTitleClicked: root.infoRequested()
     }
 
     footer: ChatMessageInput {
@@ -81,22 +81,26 @@ Page {
 
     // TODO(fpohtmeh): implement without timer
     Timer {
-        id: focusInputTimer
         interval: 10
-        onTriggered: messageInput.setFocus()
+
+        function runSetFocus() {
+            if (root) {
+                running = Platform.isDesktop && root.visible
+            }
+        }
+
+        Component.onCompleted: {
+            triggered.connect(messageInput.setFocus)
+            root.visibleChanged.connect(runSetFocus);
+        }
     }
 
-    Component.onCompleted: {
-        appState.messageSent.connect(messageSentAudio.play)
-    }
-
-    onVisibleChanged: {
-        focusInputTimer.running = Platform.isDesktop && visible
-    }
+    Component.onCompleted: appState.messageSent.connect(messageSentAudio.play)
 
     Connections {
         target: models.messages
 
+        // FIXME(fpohtmeh): recreate page every time, remove messagesReset and focus timer
         function onMessagesReset() { messageInput.clear() }
     }
 }

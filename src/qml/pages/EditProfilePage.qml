@@ -1,23 +1,25 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
+import "../base"
 import "../theme"
 import "../components"
 
 OperationPage {
-    id: editProfilePage
+    id: root
     appState: app.stateManager.editProfileState
-
     loadingText: qsTr("Opening profile page...")
 
+    signal verificationRequested(int codeType)
+
     header: Header {
-        showBackButton: !profileForm.isLoading
+        showBackButton: !form.isLoading
         title: qsTr("Profile")
     }
 
     Form {
-        id: profileForm
+        id: form
 
         Avatar {
             Layout.alignment: Qt.AlignHCenter
@@ -33,6 +35,8 @@ OperationPage {
             text: controllers.users.currentUsername
         }
 
+        // PHONE
+
         FormInput {
             id: phone
             label: appState.isPhoneNumberConfirmed ? qsTr("Confirmed phone") : qsTr("Phone")
@@ -46,10 +50,20 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            text: appState.isPhoneNumberConfirmed ? qsTr("Reset") : qsTr("Confirm")
+            text: qsTr("Reset")
+            visible: appState.isPhoneNumberConfirmed
             enabled: phone.acceptableInput
-            onClicked: phoneButtonClicked()
+            onClicked: appState.phoneNumber = ""
         }
+
+        FormPrimaryButton {
+            text: qsTr("Confirm")
+            visible: !appState.isPhoneNumberConfirmed
+            enabled: phone.acceptableInput
+            onClicked: root.verificationRequested(ConfirmationCodeTypes.phoneNumber)
+        }
+
+        // EMAIL
 
         FormInput {
             id: email
@@ -64,25 +78,17 @@ OperationPage {
         }
 
         FormPrimaryButton {
-            text: appState.isEmailConfirmed ? qsTr("Reset") : qsTr("Confirm")
+            text: qsTr("Reset")
+            visible: appState.isEmailConfirmed
             enabled: email.acceptableInput
-            onClicked: emailButtonClicked()
+            onClicked: appState.email = ""
         }
-    }
 
-    function phoneButtonClicked() {
-        if (appState.isPhoneNumberConfirmed) {
-            appState.phoneNumber = ""
-        } else {
-            appState.verify(Enums.ConfirmationCodeType.Phone)
-        }
-    }
-
-    function emailButtonClicked() {
-        if (appState.isEmailConfirmed) {
-            appState.email = ""
-        } else {
-            appState.verify(Enums.ConfirmationCodeType.Email)
+        FormPrimaryButton {
+            text: qsTr("Confirm")
+            visible: !appState.isEmailConfirmed
+            enabled: email.acceptableInput
+            onClicked: root.verificationRequested(ConfirmationCodeTypes.email)
         }
     }
 }

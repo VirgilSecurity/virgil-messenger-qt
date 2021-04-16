@@ -5,13 +5,14 @@ import "../components"
 import "../theme"
 
 Rectangle {
+    id: root
     color: Theme.contactsBackgroundColor
+
+    signal newChatRequested()
+    signal newGroupChatRequested()
 
     QtObject {
         id: d
-
-        readonly property var manager: app.stateManager
-        readonly property var chatListState: manager.chatListState
         readonly property bool online: messenger.connectionStateString === "connected"
     }
 
@@ -34,13 +35,13 @@ Rectangle {
 
             ContextMenuItem {
                 text: qsTr("New chat")
-                onTriggered: d.chatListState.requestNewChat()
+                onTriggered: root.newChatRequested()
                 enabled: d.online
             }
 
             ContextMenuItem {
                 text: qsTr("New group")
-                onTriggered: d.chatListState.requestNewGroupChat()
+                onTriggered: root.newGroupChatRequested()
                 enabled: d.online
             }
         }
@@ -50,7 +51,7 @@ Rectangle {
             anchors.fill: parent
 
             onChatSelected: controllers.chats.openChat(chatId)
-            onChatDeselected: d.manager.goBack()
+            onChatDeselected: controllers.chats.closeChat()
         }
     }
 }

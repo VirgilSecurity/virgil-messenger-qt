@@ -47,12 +47,9 @@ class DownloadKeyState : public OperationState
 public:
     DownloadKeyState(UsersController *usersController, QState *parent);
 
-signals:
-    void downloadKey(const QString &password);
+    Q_INVOKABLE void downloadKey(const QString &username, const QString &password);
 
 private:
-    void processDownloadKey(const QString &password);
-
     UsersController *m_usersController;
 };
 } // namespace vm

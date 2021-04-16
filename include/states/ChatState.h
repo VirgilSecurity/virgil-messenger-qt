@@ -36,7 +36,8 @@
 #define VM_CHATSTATE_H
 
 #include "Message.h"
-#include "State.h"
+
+#include <QState>
 
 class Messenger;
 
@@ -44,7 +45,7 @@ namespace vm {
 class Messenger;
 class Controllers;
 
-class ChatState : public State
+class ChatState : public QState
 {
     Q_OBJECT
 
@@ -52,9 +53,6 @@ public:
     ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
 
 signals:
-    void requestPreview(const QUrl &url);
-    void requestInfo();
-
     void messageSent();
 
 private:

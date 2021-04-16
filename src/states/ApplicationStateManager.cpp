@@ -35,11 +35,11 @@
 #include "states/ApplicationStateManager.h"
 
 #include "Messenger.h"
-#include "controllers/Controllers.h"
-#include "controllers/ChatsController.h"
-#include "controllers/CloudFilesController.h"
-#include "controllers/UsersController.h"
-#include "models/Models.h"
+#include "Models.h"
+#include "ChatsController.h"
+#include "CloudFilesController.h"
+#include "Controllers.h"
+#include "UsersController.h"
 
 #include <QLoggingCategory>
 
@@ -55,192 +55,60 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_controllers(controllers),
       m_validator(validator),
       m_settings(m_messenger->settings()),
-      m_accountSelectionState(new AccountSelectionState(controllers->users(), this)),
-      m_accountSettingsState(new AccountSettingsState(this)),
-      m_addCloudFolderMembersState(
-              new AddCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
-      m_addGroupChatMembersState(
-              new AddGroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),
-      m_attachmentPreviewState(new AttachmentPreviewState(this)),
+      m_emptyState(new QState(this)),
+      m_cloudFolderMembersState(
+              new CloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
       m_backupKeyState(new BackupKeyState(m_messenger, this)),
       m_editChatInfoState(new EditChatInfoState(m_messenger, controllers->chats(), this)),
       m_editProfileState(new EditProfileState(controllers->users(), this)),
       m_verifyProfileState(new VerifyProfileState(this)),
-      m_chatInfoState(new ChatInfoState(controllers->chats(), this)),
-      m_chatListState(new ChatListState(controllers, models->chats(), this)),
       m_chatState(new ChatState(controllers, m_messenger, this)),
       m_downloadKeyState(new DownloadKeyState(controllers->users(), this)),
       m_cloudFileListState(new CloudFileListState(messenger, controllers->cloudFiles(), this)),
-      m_cloudFileSharingState(new CloudFileSharingState(controllers->cloudFiles(), this)),
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
-      m_newCloudFolderMembersState(
-              new NewCloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
-      m_newGroupChatState(new NewGroupChatState(controllers->chats(), models->discoveredContacts(), this)),
-      m_nameGroupChatState(new NameGroupChatState(this)),
-      m_signInAsState(new SignInAsState(this)),
-      m_signInUsernameState(new SignInUsernameState(controllers->users(), validator, this)),
+      m_groupChatMembersState(new GroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),
+      m_restoreAccountUsernameState(new RestoreAccountUsernameState(validator, this)),
       m_signUpState(new SignUpState(controllers->users(), validator, this)),
       m_startState(new StartState(controllers->users(), m_settings, this))
 {
-    registerStatesMetaTypes();
-    addTransitions();
+    addConnections();
     setInitialState(m_startState);
     start();
 }
 
 Self::~ApplicationStateManager() { }
 
-void Self::registerStatesMetaTypes()
+void Self::enterState(QState *state)
 {
-    // Qt requires registering to avoid namespace issues
-    qRegisterMetaType<AccountSelectionState *>("AccountSelectionState*");
-    qRegisterMetaType<AccountSettingsState *>("AccountSettingsState*");
-    qRegisterMetaType<AddCloudFolderMembersState *>("AddCloudFolderMembersState*");
-    qRegisterMetaType<AddGroupChatMembersState *>("AddGroupChatMembersState*");
-    qRegisterMetaType<AttachmentPreviewState *>("AttachmentPreviewState*");
-    qRegisterMetaType<BackupKeyState *>("BackupKeyState*");
-    qRegisterMetaType<EditChatInfoState *>("EditChatInfoState*");
-    qRegisterMetaType<EditProfileState *>("EditProfileState*");
-    qRegisterMetaType<VerifyProfileState *>("VerifyProfileState*");
-    qRegisterMetaType<ChatInfoState *>("ChatInfoState*");
-    qRegisterMetaType<ChatListState *>("ChatListState*");
-    qRegisterMetaType<ChatState *>("ChatState*");
-    qRegisterMetaType<DownloadKeyState *>("DownloadKeyState*");
-    qRegisterMetaType<CloudFileListState *>("CloudFileListState*");
-    qRegisterMetaType<CloudFileSharingState *>("CloudFileSharingState*");
-    qRegisterMetaType<NewChatState *>("NewChatState*");
-    qRegisterMetaType<NewCloudFolderMembersState *>("NewCloudFolderMembersState*");
-    qRegisterMetaType<NewGroupChatState *>("NewGroupChatState*");
-    qRegisterMetaType<NameGroupChatState *>("NameGroupChatState*");
-    qRegisterMetaType<SignInAsState *>("SignInAsState*");
-    qRegisterMetaType<SignInUsernameState *>("SignInUsernameState*");
-    qRegisterMetaType<SignUpState *>("SignUpState*");
-    qRegisterMetaType<StartState *>("StartState*");
+    const auto newState = state ? state : m_emptyState;
+    if (m_currentState == newState) {
+        return;
+    }
+    if (m_transition) {
+        delete m_transition;
+    }
+    m_transition = m_currentState->addTransition(this, &Self::enterStateCall, newState);
+    emit enterStateCall(QPrivateSignal());
 }
 
-void Self::addTransitions()
+void Self::addConnections()
 {
-    const auto states = findChildren<State *>();
+    const auto states = findChildren<QState *>();
     for (auto state : states) {
-        connect(state, &State::entered, this, std::bind(&Self::setCurrentState, this, state));
-        connect(state, &State::exited, this, std::bind(&Self::setPreviousState, this, state));
+        connect(state, &QState::entered, this, std::bind(&Self::setCurrentState, this, state));
+        connect(state, &QState::exited, this, std::bind(&Self::setPreviousState, this, state));
     }
-
-    auto users = m_controllers->users();
-    auto chats = m_controllers->chats();
-
-    // NOTE: Queued connection is a workaround for working state transition
-    connect(this, &Self::openChatList, this, std::bind(&Self::chatListRequested, this, QPrivateSignal()),
-            Qt::QueuedConnection);
-    connect(this, &Self::openCloudFileList, this, &Self::checkCloudFileList, Qt::QueuedConnection);
-
-    m_startState->addTransition(m_startState, &StartState::chatListRequested, m_chatListState);
-    m_startState->addTransition(m_startState, &StartState::accountSelectionRequested, m_accountSelectionState);
-
-    m_accountSelectionState->addTransition(m_accountSelectionState, &AccountSelectionState::chatListRequested,
-                                           m_chatListState);
-    addTwoSideTransition(m_accountSelectionState, m_accountSelectionState,
-                         &AccountSelectionState::requestSignInUsername, m_signInUsernameState);
-    addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignUp,
-                         m_signUpState);
-
-    // Sign-out
-    const std::vector<QState *> signOutStates { m_chatListState, m_chatState, m_cloudFileListState,
-                                                m_accountSettingsState };
-    for (auto state : signOutStates) {
-        state->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
-    }
-
-    // Main menu
-    const std::vector<QState *> mainMenuStates { m_chatListState, m_chatState, m_cloudFileListState };
-    for (auto state : mainMenuStates) {
-        state->addTransition(users, &UsersController::signInErrorOccured, m_accountSelectionState);
-        addTwoSideTransition(state, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
-    }
-
-    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
-    addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_nameGroupChatState);
-    addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
-    m_chatListState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
-
-    addTwoSideTransition(m_nameGroupChatState, m_nameGroupChatState, &NameGroupChatState::groupNamed,
-                         m_newGroupChatState);
-    connect(m_nameGroupChatState, &NameGroupChatState::groupNamed, m_newGroupChatState, &NewGroupChatState::setName);
-
-    m_newGroupChatState->addTransition(chats, &ChatsController::chatCreated, m_chatState);
-
-    addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestNewSharedFolder,
-                         m_newCloudFolderMembersState);
-    addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestSharingInfo,
-                         m_cloudFileSharingState);
-    connect(m_cloudFileListState, &CloudFileListState::requestNewSharedFolder, m_newCloudFolderMembersState,
-            &NewCloudFolderMembersState::setName);
-    m_cloudFileListState->addTransition(this, &Self::chatListRequested, m_chatListState);
-
-    addTwoSideTransition(m_cloudFileSharingState, m_cloudFileSharingState, &CloudFileSharingState::addMembersRequested,
-                         m_addCloudFolderMembersState);
-
-    connect(m_newCloudFolderMembersState, &NewCloudFolderMembersState::contactsSelected, this,
-            &ApplicationStateManager::goBack);
-    connect(m_addCloudFolderMembersState, &AddCloudFolderMembersState::contactsSelected, this,
-            &ApplicationStateManager::goBack);
-
-    addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey,
-                         m_backupKeyState);
-    addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile,
-                         m_editProfileState);
-
-    addTwoSideTransition(m_editProfileState, m_editProfileState, &EditProfileState::verify, m_verifyProfileState);
-    connect(m_editProfileState, &EditProfileState::verify, m_verifyProfileState, &VerifyProfileState::setCodeType);
-    connect(m_verifyProfileState, &VerifyProfileState::verificationFinished, m_editProfileState,
-            &EditProfileState::processVerificationResponse);
-
-    m_newChatState->addTransition(chats, &ChatsController::chatCreated, m_chatState);
-
-    addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewChat,
-                         m_newChatState); // TODO(fpohtmeh): don't use signal from another state
-    addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewGroupChat,
-                         m_nameGroupChatState); // TODO(fpohtmeh): don't use signal from another state
-    addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
-    connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
-    addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestInfo, m_chatInfoState);
-    m_chatState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
-    connect(chats, &ChatsController::groupInvitationRejected, this, &ApplicationStateManager::goBack);
-
-    addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested,
-                         m_addGroupChatMembersState);
-    addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::editRequested, m_editChatInfoState);
-    connect(m_addGroupChatMembersState, &AddGroupChatMembersState::contactsSelected, this,
-            &ApplicationStateManager::goBack);
-
-    connect(m_editChatInfoState, &EditChatInfoState::editingFinished, this, &Self::goBack);
-
-    m_signUpState->addTransition(users, &UsersController::signedIn, m_chatListState);
-
-    addTwoSideTransition(m_signInUsernameState, m_signInUsernameState, &SignInUsernameState::validated,
-                         m_signInAsState);
-
-    addTwoSideTransition(m_signInAsState, m_signInAsState, &SignInAsState::requestDownloadKey, m_downloadKeyState);
-
-    m_downloadKeyState->addTransition(users, &UsersController::signedIn, m_chatListState);
 }
 
-void Self::setCurrentState(State *state)
+void Self::setCurrentState(QState *state)
 {
-    qCDebug(lcAppState).noquote() << "Current state:" << state->name();
+    qCDebug(lcAppState) << "Current state:" << state;
     m_currentState = state;
     emit currentStateChanged(state);
 }
 
-void Self::setPreviousState(State *state)
+void Self::setPreviousState(QState *state)
 {
     m_previousState = state;
     emit previousStateChanged(state);
-}
-
-void Self::checkCloudFileList()
-{
-    if (m_controllers->cloudFiles()->createLocalRootFolder()) {
-        emit cloudFileListRequested(QPrivateSignal());
-    }
 }

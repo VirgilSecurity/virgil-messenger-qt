@@ -1,10 +1,14 @@
-import QtQuick 2.12
+import QtQuick 2.15
 
 import "../components"
 
 OperationPage {
+    id: root
+
     appState: app.stateManager.backupKeyState
     loadingText: qsTr("Backing up your private key...")
+
+    signal keyBackuped()
 
     header: Header {
         showBackButton: !form.isLoading
@@ -38,9 +42,10 @@ OperationPage {
         target: appState
 
         function onOperationFinished() {
-            showPopupSuccess(qsTr("Backup private key success"))
             password.text = ""
             confirmPassword.text = ""
+            notificationPopup.showSuccess(qsTr("Backup private key success"))
+            root.keyBackuped()
         }
     }
 }

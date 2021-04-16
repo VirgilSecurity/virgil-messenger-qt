@@ -42,11 +42,9 @@ BackupKeyState::BackupKeyState(Messenger *messenger, QState *parent) : Operation
 {
     connect(m_messenger, &Messenger::keyBackuped, this, &BackupKeyState::operationFinished);
     connect(m_messenger, &Messenger::backupKeyFailed, this, &BackupKeyState::operationErrorOccurred);
-    connect(m_messenger, &Messenger::keyBackuped, this, &BackupKeyState::keyBackuped);
-    connect(this, &BackupKeyState::backupKey, this, &BackupKeyState::processBackupKey);
 }
 
-void BackupKeyState::processBackupKey(const QString &password, const QString &confirmedPassword)
+void BackupKeyState::backupKey(const QString &password, const QString &confirmedPassword)
 {
     emit operationStarted();
     m_messenger->backupKey(password, confirmedPassword);

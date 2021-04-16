@@ -42,7 +42,7 @@ Control {
         ImageButton {
             id: backButton
             image: "Arrow-Left"
-            onClicked: app.stateManager.goBack()
+            onClicked: window.navigateBack()
         }
 
         HeaderTitle {
@@ -59,13 +59,10 @@ Control {
             onClicked: contextMenu.open()
             visible: contextMenu.count > 0
 
-            property var contextMenu: ContextMenu {
-            }
+            property var contextMenu: ContextMenu {}
         }
 
-        Loader {
-            id: rightControlLoader
-        }
+        Loader { id: rightControlLoader }
     }
 
     onContextMenuChanged: {

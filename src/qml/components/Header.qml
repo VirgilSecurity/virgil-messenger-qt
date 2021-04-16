@@ -6,6 +6,8 @@ import "../theme"
 
 // TODO(fpohtmeh): use PageHeader
 ToolBar {
+    id: root
+
     property alias title: titleLabel.text
     property bool showBackButton: true
     property alias showSeparator: headerBackground.showSeparator
@@ -19,7 +21,7 @@ ToolBar {
         anchors.fill: parent
 
         ImageButton {
-            Layout.leftMargin: 12
+            Layout.leftMargin: 12 // TODO(fpohtmeh): use constants
 
             opacity: showBackButton ? 1 : 0
             enabled: showBackButton
@@ -27,7 +29,7 @@ ToolBar {
             id: backButton
             image: "Arrow-Left"
 
-            onClicked: app.stateManager.goBack()
+            onClicked: window.navigateBack()
         }
 
         Label {

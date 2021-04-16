@@ -126,6 +126,13 @@ bool Self::createLocalRootFolder()
     return false;
 }
 
+void Self::checkPermissions()
+{
+    if (createLocalRootFolder()) {
+        emit permissionsChecked();
+    }
+}
+
 void Self::openFile(const QVariant &proxyRow)
 {
     const auto cloudFile = model()->file(proxyRow.toInt());
