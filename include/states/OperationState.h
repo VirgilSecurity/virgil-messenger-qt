@@ -35,15 +35,15 @@
 #ifndef VM_OPERATIONSTATE_H
 #define VM_OPERATIONSTATE_H
 
-#include <QState>
+#include "State.h"
 
 namespace vm {
-class OperationState : public QState
+class OperationState : public State
 {
     Q_OBJECT
 
 public:
-    using QState::QState;
+    using State::State;
 
 signals:
     void operationStarted();

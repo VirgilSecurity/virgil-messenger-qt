@@ -35,15 +35,15 @@
 #ifndef VM_SIGNINASSTATE_H
 #define VM_SIGNINASSTATE_H
 
-#include <QState>
+#include "State.h"
 
 namespace vm {
-class SignInAsState : public QState
+class SignInAsState : public State
 {
     Q_OBJECT
 
 public:
-    using QState::QState;
+    using State::State;
 
 signals:
     void requestDownloadKey(const QString &userId);

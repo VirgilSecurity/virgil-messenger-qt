@@ -35,12 +35,12 @@
 #ifndef VM_CHAT_INFO_STATE_H
 #define VM_CHAT_INFO_STATE_H
 
-#include <QState>
+#include "State.h"
 
 namespace vm {
 class ChatsController;
 
-class ChatInfoState : public QState
+class ChatInfoState : public State
 {
     Q_OBJECT
 

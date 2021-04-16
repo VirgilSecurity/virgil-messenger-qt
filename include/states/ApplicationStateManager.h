@@ -92,8 +92,8 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(SignInUsernameState *signInUsernameState MEMBER m_signInUsernameState CONSTANT)
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
     Q_PROPERTY(StartState *startState MEMBER m_startState CONSTANT)
-    Q_PROPERTY(QState *currentState MEMBER m_currentState NOTIFY currentStateChanged)
-    Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
+    Q_PROPERTY(State *currentState MEMBER m_currentState NOTIFY currentStateChanged)
+    Q_PROPERTY(State *previousState MEMBER m_previousState NOTIFY previousStateChanged)
 
 public:
     ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator,
@@ -105,8 +105,8 @@ signals:
     void openChatList();
     void openCloudFileList();
 
-    void currentStateChanged(QState *);
-    void previousStateChanged(QState *);
+    void currentStateChanged(State *);
+    void previousStateChanged(State *);
 
     void chatListRequested(QPrivateSignal);
     void cloudFileListRequested(QPrivateSignal);
@@ -124,8 +124,8 @@ private:
         target->addTransition(this, &ApplicationStateManager::goBack, source);
     }
 
-    void setCurrentState(QState *state);
-    void setPreviousState(QState *state);
+    void setCurrentState(State *state);
+    void setPreviousState(State *state);
 
     void checkCloudFileList();
 
@@ -158,8 +158,8 @@ private:
     SignUpState *m_signUpState;
     StartState *m_startState;
 
-    QState *m_currentState = nullptr;
-    QState *m_previousState = nullptr;
+    State *m_currentState = nullptr;
+    State *m_previousState = nullptr;
 };
 } // namespace vm
 

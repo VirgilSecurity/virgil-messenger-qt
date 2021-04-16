@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,32 +32,16 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CHATLISTSTATE_H
-#define VM_CHATLISTSTATE_H
-
 #include "State.h"
 
-namespace vm {
-class Controllers;
-class ChatsModel;
+using namespace vm;
+using Self = State;
 
-class ChatListState : public State
+Self::State(QState *parent) : QState(parent) { }
+
+Self::~State() { }
+
+QString Self::name() const
 {
-    Q_OBJECT
-
-public:
-    ChatListState(Controllers *controllers, ChatsModel *model, QState *parent);
-
-signals:
-    void requestNewChat();
-    void requestNewGroupChat();
-
-private:
-    void onEntry(QEvent *) override;
-
-    Controllers *m_controllers;
-    ChatsModel *m_model;
-};
-} // namespace vm
-
-#endif // VM_CHATLISTSTATE_H
+    return metaObject()->className();
+}

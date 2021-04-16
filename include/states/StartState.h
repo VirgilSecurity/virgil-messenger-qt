@@ -35,14 +35,14 @@
 #ifndef VM_STARTSTATE_H
 #define VM_STARTSTATE_H
 
-#include <QState>
+#include "State.h"
 
 class Settings;
 
 namespace vm {
 class UsersController;
 
-class StartState : public QState
+class StartState : public State
 {
     Q_OBJECT
 

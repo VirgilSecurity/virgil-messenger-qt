@@ -42,7 +42,7 @@ using namespace vm;
 using Self = CloudFileListState;
 
 Self::CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent)
-    : QState(parent), m_messenger(messenger), m_controller(controller)
+    : State(parent), m_messenger(messenger), m_controller(controller)
 {
     connect(this, &Self::requestNewFolder, this,
             [controller](auto name) { controller->createFolder(name, CloudFileMembers()); });

@@ -35,12 +35,12 @@
 #ifndef VM_CLOUD_FILE_SHARING_STATE_H
 #define VM_CLOUD_FILE_SHARING_STATE_H
 
-#include <QState>
+#include "State.h"
 
 namespace vm {
 class CloudFilesController;
 
-class CloudFileSharingState : public QState
+class CloudFileSharingState : public State
 {
     Q_OBJECT
 

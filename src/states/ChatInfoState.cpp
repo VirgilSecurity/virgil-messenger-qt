@@ -39,8 +39,7 @@
 using namespace vm;
 using Self = ChatInfoState;
 
-Self::ChatInfoState(ChatsController *chatsController, QState *parent)
-    : QState(parent), m_controller(chatsController) { }
+Self::ChatInfoState(ChatsController *chatsController, QState *parent) : State(parent), m_controller(chatsController) { }
 
 void ChatInfoState::onEntry(QEvent *event)
 {

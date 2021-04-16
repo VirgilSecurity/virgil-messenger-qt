@@ -35,10 +35,10 @@
 #ifndef VM_ACCOUNTSETTINGSSTATE_H
 #define VM_ACCOUNTSETTINGSSTATE_H
 
-#include <QState>
+#include "State.h"
 
 namespace vm {
-class AccountSettingsState : public QState
+class AccountSettingsState : public State
 {
     Q_OBJECT
 

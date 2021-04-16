@@ -120,10 +120,10 @@ void Self::registerStatesMetaTypes()
 
 void Self::addTransitions()
 {
-    const auto states = findChildren<QState *>();
+    const auto states = findChildren<State *>();
     for (auto state : states) {
-        connect(state, &QState::entered, this, std::bind(&Self::setCurrentState, this, state));
-        connect(state, &QState::exited, this, std::bind(&Self::setPreviousState, this, state));
+        connect(state, &State::entered, this, std::bind(&Self::setCurrentState, this, state));
+        connect(state, &State::exited, this, std::bind(&Self::setPreviousState, this, state));
     }
 
     auto users = m_controllers->users();
@@ -225,14 +225,14 @@ void Self::addTransitions()
     m_downloadKeyState->addTransition(users, &UsersController::signedIn, m_chatListState);
 }
 
-void Self::setCurrentState(QState *state)
+void Self::setCurrentState(State *state)
 {
-    qCDebug(lcAppState) << "Current state:" << state;
+    qCDebug(lcAppState).noquote() << "Current state:" << state->name();
     m_currentState = state;
     emit currentStateChanged(state);
 }
 
-void Self::setPreviousState(QState *state)
+void Self::setPreviousState(State *state)
 {
     m_previousState = state;
     emit previousStateChanged(state);

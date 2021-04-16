@@ -46,7 +46,7 @@ using namespace vm;
 using Self = ChatListState;
 
 Self::ChatListState(Controllers *controllers, ChatsModel *model, QState *parent)
-    : QState(parent), m_controllers(controllers), m_model(model)
+    : State(parent), m_controllers(controllers), m_model(model)
 {
 }
 

@@ -42,7 +42,7 @@ using namespace vm;
 using Self = StartState;
 
 Self::StartState(UsersController *controller, Settings *settings, QState *parent)
-    : QState(parent), m_controller(controller), m_settings(settings)
+    : State(parent), m_controller(controller), m_settings(settings)
 {
     connect(this, &Self::requestUi, this, &Self::onRequestUi, Qt::QueuedConnection);
 }

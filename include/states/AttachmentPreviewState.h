@@ -35,17 +35,18 @@
 #ifndef VM_ATTACHMENTPREVIEWSTATE_H
 #define VM_ATTACHMENTPREVIEWSTATE_H
 
-#include <QState>
+#include "State.h"
+
 #include <QUrl>
 
 namespace vm {
-class AttachmentPreviewState : public QState
+class AttachmentPreviewState : public State
 {
     Q_OBJECT
     Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
 
 public:
-    using QState::QState;
+    using State::State;
 
     QUrl url() const;
     void setUrl(const QUrl &filePath);

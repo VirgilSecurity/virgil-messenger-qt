@@ -35,9 +35,8 @@
 #ifndef VM_CHATSTATE_H
 #define VM_CHATSTATE_H
 
-#include <QState>
-
 #include "Message.h"
+#include "State.h"
 
 class Messenger;
 
@@ -45,7 +44,7 @@ namespace vm {
 class Messenger;
 class Controllers;
 
-class ChatState : public QState
+class ChatState : public State
 {
     Q_OBJECT
 

@@ -39,7 +39,7 @@
 using namespace vm;
 using Self = CloudFileSharingState;
 
-Self::CloudFileSharingState(CloudFilesController *controller, QState *parent) : QState(parent), m_controller(controller)
+Self::CloudFileSharingState(CloudFilesController *controller, QState *parent) : State(parent), m_controller(controller)
 {
 }
 

@@ -36,4 +36,4 @@
 
 using namespace vm;
 
-AccountSettingsState::AccountSettingsState(QState *parent) : QState(parent) { }
+AccountSettingsState::AccountSettingsState(QState *parent) : State(parent) { }

@@ -36,16 +36,16 @@
 #define VM_CLOUDFILELISTSTATE_H
 
 #include <QPointer>
-#include <QState>
 
 #include "CloudFilesModel.h"
+#include "State.h"
 #include "User.h"
 
 namespace vm {
 class CloudFilesController;
 class Messenger;
 
-class CloudFileListState : public QState
+class CloudFileListState : public State
 {
     Q_OBJECT
 
