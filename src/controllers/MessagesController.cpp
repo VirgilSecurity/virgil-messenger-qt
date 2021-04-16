@@ -73,17 +73,19 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     connect(m_messenger, &Messenger::updateMessage, this, &Self::onUpdateMessage);
 }
 
-void Self::loadMessages(const ChatHandler &chat, bool isNewChat)
+void Self::loadChat(const ChatHandler &chat)
 {
     m_models->messages()->setChat(chat);
-    if (isNewChat) {
-        m_models->messages()->clearMessages();
-    } else {
-        m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
-    }
+    m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
 }
 
-void Self::clearMessages()
+void Self::loadNewChat(const ChatHandler &chat)
+{
+    m_models->messages()->setChat(chat);
+    m_models->messages()->clearMessages();
+}
+
+void Self::closeChat()
 {
     auto messages = m_models->messages();
     messages->clearChat();

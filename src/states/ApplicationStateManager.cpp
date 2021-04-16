@@ -167,7 +167,7 @@ void Self::addTransitions()
                          m_newGroupChatState);
     connect(m_nameGroupChatState, &NameGroupChatState::groupNamed, m_newGroupChatState, &NewGroupChatState::setName);
 
-    m_newGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
+    m_newGroupChatState->addTransition(chats, &ChatsController::chatCreated, m_chatState);
 
     addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestNewSharedFolder,
                          m_newCloudFolderMembersState);
@@ -195,7 +195,7 @@ void Self::addTransitions()
     connect(m_verifyProfileState, &VerifyProfileState::verificationFinished, m_editProfileState,
             &EditProfileState::processVerificationResponse);
 
-    m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
+    m_newChatState->addTransition(chats, &ChatsController::chatCreated, m_chatState);
 
     addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewChat,
                          m_newChatState); // TODO(fpohtmeh): don't use signal from another state
