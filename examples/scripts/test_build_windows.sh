@@ -3,6 +3,8 @@
 SCRIPT_FOLDER="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_FOLDER="${SCRIPT_FOLDER}/../.."
 
+export LANG=C
+
 pushd ${PROJECT_FOLDER}
 
   rm -rf build
