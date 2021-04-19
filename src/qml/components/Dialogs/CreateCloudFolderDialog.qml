@@ -7,7 +7,15 @@ InputDialog {
     label: qsTr("New directory")
     placeholderText: qsTr("Enter name")
     validator: app.validator.reDirectoryName
-    onAccepted: sharedCheckBox.checked ? appState.requestNewSharedFolder(text) : appState.requestNewFolder(text)
+
+    onAccepted: {
+        const state = app.stateManager.cloudFileListState
+        if (sharedCheckBox.checked) {
+            state.requestNewSharedFolder(text)
+        } else {
+            state.requestNewFolder(text)
+        }
+    }
     onClosed: sharedCheckBox.checked = false
 
     StyledCheckBox {

@@ -6,6 +6,20 @@ import "../components"
 import "../theme"
 
 Page {
+    QtObject {
+        id: d
+        readonly property var manager: app.stateManager
+
+        function updateStackIndex(state) {
+            if (state === manager.chatListState) {
+                stackLayout.currentIndex = 0
+            }
+            else if (state === manager.cloudFileListState) {
+                stackLayout.currentIndex = 1
+            }
+        }
+    }
+
     background: Rectangle {
         color: Theme.contactsBackgroundColor
     }
@@ -19,9 +33,25 @@ Page {
             Layout.fillHeight: true
         }
 
-        MainListsPage {
+        StackLayout {
+            id: stackLayout
+            clip: true
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            ChatStackPage {
+            }
+
+            CloudFileListPage {
+            }
+        }
+    }
+
+    Connections {
+        target: d.manager
+
+        function onCurrentStateChanged(state) {
+            d.updateStackIndex(state)
         }
     }
 }

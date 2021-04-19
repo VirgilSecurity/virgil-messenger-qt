@@ -102,8 +102,7 @@ ToolBar {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: Theme.margin
-            rightMargin: Theme.smallMargin
+            leftMargin: Theme.smallMargin
         }
         height: searchId.recommendedHeight
 
@@ -153,13 +152,7 @@ ToolBar {
                     id: searchId
                     anchors.fill: parent
                     visible: true
-                    onStateChanged: {
-                        toolbarId.state = searchId.state
-                    }
-
-                    onClosed: {
-                        searchId.state = "closed"
-                    }
+                    onStateChanged: { toolbarId.state = searchId.state }
                 }
             }
 
@@ -184,4 +177,6 @@ ToolBar {
             }
         }
     }
+
+    function closeSearch() { searchId.close() }
 }

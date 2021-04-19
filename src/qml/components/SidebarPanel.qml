@@ -10,7 +10,7 @@ Control {
         color: Theme.mainBackgroundColor
     }
 
-    readonly property bool isCloudFileList: app.stateManager.currentState === manager.cloudFileListState
+    readonly property bool isCloudFileList: app.stateManager.currentState === app.stateManager.cloudFileListState
     readonly property int defaultMargin: 9
 
     Rectangle {

@@ -15,6 +15,7 @@ Control {
 
     property alias titleHorizontalAlignment: headerTitle.horizontalAlignment
     property alias showSeparator: headerBackground.showSeparator
+    property alias showBackButton: backButton.visible
     property alias titleClickable: headerTitle.clickable
 
     property alias rightControl: rightControlLoader.sourceComponent
@@ -39,6 +40,7 @@ Control {
         anchors.rightMargin: Theme.smallMargin
 
         ImageButton {
+            id: backButton
             image: "Arrow-Left"
             onClicked: app.stateManager.goBack()
         }

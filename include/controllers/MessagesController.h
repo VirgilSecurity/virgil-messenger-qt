@@ -52,8 +52,9 @@ public:
     MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase,
                        QObject *parent);
 
-    void loadMessages(const ChatHandler &chat);
-    void clearMessages();
+    void loadChat(const ChatHandler &chat);
+    void loadNewChat(const ChatHandler &chat);
+    void closeChat();
 
     Q_INVOKABLE void sendTextMessage(const QString &body);
     Q_INVOKABLE void sendFileMessage(const QVariant &attachmentUrl);

@@ -72,6 +72,7 @@ public:
 
     void openChat(const ModifiableChatHandler &chat);
     Q_INVOKABLE void openChat(const QString &chatId); // can be used within QML only
+    void createChat(const ModifiableChatHandler &chat);
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
 
@@ -98,7 +99,7 @@ signals:
 
 private:
     void setupTableConnections();
-    void setCurrentChat(ChatHandler chat);
+    void setCurrentChat(ModifiableChatHandler chat);
 
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);

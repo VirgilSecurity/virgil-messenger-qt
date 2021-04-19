@@ -130,7 +130,7 @@ void Self::updateLastMessage(const MessageHandler &message)
     }
 }
 
-void ChatsModel::resetLastMessage(const ChatId &chatId)
+void Self::resetLastMessage(const ChatId &chatId)
 {
     const auto chatIndex = findByChatId(chatId);
     if (!chatIndex.isValid()) {
@@ -148,10 +148,19 @@ void ChatsModel::resetLastMessage(const ChatId &chatId)
     emit chatUpdated(chat);
 }
 
-void ChatsModel::toggleById(const QString &chatId)
+void Self::toggleById(const QString &chatId)
 {
     if (const auto chatIndex = findByChatId(ChatId(chatId)); chatIndex.isValid()) {
         selection()->toggle(chatIndex);
+    }
+}
+
+void Self::selectChatOnly(const ChatHandler &chat)
+{
+    if (!chat) {
+        selection()->clear();
+    } else if (const auto index = findByChatId(chat->id()); index.isValid()) {
+        selection()->select(index, QItemSelectionModel::ClearAndSelect);
     }
 }
 
