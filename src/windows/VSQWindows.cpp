@@ -50,7 +50,8 @@ VSQWindows::~VSQWindows()
 void VSQWindows::_WinSparkle_init() const
 {
     win_sparkle_set_appcast_url(Customer::kWinSparklURL.toUtf8().constData());
-    win_sparkle_set_dsa_pub_pem(reinterpret_cast<const char *>(QResource("://qml/resources/windows/dsa_pub.pem").data()));
+    win_sparkle_set_dsa_pub_pem(
+            reinterpret_cast<const char *>(QResource("://qml/resources/windows/dsa_pub.pem").data()));
     win_sparkle_set_app_details(Customer::ApplicationName.toStdWString().c_str(),
                                 Customer::OrganizationDisplayName.toStdWString().c_str(),
                                 vm::CustomerEnv::version().toStdWString().c_str());
