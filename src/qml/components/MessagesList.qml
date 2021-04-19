@@ -31,7 +31,7 @@ Item {
         }
 
         verticalLayoutDirection: ListView.BottomToTop
-        spacing: d.listSpacing
+        spacing: 5 // TODO(fpohtmeh): move to constants
         model: models.messages.proxy
 
         footer: Item {

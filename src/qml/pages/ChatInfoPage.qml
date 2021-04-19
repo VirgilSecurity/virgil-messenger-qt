@@ -23,7 +23,7 @@ Page {
     header: PageHeader {
         id: pageHeader
         title: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-        contextMenuVisible: d.chat.isGroup && (d.groupMembersEditable || !d.isOwnGroup)
+        contextMenuVisible: d.chat.isGroup && d.chat.userCanEdit
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: d.chat.isGroup ? qsTr("Edit group") : qsTr("Edit chat")

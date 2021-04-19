@@ -45,7 +45,7 @@ Self::NewGroupChatState(ChatsController *controller, DiscoveredContactsModel *co
     setMultiSelect(true);
 
     connect(this, &Self::contactsSelected, this, &Self::onContactsSelected);
-    connect(controller, &ChatsController::chatOpened, this, &Self::operationFinished);
+    connect(controller, &ChatsController::chatCreated, this, &Self::operationFinished);
     connect(controller, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
 }
 

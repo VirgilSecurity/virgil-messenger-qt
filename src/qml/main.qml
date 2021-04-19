@@ -13,6 +13,7 @@ import "theme"
 ApplicationWindow {
     id: root
 
+    property alias window: root
     property alias mainView: mainView
 
     visible: true
@@ -131,9 +132,5 @@ ApplicationWindow {
 
         Platform.detect()
         app.stateManager.startState.requestUi()
-    }
-
-    onActiveFocusItemChanged: {
-//        console.log(activeFocusItem, activeFocusItem ? activeFocusItem.objectName : undefined)
     }
 }

@@ -73,15 +73,23 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     connect(m_messenger, &Messenger::updateMessage, this, &Self::onUpdateMessage);
 }
 
-void Self::loadMessages(const ChatHandler &chat)
+void Self::loadChat(const ChatHandler &chat)
 {
     m_models->messages()->setChat(chat);
     m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
 }
 
-void Self::clearMessages()
+void Self::loadNewChat(const ChatHandler &chat)
 {
-    m_models->messages()->clearChat();
+    m_models->messages()->setChat(chat);
+    m_models->messages()->clearMessages();
+}
+
+void Self::closeChat()
+{
+    auto messages = m_models->messages();
+    messages->clearChat();
+    messages->clearMessages();
 }
 
 void Self::sendTextMessage(const QString &body)
@@ -201,7 +209,7 @@ void Self::setupTableConnections()
 {
     auto table = m_userDatabase->messagesTable();
     connect(table, &MessagesTable::errorOccurred, this, &Self::errorOccurred);
-    connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::addMessages);
+    connect(table, &MessagesTable::chatMessagesFetched, m_models->messages(), &MessagesModel::setMessages);
 }
 
 void Self::onUpdateMessage(const MessageUpdate &messageUpdate)
@@ -274,7 +282,10 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
     if (message->isIncoming()) {
         if (auto currentChat = messages->chat(); currentChat && (currentChat->id() == message->chatId())) {
             m_messenger->sendMessageStatusDisplayed(message);
-            onUpdateMessage(IncomingMessageStageUpdate { message->id(), IncomingMessageStage::Read });
+            IncomingMessageStageUpdate update;
+            update.messageId = message->id();
+            update.stage = IncomingMessageStage::Read;
+            onUpdateMessage(update);
         }
     }
 }

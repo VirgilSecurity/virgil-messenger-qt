@@ -42,7 +42,7 @@ using Self = NewChatState;
 Self::NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent)
     : SelectContactsState(contactsModel, parent)
 {
-    connect(chatsController, &ChatsController::chatOpened, this, &Self::operationFinished);
+    connect(chatsController, &ChatsController::chatCreated, this, &Self::operationFinished);
     connect(chatsController, &ChatsController::errorOccurred, this, &Self::operationErrorOccurred);
     connect(this, &Self::contactSelected, this, &Self::operationStarted);
     connect(this, &Self::contactSelected, chatsController, &ChatsController::createChatWithUsername);

@@ -144,9 +144,20 @@ void Self::addTransitions()
     addTwoSideTransition(m_accountSelectionState, m_accountSelectionState, &AccountSelectionState::requestSignUp,
                          m_signUpState);
 
-    m_chatListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
-    m_chatListState->addTransition(users, &UsersController::signInErrorOccured, m_accountSelectionState);
-    addTwoSideTransition(m_chatListState, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
+    // Sign-out
+    const std::vector<QState *> signOutStates { m_chatListState, m_chatState, m_cloudFileListState,
+                                                m_accountSettingsState };
+    for (auto state : signOutStates) {
+        state->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+    }
+
+    // Main menu
+    const std::vector<QState *> mainMenuStates { m_chatListState, m_chatState, m_cloudFileListState };
+    for (auto state : mainMenuStates) {
+        state->addTransition(users, &UsersController::signInErrorOccured, m_accountSelectionState);
+        addTwoSideTransition(state, users, &UsersController::accountSettingsRequested, m_accountSettingsState);
+    }
+
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewChat, m_newChatState);
     addTwoSideTransition(m_chatListState, m_chatListState, &ChatListState::requestNewGroupChat, m_nameGroupChatState);
     addTwoSideTransition(m_chatListState, chats, &ChatsController::chatOpened, m_chatState);
@@ -156,17 +167,14 @@ void Self::addTransitions()
                          m_newGroupChatState);
     connect(m_nameGroupChatState, &NameGroupChatState::groupNamed, m_newGroupChatState, &NewGroupChatState::setName);
 
-    m_newGroupChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
+    m_newGroupChatState->addTransition(chats, &ChatsController::chatCreated, m_chatState);
 
-    addTwoSideTransition(m_cloudFileListState, users, &UsersController::accountSettingsRequested,
-                         m_accountSettingsState);
     addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestNewSharedFolder,
                          m_newCloudFolderMembersState);
     addTwoSideTransition(m_cloudFileListState, m_cloudFileListState, &CloudFileListState::requestSharingInfo,
                          m_cloudFileSharingState);
     connect(m_cloudFileListState, &CloudFileListState::requestNewSharedFolder, m_newCloudFolderMembersState,
             &NewCloudFolderMembersState::setName);
-    m_cloudFileListState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     m_cloudFileListState->addTransition(this, &Self::chatListRequested, m_chatListState);
 
     addTwoSideTransition(m_cloudFileSharingState, m_cloudFileSharingState, &CloudFileSharingState::addMembersRequested,
@@ -179,7 +187,6 @@ void Self::addTransitions()
 
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::requestBackupKey,
                          m_backupKeyState);
-    m_accountSettingsState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
     addTwoSideTransition(m_accountSettingsState, m_accountSettingsState, &AccountSettingsState::editProfile,
                          m_editProfileState);
 
@@ -188,13 +195,16 @@ void Self::addTransitions()
     connect(m_verifyProfileState, &VerifyProfileState::verificationFinished, m_editProfileState,
             &EditProfileState::processVerificationResponse);
 
-    m_newChatState->addTransition(chats, &ChatsController::chatOpened, m_chatState);
-    m_newChatState->addTransition(users, &UsersController::accountSettingsRequested, m_accountSettingsState);
-    m_newChatState->addTransition(users, &UsersController::signedOut, m_accountSelectionState);
+    m_newChatState->addTransition(chats, &ChatsController::chatCreated, m_chatState);
 
+    addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewChat,
+                         m_newChatState); // TODO(fpohtmeh): don't use signal from another state
+    addTwoSideTransition(m_chatState, m_chatListState, &ChatListState::requestNewGroupChat,
+                         m_nameGroupChatState); // TODO(fpohtmeh): don't use signal from another state
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestPreview, m_attachmentPreviewState);
     connect(m_chatState, &ChatState::requestPreview, m_attachmentPreviewState, &AttachmentPreviewState::setUrl);
     addTwoSideTransition(m_chatState, m_chatState, &ChatState::requestInfo, m_chatInfoState);
+    m_chatState->addTransition(this, &Self::cloudFileListRequested, m_cloudFileListState);
     connect(chats, &ChatsController::groupInvitationRejected, this, &ApplicationStateManager::goBack);
 
     addTwoSideTransition(m_chatInfoState, m_chatInfoState, &ChatInfoState::addMembersRequested,

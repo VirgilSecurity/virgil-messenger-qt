@@ -90,4 +90,10 @@ Rectangle {
     Component.onDestruction: {
         models.messages.groupInvitationReceived.disconnect(open)
     }
+
+    Connections {
+        target: models.messages
+
+        function onMessagesReset() { root.visible = false }
+    }
 }

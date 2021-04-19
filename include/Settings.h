@@ -49,6 +49,8 @@ class Settings : public QSettings
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
+    Q_PROPERTY(int chatListLandscapeWidth READ chatListLandscapeWidth WRITE setChatListLandscapeWidth NOTIFY
+                       chatListLandscapeWidthChanged)
 
 public:
     explicit Settings(QObject *parent);
@@ -98,6 +100,9 @@ public:
     QRect windowGeometry() const;
     void setWindowGeometry(const QRect &geometry);
 
+    int chatListLandscapeWidth();
+    void setChatListLandscapeWidth(int width);
+
     // Short interval for elapsed seconds that means now
     std::chrono::seconds nowInterval() const;
 
@@ -109,6 +114,7 @@ signals:
     void lastSignedInUserChanged(const QString &username);
     void usersListChanged(const QStringList &);
     void windowGeometryChanged(const QRect &); // Required by QML, not used
+    void chatListLandscapeWidthChanged(int width); // Required by QML, not used
 
 private:
     QString makeGroupKey(const QString &group, const QString &key) const;

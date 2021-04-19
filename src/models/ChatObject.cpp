@@ -49,6 +49,7 @@ void Self::setChat(const ModifiableChatHandler &chat)
 {
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
+    const auto oldIsNull = isNull();
     m_chat = chat;
     m_groupMembersModel->setGroupMembers({});
     if (oldTitle != title()) {
@@ -56,6 +57,9 @@ void Self::setChat(const ModifiableChatHandler &chat)
     }
     if (oldIsGroup != isGroup()) {
         emit isGroupChanged(isGroup());
+    }
+    if (oldIsNull != isNull()) {
+        emit isNullChanged(isNull());
     }
 }
 
@@ -115,4 +119,9 @@ void Self::setLastActivityText(const QString &text)
     }
     m_lastActivityText = text;
     emit lastActivityTextChanged(text);
+}
+
+bool Self::isNull() const
+{
+    return m_chat == nullptr;
 }
