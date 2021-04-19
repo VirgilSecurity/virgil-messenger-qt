@@ -70,6 +70,13 @@ else()
         set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
         set(MACOSX_BUNDLE_BUNDLE_NAME "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
         set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
+    # ----------
+    # Windows
+    # ----------
+    # ***********************************************************************************
+    elseif(VS_PLATFORM STREQUAL "windows")
+       list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/windows/messenger.nsi.in=${CMAKE_BINARY_DIR}/messenger.nsi")
+       list(APPEND VS_TEMPLATES "${PROJECT_SOURCE_DIR}/platforms/windows/appcast.xml.in=${CMAKE_BINARY_DIR}/appcast.xml")
     endif()
 endif()
 

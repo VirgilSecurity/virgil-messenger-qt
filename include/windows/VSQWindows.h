@@ -32,35 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQ_CUSTOMER_H
-#define VSQ_CUSTOMER_H
+#ifndef VSQWINDOWS_H
+#define VSQWINDOWS_H
 
-#include <QString>
+#if VS_WINDOWS
 
-namespace Customer
+#    include <QObject>
+#    include <QTimer>
+#    include "helpers/VSQSingleton.h"
+#    include <winsparkle.h>
+
+class VSQWindows : public QObject, public VSQSingleton<VSQWindows>
 {
-    static QString OrganizationName = "@VS_ORGANIZATION_NAME@";
-    static QString OrganizationDisplayName = "@VS_ORGANIZATION_DISPLAYNAME@";
+    Q_OBJECT
+public:
+    virtual ~VSQWindows();
 
-    static QString ApplicationName = "@VS_APPLICATION_NAME@";
-    static QString ApplicationDisplayName = "@VS_APPLICATION_DISPLAY_NAME@";
+public slots:
+    void checkUpdatesBackground() const;
+    void checkUpdates() const;
+    void startUpdatesTimer();
 
-    static QString OrganizationDomain = "@VS_ORGANIATION_DOMAIN@";
-    static QString MessengerUrlTemplate = "@VS_MESSANGER_URL_TEMPLATE@";
-    static QString XmppUrlTemplate = "@VS_XMPP_URL_TEMPLATE@";
-    static QString XmppDomainTemplate = "@VS_XMPP_DOMAIN_TEMPLATE@";
-    static QString ContactDiscoveryUrlTemplate = "@CONTACT_DISCOVERY_URL_TEMPLATE@";
+private:
+    QTimer *m_updateTimer = nullptr;
+    const int kUpdateCheckMinutes = 5;
+    void _WinSparkle_init() const;
+    void _deleteTimer();
+};
 
-    static const QString kPushNotificationsProxy = "@VS_PUSH_PROXY@";
-    static const QString kPushNotificationsTopic = "@VS_PUSH_TOPIC@";
+#endif // VS_WINDOWS
 
-    static const QString kSecurityApplicationGroupIdentifier = "@SECURITY_APPLICATION_GROUP_IDENTIFIER@";
-
-    static const QString kWinSparklURL = "@WIN_SU_FEED_URL@";
-}
-
-#endif // VSQ_CUSTOMER_H
-
-
-
-
+#endif // VSQWINDOWS_H

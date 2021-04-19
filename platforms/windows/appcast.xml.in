@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>@VS_APPLICATION_NAME@</title>
+        <description>@VS_APPLICATION_DISPLAY_NAME@</description>
+        <language>en</language>
+        <item>
+            <title>Version @VS_TARGET_VERSION@</title>
+            <pubDate>{{ BUILD_DATE }}</pubDate>
+            <enclosure url="@WIN_SU_FILE_URL@"
+                       sparkle:dsaSignature="{{ DSA_SIGN }}"
+                       sparkle:version="@VS_TARGET_VERSION@"
+                       sparkle:installerArguments="/S"
+                       length="0"
+                       type="application/octet-stream" />
+        </item>
+    </channel>
+</rss>

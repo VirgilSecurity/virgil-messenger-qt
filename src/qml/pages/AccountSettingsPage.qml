@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import "../base"
 import "../theme"
 import "../components"
 import "../components/Dialogs"
@@ -50,6 +51,12 @@ Page {
         FormPrimaryButton {
             text: qsTr("Send logs")
             onClicked: sendLogsDialog.open()
+        }
+
+        FormPrimaryButton {
+            text: qsTr("Check updates")
+            visible: Platform.isWindows
+            onClicked: app.checkUpdates()
         }
 
         FormPrimaryButton {
