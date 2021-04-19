@@ -87,7 +87,7 @@ Self::VSQApplication()
 
 #if VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
-#elif VS_WINDOWS
+#elif VS_WINDOWS && VS_WINSPARKLE
     VSQWindows::instance().startUpdatesTimer();
 #endif
 }
