@@ -93,6 +93,7 @@ elseif (VS_PLATFORM STREQUAL "linux")
             -qmlDir ${PROJECT_SOURCE_DIR}/src/qml
             -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist
             -qmake ${QT_QMAKE_EXECUTABLE} clear
+            COMMAND tar czf ${PROJECT_NAME}-${PROJECT_VERSION}.tgz ${PROJECT_NAME}.dist
             VERBATIM)
 
 elseif (VS_PLATFORM STREQUAL "windows")
