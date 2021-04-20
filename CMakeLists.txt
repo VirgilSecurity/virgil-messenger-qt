@@ -47,7 +47,10 @@ include(customers)
 # ---------------------------------------------------------------------------
 # Project version
 # ---------------------------------------------------------------------------
-set(VS_TARGET_VERSION "3.10.10")
+set(VERSIONMAJOR "3")
+set(VERSIONMINOR "10")
+set(VERSIONBUILD "10")
+set(VS_TARGET_VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}")
 set(VS_CORE_VERSION "0.2.1.82")
 set(VERSION_DATABASE_SCHEME "3")
 
@@ -606,6 +609,8 @@ target_sources(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
 
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/include/windows/VSQWindows.h>
+
         #
         #  Sources
         #
@@ -797,6 +802,8 @@ target_sources(${VS_TARGET_NAME}
         # Windows
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/windows/VSQWindows.cpp>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/winsparkle.qrc>
         # MACOS
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
         $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
@@ -822,6 +829,7 @@ target_link_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${VS_ANDROID_SSL_DIR}>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/x64/Release>>
         )
 
 target_link_libraries(${VS_TARGET_NAME}
@@ -836,6 +844,7 @@ target_link_libraries(${VS_TARGET_NAME}
         $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>
         $<$<STREQUAL:"${VS_PLATFORM}","android">:log>
         $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
+        $<$<STREQUAL:"${VS_PLATFORM}","windows">:WinSparkle>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
         $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         Qt5::Sql
@@ -897,6 +906,7 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>
         $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>
+        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/include>>
         )
 
 target_compile_definitions(${VS_TARGET_NAME}
@@ -922,6 +932,7 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:VS_MACOS=$<STREQUAL:"${VS_PLATFORM}","macos">>
         $<BUILD_INTERFACE:VS_LINUX=$<STREQUAL:"${VS_PLATFORM}","linux">>
         $<BUILD_INTERFACE:VS_WINDOWS=$<STREQUAL:"${VS_PLATFORM}","windows">>
+#        $<BUILD_INTERFACE:VS_WINSPARKLE=$<STREQUAL:"${VS_PLATFORM}","windows">>        
 
         $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
         $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
