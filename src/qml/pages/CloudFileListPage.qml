@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+import "../base"
 import "../components"
 import "../components/Dialogs"
 import "../theme"
