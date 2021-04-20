@@ -79,8 +79,10 @@ NavigationStackView {
         appState.chatListRequested.connect(d.openChatList)
         appState.accountSelectionRequested.connect(d.openAccountSelection)
 
-        controllers.users.signedIn.connect(d.openChatList)
-        controllers.users.signedOut.connect(d.openAccountSelection)
-        controllers.users.signInErrorOccured.connect(d.openAccountSelection)
+        messenger.signedIn.connect(d.openChatList)
+        messenger.signedUp.connect(d.openChatList)
+        messenger.keyDownloaded.connect(d.openChatList)
+        messenger.signedOut.connect(d.openAccountSelection)
+        messenger.signInErrorOccured.connect(d.openAccountSelection)
     }
 }

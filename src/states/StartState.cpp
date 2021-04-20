@@ -35,14 +35,14 @@
 #include "StartState.h"
 
 #include "android/VSQAndroid.h"
+#include "Messenger.h"
 #include "Settings.h"
-#include "UsersController.h"
 
 using namespace vm;
 using Self = StartState;
 
-Self::StartState(UsersController *controller, Settings *settings, QState *parent)
-    : QState(parent), m_controller(controller), m_settings(settings)
+Self::StartState(Messenger *messenger, Settings *settings, QState *parent)
+    : QState(parent), m_messenger(messenger), m_settings(settings)
 {
 }
 
@@ -61,7 +61,7 @@ void Self::requestUi()
     if (username.isEmpty() || m_settings->userCredential(username).isEmpty()) {
         emit accountSelectionRequested();
     } else {
-        m_controller->signIn(username);
+        m_messenger->signIn(username);
         emit chatListRequested();
     }
 }

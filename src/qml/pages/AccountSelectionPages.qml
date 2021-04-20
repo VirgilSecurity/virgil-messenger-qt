@@ -9,7 +9,7 @@ NavigationStackView {
         id: accountSelectionOptionsComponent
         AccountSelectionOptionsPage {
             onSignIn: {
-                controllers.users.signIn(username)
+                messenger.signIn(username)
                 root.chatListRequested()
             }
             onSignInUsername: root.navigatePush(restoreAccountUsernameComponent)

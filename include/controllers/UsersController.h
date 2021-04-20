@@ -48,7 +48,6 @@ namespace vm {
 class Models;
 class UserDatabase;
 
-// TODO(fpohtmeh): remove users controller?
 class UsersController : public QObject
 {
     Q_OBJECT
@@ -58,30 +57,18 @@ class UsersController : public QObject
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    Q_INVOKABLE void signIn(const QString &username);
-    Q_INVOKABLE void signUp(const QString &username);
-    Q_INVOKABLE void signOut();
-
-    QString currentUserId() const;
-    QString currentUsername() const;
-
 signals:
-    void signedIn(const QString &username);
-    void signedOut();
-    void signInErrorOccured(const QString &errorText);
-    void signUpErrorOccured(const QString &errorText);
-
     void notificationCreated(const QString &notification, const bool error) const;
 
     void currentUserIdChanged(const QString &userId);
     void currentUsernameChanged(const QString &username);
 
 private:
-    void onSignedIn(const QString &username);
-    void onSignedOut();
-    void onFinishSignIn();
-    void onFinishSignOut();
-    void onUpdateContactsWithUser(const UserHandler &user);
+    QString currentUserId() const;
+    QString currentUsername() const;
+
+    void updateCurrentUser();
+    void updateContactsWithUser(const UserHandler &user);
 
     void onChatAdded(const ChatHandler &chat);
 

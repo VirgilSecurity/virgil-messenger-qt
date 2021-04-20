@@ -21,6 +21,7 @@ FlowView {
 
         readonly property real flowItemHeight: 28
         readonly property real lineWidth: 2
+        // TODO(fpohtmeh): remove usage of external variable root
         readonly property real recommendedHeight: Math.min(flowListView.contentHeight, 3 * (d.flowItemHeight + root.spacing) - root.spacing)
     }
 

@@ -73,13 +73,9 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     connect(m_cloudFiles, &CloudFilesController::openUrlRequested, m_documentInteraction,
             &DocumentInteractionController::openUrl);
 
-    //
-    //  Queued connection is used here to give ChatsController a chance to setup database connections.
-    //  TODO: find a better solution.
-    //
-    connect(m_users, &UsersController::signedIn, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
-    connect(m_users, &UsersController::signedOut, m_chats, &ChatsController::clearChats);
-    connect(m_users, &UsersController::signedOut, m_cloudFiles, &CloudFilesController::clearFiles);
+    connect(userDatabase, &UserDatabase::opened, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
+    connect(userDatabase, &UserDatabase::closed, m_chats, &ChatsController::clearChats);
+    connect(userDatabase, &UserDatabase::closed, m_cloudFiles, &CloudFilesController::clearFiles);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadChat);
     connect(m_chats, &ChatsController::chatCreated, m_messages, &MessagesController::loadNewChat);
     connect(m_chats, &ChatsController::chatClosed, m_messages, &MessagesController::closeChat);

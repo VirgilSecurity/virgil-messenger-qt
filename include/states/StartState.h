@@ -40,14 +40,14 @@
 class Settings;
 
 namespace vm {
-class UsersController;
+class Messenger;
 
 class StartState : public QState
 {
     Q_OBJECT
 
 public:
-    StartState(UsersController *controller, Settings *settings, QState *parent);
+    StartState(Messenger *messenger, Settings *settings, QState *parent);
 
     Q_INVOKABLE void requestUi();
 
@@ -58,7 +58,7 @@ signals:
 private:
     void hideNativeSplashScreen();
 
-    UsersController *m_controller;
+    Messenger *m_messenger;
     Settings *m_settings;
 };
 } // namespace vm

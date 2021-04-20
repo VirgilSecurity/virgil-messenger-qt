@@ -64,7 +64,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Sign out")
-            onClicked: controllers.users.signOut()
+            onClicked: messenger.signOut()
         }
     }
 

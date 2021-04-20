@@ -59,7 +59,7 @@ Control {
 
                 Action {
                     text: qsTr("Sign Out")
-                    onTriggered: controllers.users.signOut()
+                    onTriggered: messenger.signOut()
                 }
             }
         }

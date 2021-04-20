@@ -96,11 +96,6 @@ signals:
 
     void updateGroup(const GroupUpdate &groupUpdate);
 
-    //
-    //  Notification signals.
-    //
-    void opened();
-
 private:
     bool create() override;
     void onOpen(const QString &username);
