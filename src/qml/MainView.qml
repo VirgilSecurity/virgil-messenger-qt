@@ -29,5 +29,4 @@ Control {
     }
 
     function navigateBack(transition) { return stackView.navigateBack(transition) }
-    function currentPage() { return stackView.currentPage() }
 }

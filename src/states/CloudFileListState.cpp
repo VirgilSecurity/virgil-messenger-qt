@@ -46,7 +46,7 @@ Self::CloudFileListState(Messenger *messenger, CloudFilesController *controller,
 {
 }
 
-void Self::onEntry(QEvent *)
+void Self::switchToRootFolder()
 {
     if (m_lastUser == m_messenger->currentUser()) {
         return;

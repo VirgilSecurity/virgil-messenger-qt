@@ -37,10 +37,4 @@ StackView {
             return false
         }
     }
-
-    function currentPage() {
-        return currentItem && currentItem.currentPage ? currentItem.currentPage() : currentItem
-    }
-
-    onCurrentItemChanged: window.updateAppState()
 }

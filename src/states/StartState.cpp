@@ -44,6 +44,12 @@ using Self = StartState;
 Self::StartState(Messenger *messenger, Settings *settings, QState *parent)
     : QState(parent), m_messenger(messenger), m_settings(settings)
 {
+    connect(messenger, &Messenger::signedIn, this, &Self::chatListRequested);
+    connect(messenger, &Messenger::signedUp, this, &Self::chatListRequested);
+    connect(messenger, &Messenger::keyDownloaded, this, &Self::chatListRequested);
+
+    connect(messenger, &Messenger::signedOut, this, &Self::accountSelectionRequested);
+    connect(messenger, &Messenger::signInErrorOccured, this, &Self::accountSelectionRequested);
 }
 
 void Self::hideNativeSplashScreen()
@@ -53,7 +59,7 @@ void Self::hideNativeSplashScreen()
 #endif
 }
 
-void Self::requestUi()
+void Self::updateUi()
 {
     hideNativeSplashScreen();
 

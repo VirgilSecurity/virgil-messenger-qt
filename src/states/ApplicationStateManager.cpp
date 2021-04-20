@@ -55,7 +55,6 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_controllers(controllers),
       m_validator(validator),
       m_settings(m_messenger->settings()),
-      m_emptyState(new QState(this)),
       m_cloudFolderMembersState(
               new CloudFolderMembersState(controllers->cloudFiles(), models->discoveredContacts(), this)),
       m_backupKeyState(new BackupKeyState(m_messenger, this)),
@@ -71,44 +70,6 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_signUpState(new SignUpState(messenger, validator, this)),
       m_startState(new StartState(messenger, m_settings, this))
 {
-    addConnections();
-    setInitialState(m_startState);
-    start();
 }
 
 Self::~ApplicationStateManager() { }
-
-void Self::enterState(QState *state)
-{
-    const auto newState = state ? state : m_emptyState;
-    if (m_currentState == newState) {
-        return;
-    }
-    if (m_transition) {
-        delete m_transition;
-    }
-    m_transition = m_currentState->addTransition(this, &Self::enterStateCall, newState);
-    emit enterStateCall(QPrivateSignal());
-}
-
-void Self::addConnections()
-{
-    const auto states = findChildren<QState *>();
-    for (auto state : states) {
-        connect(state, &QState::entered, this, std::bind(&Self::setCurrentState, this, state));
-        connect(state, &QState::exited, this, std::bind(&Self::setPreviousState, this, state));
-    }
-}
-
-void Self::setCurrentState(QState *state)
-{
-    qCDebug(lcAppState) << "Current state:" << state;
-    m_currentState = state;
-    emit currentStateChanged(state);
-}
-
-void Self::setPreviousState(QState *state)
-{
-    m_previousState = state;
-    emit previousStateChanged(state);
-}

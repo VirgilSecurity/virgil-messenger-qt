@@ -95,11 +95,6 @@ ApplicationWindow {
         return attachmentPreview.navigateBack(transition) || mainView.navigateBack(transition)
     }
 
-    function updateAppState() {
-        const page = mainView.currentPage()
-        app.stateManager.enterState(page ? page.appState : null)
-    }
-
     Component.onCompleted: {
         app.notificationCreated.connect(function(text, error) {
             if (error) {
@@ -113,6 +108,5 @@ ApplicationWindow {
         crashReporter.reportErrorOccurred.connect(notificationPopup.showError)
 
         Platform.detect()
-        app.stateManager.startState.requestUi()
     }
 }

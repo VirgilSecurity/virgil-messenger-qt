@@ -49,7 +49,7 @@ class StartState : public QState
 public:
     StartState(Messenger *messenger, Settings *settings, QState *parent);
 
-    Q_INVOKABLE void requestUi();
+    Q_INVOKABLE void updateUi();
 
 signals:
     void chatListRequested();

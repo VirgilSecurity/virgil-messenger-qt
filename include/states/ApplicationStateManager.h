@@ -76,33 +76,17 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
     Q_PROPERTY(StartState *startState MEMBER m_startState CONSTANT)
 
-    Q_PROPERTY(QState *currentState MEMBER m_currentState NOTIFY currentStateChanged)
-    Q_PROPERTY(QState *previousState MEMBER m_previousState NOTIFY previousStateChanged)
-
 public:
     ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator,
                             QObject *parent);
     ~ApplicationStateManager() override;
 
-    Q_INVOKABLE void enterState(QState *state);
-
-signals:
-    void currentStateChanged(QState *);
-    void previousStateChanged(QState *);
-
-    void enterStateCall(QPrivateSignal);
-
 private:
-    void addConnections();
-    void setCurrentState(QState *state);
-    void setPreviousState(QState *state);
-
     Messenger *m_messenger;
     Controllers *m_controllers;
     Validator *m_validator;
     Settings *m_settings;
 
-    QState *m_emptyState;
     CloudFolderMembersState *m_cloudFolderMembersState;
     BackupKeyState *m_backupKeyState;
     EditChatInfoState *m_editChatInfoState;
@@ -116,10 +100,6 @@ private:
     RestoreAccountUsernameState *m_restoreAccountUsernameState;
     SignUpState *m_signUpState;
     StartState *m_startState;
-
-    QState *m_currentState = nullptr;
-    QState *m_previousState = nullptr;
-    QSignalTransition *m_transition = nullptr;
 };
 } // namespace vm
 

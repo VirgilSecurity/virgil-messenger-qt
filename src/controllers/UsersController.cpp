@@ -49,7 +49,7 @@ using Self = UsersController;
 Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent), m_messenger(messenger), m_userDatabase(userDatabase)
 {
-    connect(messenger, &Messenger::signedIn, userDatabase, &UserDatabase::open);
+    connect(messenger, &Messenger::signInStarted, userDatabase, &UserDatabase::open);
     connect(messenger, &Messenger::signedUp, userDatabase, &UserDatabase::open);
     connect(messenger, &Messenger::keyDownloaded, userDatabase, &UserDatabase::open);
     connect(messenger, &Messenger::signedOut, userDatabase, &UserDatabase::close);

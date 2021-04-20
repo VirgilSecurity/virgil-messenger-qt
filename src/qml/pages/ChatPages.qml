@@ -46,8 +46,6 @@ Item {
         id: loader
         anchors.fill: parent
         sourceComponent: d.isLandscapeMode ? splitViewComponent : stackViewComponent
-
-        onItemChanged: window.updateAppState()
     }
 
     function navigateBack(transition) {
@@ -57,6 +55,4 @@ Item {
         }
         return false
     }
-
-    function currentPage() { return loader.item.currentPage() }
 }

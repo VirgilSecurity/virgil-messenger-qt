@@ -12,5 +12,8 @@ SelectContactsPage {
         title: qsTr("New chat")
     }
 
-    Component.onCompleted: controllers.chats.chatCreated.connect(created)
+    Component.onCompleted: {
+        appState.reload()
+        controllers.chats.chatCreated.connect(created)
+    }
 }

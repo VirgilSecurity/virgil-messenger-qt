@@ -52,8 +52,4 @@ SplitView {
         SplitView.fillHeight: true
         SplitView.fillWidth: true
     }
-
-    function currentPage() {
-        return isChatOpened ? chatPage : chatListPage
-    }
 }

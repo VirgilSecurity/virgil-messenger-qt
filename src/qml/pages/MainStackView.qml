@@ -78,11 +78,6 @@ NavigationStackView {
         var appState = app.stateManager.startState
         appState.chatListRequested.connect(d.openChatList)
         appState.accountSelectionRequested.connect(d.openAccountSelection)
-
-        messenger.signedIn.connect(d.openChatList)
-        messenger.signedUp.connect(d.openChatList)
-        messenger.keyDownloaded.connect(d.openChatList)
-        messenger.signedOut.connect(d.openAccountSelection)
-        messenger.signInErrorOccured.connect(d.openAccountSelection)
+        appState.updateUi()
     }
 }

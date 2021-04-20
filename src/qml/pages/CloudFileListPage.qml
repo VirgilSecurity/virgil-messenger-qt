@@ -136,5 +136,5 @@ Rectangle {
         return false
     }
 
-    function currentPage() { return root }
+    Component.onCompleted: appState.switchToRootFolder()
 }

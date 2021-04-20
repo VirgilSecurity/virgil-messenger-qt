@@ -5,5 +5,8 @@ MultiSelectContactsPage {
 
     signal selected(var contacts)
 
-    Component.onCompleted: appState.contactsSelected.connect(selected)
+    Component.onCompleted: {
+        appState.reload()
+        appState.contactsSelected.connect(selected)
+    }
 }

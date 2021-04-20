@@ -52,9 +52,9 @@ class CloudFileListState : public QState
 public:
     CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent);
 
-private:
-    void onEntry(QEvent *);
+    Q_INVOKABLE void switchToRootFolder();
 
+private:
     QPointer<Messenger> m_messenger;
     QPointer<CloudFilesController> m_controller;
     UserHandler m_lastUser;
