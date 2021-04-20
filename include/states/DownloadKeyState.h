@@ -38,19 +38,19 @@
 #include "OperationState.h"
 
 namespace vm {
-class UsersController;
+class Messenger;
 
 class DownloadKeyState : public OperationState
 {
     Q_OBJECT
 
 public:
-    DownloadKeyState(UsersController *usersController, QState *parent);
+    DownloadKeyState(Messenger *messenger, QState *parent);
 
     Q_INVOKABLE void downloadKey(const QString &username, const QString &password);
 
 private:
-    UsersController *m_usersController;
+    Messenger *m_messenger;
 };
 } // namespace vm
 

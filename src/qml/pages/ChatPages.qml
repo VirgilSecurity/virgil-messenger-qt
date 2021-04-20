@@ -9,8 +9,6 @@ import "../theme"
 Item {
     id: root
 
-    readonly property bool isChatOpened: !controllers.chats.current.isNull
-
     signal newChatRequested()
     signal newGroupChatRequested()
     signal infoRequested()
@@ -23,44 +21,42 @@ Item {
     }
 
     Component {
-        id: chatSplitView
-        ChatSplitView {
+        id: splitViewComponent
+        ChatPagesSplitView {
             anchors.fill: parent
-            isChatOpened: root.isChatOpened
 
-            onNewChatRequested: root.newChatRequested
-            onNewGroupChatRequested: root.newGroupChatRequested
-            onInfoRequested: root.infoRequested
+            onNewChatRequested: root.newChatRequested()
+            onNewGroupChatRequested: root.newGroupChatRequested()
+            onInfoRequested: root.infoRequested()
         }
     }
 
     Component {
-        id: chatStackView
-        ChatStackView {
+        id: stackViewComponent
+        ChatPagesStackView {
             anchors.fill: parent
-            isChatOpened: root.isChatOpened
 
-            onNewChatRequested: root.newChatRequested
-            onNewGroupChatRequested: root.newGroupChatRequested
-            onInfoRequested: root.infoRequested
+            onNewChatRequested: root.newChatRequested()
+            onNewGroupChatRequested: root.newGroupChatRequested()
+            onInfoRequested: root.infoRequested()
         }
     }
 
     Loader {
         id: loader
         anchors.fill: parent
-        sourceComponent: d.isLandscapeMode ? chatSplitView : chatStackView
+        sourceComponent: d.isLandscapeMode ? splitViewComponent : stackViewComponent
 
-        onItemChanged: root.enterState()
+        onItemChanged: window.updateAppState()
     }
 
     function navigateBack(transition) {
-        if (isChatOpened) {
+        if (controllers.chats.current.id.length > 0) {
             controllers.chats.closeChat()
             return true
         }
         return false
     }
 
-    function enterState() { loader.item.enterState() }
+    function currentPage() { return loader.item.currentPage() }
 }

@@ -56,7 +56,6 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
 
     connect(messenger, &Messenger::signInErrorOccured, this, &Self::signInErrorOccured);
     connect(messenger, &Messenger::signUpErrorOccured, this, &Self::signUpErrorOccured);
-    connect(messenger, &Messenger::downloadKeyFailed, this, &Self::downloadKeyFailed);
 
     connect(messenger, &Messenger::userWasFound, this, &Self::onUpdateContactsWithUser);
 
@@ -67,7 +66,7 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
     auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
     connect(this, &Self::signInErrorOccured, notifyAboutError);
     connect(this, &Self::signUpErrorOccured, notifyAboutError);
-    connect(this, &Self::downloadKeyFailed, notifyAboutError);
+    connect(messenger, &Messenger::downloadKeyFailed, notifyAboutError);
     connect(userDatabase, &UserDatabase::errorOccurred, notifyAboutError);
 
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
@@ -86,11 +85,6 @@ void Self::signUp(const QString &username)
 void Self::signOut()
 {
     m_messenger->signOut();
-}
-
-void Self::downloadKey(const QString &username, const QString &password)
-{
-    m_messenger->downloadKey(username, password);
 }
 
 QString UsersController::currentUserId() const

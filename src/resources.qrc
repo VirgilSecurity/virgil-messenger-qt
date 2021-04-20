@@ -11,8 +11,8 @@
         <file>qml/pages/ChatListPage.qml</file>
         <file>qml/pages/ChatPage.qml</file>
         <file>qml/pages/ChatPages.qml</file>
-        <file>qml/pages/ChatSplitView.qml</file>
-        <file>qml/pages/ChatStackView.qml</file>
+        <file>qml/pages/ChatPagesSplitView.qml</file>
+        <file>qml/pages/ChatPagesStackView.qml</file>
         <file>qml/pages/CloudFileInfoMainPage.qml</file>
         <file>qml/pages/CloudFileInfoPages.qml</file>
         <file>qml/pages/CloudFileListPage.qml</file>

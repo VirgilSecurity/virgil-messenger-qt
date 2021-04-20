@@ -8,9 +8,9 @@ NavigationStackView {
         id: mainComponent
         MainPage {
             onAccountSettingsRequested: root.navigatePush(accountSettingsComponent)
-//            onNewChatRequested: root.navigatePush(newChatComponent)
-//            onNewGroupChatRequested: root.navigatePush(newGroupChatComponent)
-//            onChatInfoRequested: root.navigatePush(chatInfoComponent)
+            onNewChatRequested: root.navigatePush(newChatComponent)
+            onNewGroupChatRequested: root.navigatePush(newGroupChatComponent)
+            onChatInfoRequested: root.navigatePush(chatInfoComponent)
             onCloudFileSharingRequested: root.navigatePush(cloudFileInfoComponent)
             onCloudFileSetMembersRequested: root.navigatePush(setCloudFolderMembersComponent, { "name": name })
         }
@@ -19,7 +19,7 @@ NavigationStackView {
     Component {
         id: accountSelectionComponent
         AccountSelectionPages {
-            onChatListRequested: root.openChatList()
+            onChatListRequested: d.openChatList()
         }
     }
 
@@ -33,14 +33,14 @@ NavigationStackView {
     Component {
         id: newChatComponent
         NewChatPage {
-            onCreated: window.navigateBack()
+            onCreated: d.openChatList()
         }
     }
 
     Component {
         id: newGroupChatComponent
         NewGroupChatPages {
-            onCreated: window.navigateBack()
+            onCreated: d.openChatList()
         }
     }
 
@@ -68,17 +68,19 @@ NavigationStackView {
         }
     }
 
-    Component.onCompleted: {
-        var appState = app.stateManager.startState
-        appState.chatListRequested.connect(root.openChatList)
-        appState.accountSelectionRequested.connect(root.openAccountSelection)
-
-        controllers.users.signedIn.connect(root.openChatList)
-        controllers.users.signedOut.connect(root.openAccountSelection)
-        controllers.users.signInErrorOccured.connect(root.openAccountSelection)
+    QtObject {
+        id: d
+        function openChatList() { navigateReplace(mainComponent) }
+        function openAccountSelection() { navigateReplace(accountSelectionComponent) }
     }
 
-    function openChatList() { navigateReplace(mainComponent) }
+    Component.onCompleted: {
+        var appState = app.stateManager.startState
+        appState.chatListRequested.connect(d.openChatList)
+        appState.accountSelectionRequested.connect(d.openAccountSelection)
 
-    function openAccountSelection() { navigateReplace(accountSelectionComponent) }
+        controllers.users.signedIn.connect(d.openChatList)
+        controllers.users.signedOut.connect(d.openAccountSelection)
+        controllers.users.signInErrorOccured.connect(d.openAccountSelection)
+    }
 }

@@ -62,8 +62,6 @@ public:
     Q_INVOKABLE void signUp(const QString &username);
     Q_INVOKABLE void signOut();
 
-    void downloadKey(const QString &username, const QString &password);
-
     QString currentUserId() const;
     QString currentUsername() const;
 
@@ -72,7 +70,6 @@ signals:
     void signedOut();
     void signInErrorOccured(const QString &errorText);
     void signUpErrorOccured(const QString &errorText);
-    void downloadKeyFailed(const QString &errorText);
 
     void notificationCreated(const QString &notification, const bool error) const;
 

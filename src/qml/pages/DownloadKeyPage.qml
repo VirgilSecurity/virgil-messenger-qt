@@ -34,7 +34,7 @@ OperationPage {
 
         FormPrimaryButton {
             text: qsTr("Decrypt")
-            onClicked: appState.downloadKey(root.username, password.text)
+            onClicked: messenger.downloadKey(root.username, password.text)
         }
     }
 }

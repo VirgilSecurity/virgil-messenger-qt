@@ -79,7 +79,6 @@ Page {
         }
     }
 
-    // TODO(fpohtmeh): implement without timer
     Timer {
         interval: 10
 
@@ -99,8 +98,6 @@ Page {
 
     Connections {
         target: models.messages
-
-        // FIXME(fpohtmeh): recreate page every time, remove messagesReset and focus timer
         function onMessagesReset() { messageInput.clear() }
     }
 }

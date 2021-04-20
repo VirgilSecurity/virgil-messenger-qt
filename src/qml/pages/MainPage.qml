@@ -53,9 +53,9 @@ Page {
             }
 
             function navigateBack(transition) { return itemAt(currentIndex).navigateBack(transition) }
+            function currentPage() { return itemAt(currentIndex).currentPage() }
 
-            onCurrentIndexChanged: itemAt(currentIndex).enterState()
-            Component.onCompleted: chatPages.enterState()
+            onCurrentIndexChanged: window.updateAppState()
         }
     }
 
@@ -79,4 +79,7 @@ Page {
     }
 
     function navigateBack(transition) { return stackLayout.navigateBack(transition) }
+    function currentPage() { return stackLayout.currentPage() }
+
+    Component.onCompleted: window.updateAppState()
 }

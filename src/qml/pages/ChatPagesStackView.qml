@@ -4,7 +4,8 @@ import QtQuick.Controls 2.15
 NavigationStackView {
     id: root
 
-    property bool isChatOpened: false
+    readonly property string chatId: controllers.chats.current.id
+    readonly property bool isChatOpened: chatId.length > 0
 
     signal newChatRequested()
     signal newGroupChatRequested()
@@ -38,10 +39,5 @@ NavigationStackView {
         } else {
             navigateBack()
         }
-    }
-
-    function enterState() {
-        const appState = currentItem.appState
-        app.stateManager.enterState(appState)
     }
 }

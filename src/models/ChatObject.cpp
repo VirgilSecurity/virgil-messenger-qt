@@ -47,25 +47,30 @@ Self::ChatObject(Messenger *messenger, QObject *parent)
 
 void Self::setChat(const ModifiableChatHandler &chat)
 {
+    const auto oldId = id();
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
-    const auto oldIsNull = isNull();
     m_chat = chat;
     m_groupMembersModel->setGroupMembers({});
+    if (oldId != id()) {
+        emit idChanged(id());
+    }
     if (oldTitle != title()) {
         emit titleChanged(title());
     }
     if (oldIsGroup != isGroup()) {
         emit isGroupChanged(isGroup());
     }
-    if (oldIsNull != isNull()) {
-        emit isNullChanged(isNull());
-    }
 }
 
 ChatHandler Self::chat() const
 {
     return m_chat;
+}
+
+QString Self::id() const
+{
+    return m_chat ? m_chat->id() : QString();
 }
 
 QString Self::title() const
@@ -119,9 +124,4 @@ void Self::setLastActivityText(const QString &text)
     }
     m_lastActivityText = text;
     emit lastActivityTextChanged(text);
-}
-
-bool Self::isNull() const
-{
-    return m_chat == nullptr;
 }

@@ -57,10 +57,10 @@ ApplicationWindow {
         }
     }
 
-    // FIXME(fpohtmeh): remove test code
     Shortcut {
         sequence: "Esc"
         onActivated: window.navigateBack()
+        enabled: settings.devMode
     }
 
     MainView {
@@ -83,7 +83,6 @@ ApplicationWindow {
                 bottomMargin: Theme.smallMargin
                 leftMargin: Theme.smallMargin
             }
-
         }
 
         AttachmentPicker { id: attachmentPicker }
@@ -94,6 +93,11 @@ ApplicationWindow {
 
     function navigateBack(transition) {
         return attachmentPreview.navigateBack(transition) || mainView.navigateBack(transition)
+    }
+
+    function updateAppState() {
+        const page = mainView.currentPage()
+        app.stateManager.enterState(page ? page.appState : null)
     }
 
     Component.onCompleted: {

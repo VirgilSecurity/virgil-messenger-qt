@@ -63,7 +63,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_editProfileState(new EditProfileState(controllers->users(), this)),
       m_verifyProfileState(new VerifyProfileState(this)),
       m_chatState(new ChatState(controllers, m_messenger, this)),
-      m_downloadKeyState(new DownloadKeyState(controllers->users(), this)),
+      m_downloadKeyState(new DownloadKeyState(m_messenger, this)),
       m_cloudFileListState(new CloudFileListState(messenger, controllers->cloudFiles(), this)),
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
       m_groupChatMembersState(new GroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),

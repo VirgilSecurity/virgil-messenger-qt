@@ -136,5 +136,5 @@ Rectangle {
         return false
     }
 
-    function enterState() { app.stateManager.enterState(appState) }
+    function currentPage() { return root }
 }

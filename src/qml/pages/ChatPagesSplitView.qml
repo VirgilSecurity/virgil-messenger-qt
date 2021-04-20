@@ -6,7 +6,8 @@ import "../theme"
 SplitView {
     id: root
 
-    property bool isChatOpened: false
+    readonly property string chatId: controllers.chats.current.id
+    readonly property bool isChatOpened: chatId.length > 0
     readonly property var lm: Theme.landscapeMode
 
     signal newChatRequested()
@@ -52,8 +53,7 @@ SplitView {
         SplitView.fillWidth: true
     }
 
-    function enterState() {
-        const appState = (isChatOpened ? chatPage : chatListPage).appState
-        app.stateManager.enterState(appState)
+    function currentPage() {
+        return isChatOpened ? chatPage : chatListPage
     }
 }
