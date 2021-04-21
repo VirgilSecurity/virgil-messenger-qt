@@ -59,7 +59,7 @@ void Self::hideNativeSplashScreen()
 #endif
 }
 
-void Self::updateUi()
+void Self::trySignIn()
 {
     hideNativeSplashScreen();
 

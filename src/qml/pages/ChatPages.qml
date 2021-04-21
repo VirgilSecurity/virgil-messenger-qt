@@ -48,6 +48,8 @@ Item {
         sourceComponent: d.isLandscapeMode ? splitViewComponent : stackViewComponent
     }
 
+    Component.onCompleted: controllers.chats.groupInvitationRejected.connect(window.navigateBack)
+
     function navigateBack(transition) {
         if (controllers.chats.current.id.length > 0) {
             controllers.chats.closeChat()

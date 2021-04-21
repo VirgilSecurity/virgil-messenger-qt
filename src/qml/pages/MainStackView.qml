@@ -78,6 +78,6 @@ NavigationStackView {
         var appState = app.stateManager.startState
         appState.chatListRequested.connect(d.openChatList)
         appState.accountSelectionRequested.connect(d.openAccountSelection)
-        appState.updateUi()
+        appState.trySignIn()
     }
 }
