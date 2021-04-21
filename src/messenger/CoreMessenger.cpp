@@ -666,7 +666,7 @@ void Self::onSuspend()
         //
         //  Setting QXmppPresence::Unavailable also call the disconnectFromServer() function underneath.
         //
-        QXmppPresence presenceAway(QXmppPresence::Unavailable);
+        QXmppPresence presenceAway(QXmppPresence::Available);
         presenceAway.setAvailableStatusType(QXmppPresence::XA);
         m_impl->xmpp->setClientPresence(presenceAway);
     }
@@ -1085,6 +1085,10 @@ void Self::connectXmppServer()
         return;
     }
 
+    const auto jwtExpiresAt = vssq_ejabberd_jwt_expires_at(jwt);
+    qCDebug(lcCoreMessenger) << "XMPP credentials token will expire at: "
+                             << QDateTime::fromTime_t(jwtExpiresAt).toLocalTime();
+
     QString xmppPass = vsc_str_to_qstring(vssq_ejabberd_jwt_as_string(jwt));
 
     qCDebug(lcCoreMessenger) << "Connect user with JID:" << currentUserJid();
@@ -1093,7 +1097,7 @@ void Self::connectXmppServer()
     config.setJid(currentUserJid());
     config.setHost(CustomerEnv::xmppServiceUrl());
     config.setPassword(xmppPass);
-    config.setAutoReconnectionEnabled(false);
+    config.setAutoReconnectionEnabled(true);
     config.setAutoAcceptSubscriptions(true);
 
     resetXmppConfiguration();
