@@ -46,9 +46,6 @@ class NewChatState : public SelectContactsState
 
 public:
     NewChatState(ChatsController *chatsController, DiscoveredContactsModel *contactsModel, QState *parent);
-
-signals:
-    void addNewChatWithUsername(const QString &username);
 };
 } // namespace vm
 

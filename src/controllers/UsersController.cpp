@@ -49,55 +49,24 @@ using Self = UsersController;
 Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent), m_messenger(messenger), m_userDatabase(userDatabase)
 {
-    connect(messenger, &Messenger::signedIn, this, &Self::onSignedIn);
-    connect(messenger, &Messenger::signedUp, this, &Self::onSignedIn);
-    connect(messenger, &Messenger::keyDownloaded, this, &Self::onSignedIn);
-    connect(messenger, &Messenger::signedOut, this, &Self::onSignedOut);
+    connect(messenger, &Messenger::signInStarted, userDatabase, &UserDatabase::open);
+    connect(messenger, &Messenger::signedUp, userDatabase, &UserDatabase::open);
+    connect(messenger, &Messenger::keyDownloaded, userDatabase, &UserDatabase::open);
+    connect(messenger, &Messenger::signedOut, userDatabase, &UserDatabase::close);
 
-    connect(messenger, &Messenger::signInErrorOccured, this, &Self::signInErrorOccured);
-    connect(messenger, &Messenger::signUpErrorOccured, this, &Self::signUpErrorOccured);
-    connect(messenger, &Messenger::downloadKeyFailed, this, &Self::downloadKeyFailed);
+    connect(userDatabase, &UserDatabase::opened, this, &Self::updateCurrentUser);
 
-    connect(messenger, &Messenger::userWasFound, this, &Self::onUpdateContactsWithUser);
-
-    connect(userDatabase, &UserDatabase::opened, this, &Self::onFinishSignIn);
-    connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
-    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::databaseErrorOccurred);
-
-    auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
-    connect(this, &Self::signInErrorOccured, notifyAboutError);
-    connect(this, &Self::signUpErrorOccured, notifyAboutError);
-    connect(this, &Self::downloadKeyFailed, notifyAboutError);
-    connect(this, &Self::databaseErrorOccurred, notifyAboutError);
+    connect(messenger, &Messenger::userWasFound, this, &Self::updateContactsWithUser);
+    connect(userDatabase, &UserDatabase::errorOccurred, messenger, &Messenger::signOut);
 
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
-}
 
-void Self::signIn(const QString &username)
-{
-    setNextUsername(username);
-    m_messenger->signIn(username);
-}
-
-void Self::signUp(const QString &username)
-{
-    setNextUsername(username);
-    m_messenger->signUp(username);
-}
-
-void Self::signOut()
-{
-    m_messenger->signOut();
-}
-
-void Self::requestAccountSettings(const QString &username)
-{
-    emit accountSettingsRequested(username);
-}
-
-void Self::downloadKey(const QString &username, const QString &password)
-{
-    m_messenger->downloadKey(username, password);
+    // Notifications
+    auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
+    connect(messenger, &Messenger::signInErrorOccured, notifyAboutError);
+    connect(messenger, &Messenger::signUpErrorOccured, notifyAboutError);
+    connect(messenger, &Messenger::downloadKeyFailed, notifyAboutError);
+    connect(userDatabase, &UserDatabase::errorOccurred, notifyAboutError);
 }
 
 QString UsersController::currentUserId() const
@@ -112,43 +81,12 @@ QString UsersController::currentUsername() const
     return currentUser ? currentUser->username() : QString();
 }
 
-void UsersController::setNextUsername(const QString &username)
-{
-    m_nextUsername = username;
-    emit nextUsernameChanged(username);
-}
-
-QString UsersController::nextUsername() const
-{
-    return m_nextUsername;
-}
-
-void Self::onSignedIn(const QString &username)
-{
-    m_userDatabase->open(username);
-}
-
-void Self::onSignedOut()
-{
-    m_userDatabase->close();
-}
-
-void Self::onFinishSignIn()
+void Self::updateCurrentUser()
 {
     const auto user = m_messenger->currentUser();
-
-    onUpdateContactsWithUser(user);
-
-    // TODO: Do we really need to duplicate signals?
-    emit signedIn(user->username());
-
+    updateContactsWithUser(user);
     emit currentUserIdChanged(user->id());
     emit currentUsernameChanged(user->username());
-}
-
-void Self::onFinishSignOut()
-{
-    emit signedOut();
 }
 
 void Self::onChatAdded(const ChatHandler &chat)
@@ -158,11 +96,9 @@ void Self::onChatAdded(const ChatHandler &chat)
     }
 }
 
-void Self::onUpdateContactsWithUser(const UserHandler &user)
+void Self::updateContactsWithUser(const UserHandler &user)
 {
-    Contact contact;
-    contact.setUserId(user->id());
+    Contact contact(user->id());
     contact.setUsername(user->username());
-
     m_userDatabase->contactsTable()->addContact(contact);
 }

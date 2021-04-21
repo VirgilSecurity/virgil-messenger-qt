@@ -109,6 +109,7 @@ void Self::addMembers(const Contacts &contacts)
     const auto groupMembers = ContactsToGroupMembers(groupId, contacts);
     qCWarning(lcController) << "ChatsController::addMembers is under development"
                             << Utils::printableContactsList(contacts);
+    emit groupMembersAdded();
 }
 
 void Self::removeSelectedMembers()
@@ -116,12 +117,6 @@ void Self::removeSelectedMembers()
     const GroupId groupId(currentChat()->id());
     const auto groupMembers = m_chatObject->selectedGroupMembers();
     qCWarning(lcController) << "ChatsController::removeSelectedMembers is under development";
-}
-
-void Self::leaveGroup()
-{
-    const GroupId groupId(currentChat()->id());
-    qCWarning(lcController) << "ChatsController::leaveGroup is under development";
 }
 
 void Self::loadChats()

@@ -46,8 +46,6 @@ using namespace vm;
 ChatState::ChatState(Controllers *controllers, Messenger *messenger, QState *parent)
     : QState(parent), m_controllers(controllers)
 {
-    connect(m_controllers->attachments(), &AttachmentsController::openPreviewRequested, this,
-            &ChatState::requestPreview);
     connect(messenger, &Messenger::messageSent, this, &ChatState::onMessageSent);
 }
 

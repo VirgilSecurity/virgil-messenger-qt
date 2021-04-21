@@ -92,11 +92,11 @@ public:
     //
     // User control.
     //
-    void signIn(const QString &username);
-    void signOut();
-    void signUp(const QString &username);
-    void backupKey(const QString &password, const QString &confirmedPassword);
-    void downloadKey(const QString &username, const QString &password);
+    Q_INVOKABLE void signIn(const QString &username);
+    Q_INVOKABLE void signOut();
+    Q_INVOKABLE void signUp(const QString &username);
+    Q_INVOKABLE void backupKey(const QString &password, const QString &confirmedPassword);
+    Q_INVOKABLE void downloadKey(const QString &username, const QString &password);
 
     //
     //  Attachment control.
@@ -159,6 +159,7 @@ signals:
     //--
     // Sign-in.
     //
+    void signInStarted(const QString &username);
     void signedIn(const QString &username);
     void signInErrorOccured(const QString &errorText);
     void signedUp(const QString &username);

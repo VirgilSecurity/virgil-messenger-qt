@@ -46,13 +46,9 @@ class BackupKeyState : public OperationState
 public:
     BackupKeyState(Messenger *messenger, QState *parent);
 
-signals:
-    void backupKey(const QString &password, const QString &confirmedPassword);
-    void keyBackuped(const QString &userId);
+    Q_INVOKABLE void backupKey(const QString &password, const QString &confirmedPassword);
 
 private:
-    void processBackupKey(const QString &password, const QString &confirmedPassword);
-
     Messenger *m_messenger;
 };
 } // namespace vm

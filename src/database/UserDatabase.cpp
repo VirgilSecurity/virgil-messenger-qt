@@ -198,9 +198,7 @@ void Self::onOpen(const QString &username)
         const QString fileName = QString("user-%1.sqlite3").arg(username);
         const QString filePath(m_databaseDir.filePath(fileName));
 
-        if (Database::open(filePath, username + QLatin1String("-messenger"))) {
-            emit opened();
-        } else {
+        if (!Database::open(filePath, username + QLatin1String("-messenger"))) {
             emit errorOccurred(tr("Can not open database with users"));
         }
     }

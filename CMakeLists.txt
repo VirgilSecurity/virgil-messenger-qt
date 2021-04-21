@@ -492,32 +492,22 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
         ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FileUtils.h
         # Applications states
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSelectionState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/AccountSettingsState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/AddGroupChatMembersState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/AddCloudFolderMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/AttachmentPreviewState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileListState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFileSharingState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/CloudFolderMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/EditChatInfoState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/EditProfileState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatInfoState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatListState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ChatState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/DownloadKeyState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/GroupChatMembersState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/OperationState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/NewChatState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/NewCloudFolderMembersState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/NewGroupChatState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/NameGroupChatState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/RestoreAccountUsernameState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInAsState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/SignInUsernameState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignUpState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/StartState.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/include/database/core/Database.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/core/DatabaseTable.h
@@ -707,31 +697,21 @@ target_sources(${VS_TARGET_NAME}
         # Helpers
         ${CMAKE_CURRENT_LIST_DIR}/src/helpers/FileUtils.cpp
         # Applications states
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSelectionState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/AccountSettingsState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/AddGroupChatMembersState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/AddCloudFolderMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/AttachmentPreviewState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/EditChatInfoState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/EditProfileState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/VerifyProfileState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatInfoState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatListState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/GroupChatMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ChatState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFileListState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFileSharingState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/CloudFolderMembersState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/DownloadKeyState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/NewChatState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/NewCloudFolderMembersState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/NewGroupChatState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/NameGroupChatState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/RestoreAccountUsernameState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInAsState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/SignInUsernameState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/StartState.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/states/VerifyProfileState.cpp
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/Database.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/DatabaseTable.cpp

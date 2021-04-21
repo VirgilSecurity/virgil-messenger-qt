@@ -1,3 +1,4 @@
 module Base
 singleton Platform 1.0 Platform.qml
 singleton AttachmentTypes 1.0 AttachmentTypes.qml
+singleton ConfirmationCodeTypes 1.0 ConfirmationCodeTypes.qml

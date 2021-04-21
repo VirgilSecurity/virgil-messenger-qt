@@ -35,16 +35,21 @@
 #include "StartState.h"
 
 #include "android/VSQAndroid.h"
+#include "Messenger.h"
 #include "Settings.h"
-#include "UsersController.h"
 
 using namespace vm;
 using Self = StartState;
 
-Self::StartState(UsersController *controller, Settings *settings, QState *parent)
-    : QState(parent), m_controller(controller), m_settings(settings)
+Self::StartState(Messenger *messenger, Settings *settings, QState *parent)
+    : QState(parent), m_messenger(messenger), m_settings(settings)
 {
-    connect(this, &Self::requestUi, this, &Self::onRequestUi, Qt::QueuedConnection);
+    connect(messenger, &Messenger::signedIn, this, &Self::chatListRequested);
+    connect(messenger, &Messenger::signedUp, this, &Self::chatListRequested);
+    connect(messenger, &Messenger::keyDownloaded, this, &Self::chatListRequested);
+
+    connect(messenger, &Messenger::signedOut, this, &Self::accountSelectionRequested);
+    connect(messenger, &Messenger::signInErrorOccured, this, &Self::accountSelectionRequested);
 }
 
 void Self::hideNativeSplashScreen()
@@ -54,7 +59,7 @@ void Self::hideNativeSplashScreen()
 #endif
 }
 
-void Self::onRequestUi()
+void Self::trySignIn()
 {
     hideNativeSplashScreen();
 
@@ -62,7 +67,7 @@ void Self::onRequestUi()
     if (username.isEmpty() || m_settings->userCredential(username).isEmpty()) {
         emit accountSelectionRequested();
     } else {
-        m_controller->signIn(username);
+        m_messenger->signIn(username);
         emit chatListRequested();
     }
 }

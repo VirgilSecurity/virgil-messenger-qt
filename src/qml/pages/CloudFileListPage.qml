@@ -7,12 +7,17 @@ import "../components/Dialogs"
 import "../theme"
 
 Rectangle {
+    id: root
     color: Theme.contactsBackgroundColor
+
+    readonly property var appState: app.stateManager.cloudFileListState
+
+    signal newFolderRequested(string name)
+    signal newSharedFolderRequested(string name)
+    signal sharingRequested()
 
     QtObject {
         id: d
-        readonly property var manager: app.stateManager
-        readonly property var state: d.manager.cloudFileListState
         readonly property bool online: messenger.connectionStateString === "connected"
         readonly property int cloudFilesCount: models.cloudFiles.count
         readonly property int cloudFilesSelectedCount: models.cloudFiles.selection.selectedCount
@@ -51,7 +56,7 @@ Rectangle {
 
             ContextMenuItem {
                 text: qsTr("Share")
-                onTriggered: appState.requestSharingInfo();
+                onTriggered: root.sharingRequested();
                 visible: d.cloudFolder.isShared
                 enabled: d.online
             }
@@ -101,16 +106,6 @@ Rectangle {
             anchors.fill: parent
         }
 
-        Connections {
-            target: attachmentPicker
-
-            function onPicked(fileUrls, attachmentType) {
-                if (d.manager.currentState === d.state) {
-                    controllers.cloudFiles.addFiles(fileUrls)
-                }
-            }
-        }
-
         TransfersPanel {
             model: models.cloudFilesTransfers
             buttonVisible: !controllers.cloudFiles.isLoading
@@ -125,6 +120,21 @@ Rectangle {
 
         CreateCloudFolderDialog {
             id: createCloudFolderDialog
+            onNewFolderRequested: root.newFolderRequested(name)
+            onNewSharedFolderRequested: root.newSharedFolderRequested(name)
         }
     }
+
+    function navigateBack(transition) {
+        if (d.cloudFilesSelectedCount) {
+            models.cloudFiles.selection.clear()
+            return true
+        } else if (!controllers.cloudFiles.isRoot) {
+            controllers.cloudFiles.switchToParentFolder()
+            return true
+        }
+        return false
+    }
+
+    Component.onCompleted: appState.switchToRootFolder()
 }
