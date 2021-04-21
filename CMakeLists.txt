@@ -51,7 +51,7 @@ set(VERSIONMAJOR "3")
 set(VERSIONMINOR "10")
 set(VERSIONBUILD "11")
 set(VS_TARGET_VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}")
-set(VS_CORE_VERSION "0.2.1.93")
+set(VS_CORE_VERSION "0.2.1.94")
 set(VERSION_DATABASE_SCHEME "3")
 
 # ---------------------------------------------------------------------------
