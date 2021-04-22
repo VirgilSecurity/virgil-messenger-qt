@@ -32,39 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "TimeProfiler.h"
+#ifndef VM_MESSAGES_QUEUE_LISTENERS_H
+#define VM_MESSAGES_QUEUE_LISTENERS_H
 
-Q_LOGGING_CATEGORY(lcTimeProfiler, "time-profiler")
+#include "OperationQueueListener.h"
 
-using namespace vm;
-using Self = TimeProfiler;
+#include <QLoggingCategory>
+#include <QMutex>
 
-void Self::start()
+Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueueListener);
+
+namespace vm {
+//
+// Listener that skips non-unique message download operations
+//
+class UniqueMessageDownloadOperationFilter : public OperationQueueListener
 {
-    m_timer.start();
-}
+    Q_OBJECT
 
-void Self::stop()
-{
-    m_timer.invalidate();
-}
+public:
+    using OperationQueueListener::OperationQueueListener;
 
-bool Self::isStarted() const
-{
-    return m_timer.isValid();
-}
+private:
+    bool preRun(OperationSourcePtr source) override;
+    void postRun(OperationSourcePtr source) override;
 
-qint64 Self::elapsed() const
-{
-    return m_timer.elapsed();
-}
+    QStringList m_ids;
+    QMutex m_mutex;
+};
+} // namespace vm
 
-void Self::printMessage(const QString &message)
-{
-    printMessageWithOptions(message, elapsed());
-}
-
-void TimeProfiler::printMessageWithOptions(const QString &message, qint64 elapsed)
-{
-    qCInfo(lcTimeProfiler) << "Elapsed:" << elapsed << message;
-}
+#endif // VM_MESSAGES_QUEUE_LISTENERS_H

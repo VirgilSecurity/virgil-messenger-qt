@@ -36,12 +36,19 @@
 
 #include "operations/MessageOperation.h"
 #include "MessageUpdate.h"
+#include "Settings.h"
 
 using namespace vm;
 
-LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent) : NetworkOperation(parent)
+LoadAttachmentOperation::LoadAttachmentOperation(MessageOperation *parent, const Settings *settings)
+    : NetworkOperation(parent), m_settings(settings)
 {
     setName(QLatin1String("LoadAttachment"));
+
+    if (settings->timeProfilerEnabled()) {
+        setTimeProfiler(&m_loadTimeProfiler);
+        m_loadTimeProfiler.start();
+    }
 
     connect(this, &LoadAttachmentOperation::totalProgressChanged, [parent](quint64 bytesLoaded, quint64 bytesTotal) {
         Q_UNUSED(bytesTotal)

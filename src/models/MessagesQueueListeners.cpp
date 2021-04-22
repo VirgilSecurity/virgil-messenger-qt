@@ -32,39 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "TimeProfiler.h"
+#include "MessagesQueueListeners.h"
 
-Q_LOGGING_CATEGORY(lcTimeProfiler, "time-profiler")
+#include "MessageOperationSource.h"
+
+Q_LOGGING_CATEGORY(lcMessagesQueueListener, "messages-listener");
 
 using namespace vm;
-using Self = TimeProfiler;
 
-void Self::start()
+bool UniqueMessageDownloadOperationFilter::preRun(OperationSourcePtr source)
 {
-    m_timer.start();
+    const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
+    if (messageSource->download()) {
+        const auto id = messageSource->message()->id();
+        QMutexLocker locker(&m_mutex);
+        if (!m_ids.contains(id)) {
+            m_ids.push_back(id);
+            return true;
+        }
+        qCDebug(lcMessagesQueueListener) << "Skipped duplicated download for message" << id;
+        return false;
+    }
+    return true;
 }
 
-void Self::stop()
+void UniqueMessageDownloadOperationFilter::postRun(OperationSourcePtr source)
 {
-    m_timer.invalidate();
-}
-
-bool Self::isStarted() const
-{
-    return m_timer.isValid();
-}
-
-qint64 Self::elapsed() const
-{
-    return m_timer.elapsed();
-}
-
-void Self::printMessage(const QString &message)
-{
-    printMessageWithOptions(message, elapsed());
-}
-
-void TimeProfiler::printMessageWithOptions(const QString &message, qint64 elapsed)
-{
-    qCInfo(lcTimeProfiler) << "Elapsed:" << elapsed << message;
+    const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
+    if (messageSource->download()) {
+        const auto id = messageSource->message()->id();
+        QMutexLocker locker(&m_mutex);
+        m_ids.removeAll(id);
+    }
 }

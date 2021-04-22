@@ -62,8 +62,6 @@ public:
     void printMessage(const QString &message);
     void printMessageWithOptions(const QString &message, qint64 elapsed);
 
-    SectionPtr createSection(const QString &name);
-
 private:
     QElapsedTimer m_timer;
 };

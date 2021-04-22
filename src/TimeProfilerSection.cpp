@@ -40,9 +40,11 @@ using namespace vm;
 using Self = TimeProfilerSection;
 
 TimeProfilerSection::TimeProfilerSection(const QString &name, TimeProfiler *profiler)
-    : m_preffix(QString("[%1] ").arg(name)), m_profiler(profiler), m_initialElapsed(profiler->elapsed())
+    : m_preffix(QString("[%1] ").arg(name)), m_profiler(profiler), m_initialElapsed(profiler ? profiler->elapsed() : 0)
 {
-    profiler->printMessageWithOptions(QLatin1String("Section started"), 0);
+    if (profiler) {
+        profiler->printMessageWithOptions(m_preffix + QLatin1String("Section started"), 0);
+    }
 }
 
 TimeProfilerSection::~TimeProfilerSection()
@@ -52,10 +54,12 @@ TimeProfilerSection::~TimeProfilerSection()
 
 void Self::printMessage(const QString &message)
 {
-    m_profiler->printMessageWithOptions(message, elapsed());
+    if (m_profiler) {
+        m_profiler->printMessageWithOptions(m_preffix + message, elapsed());
+    }
 }
 
 qint64 TimeProfilerSection::elapsed() const
 {
-    return m_profiler->elapsed() - m_initialElapsed;
+    return m_profiler ? (m_profiler->elapsed() - m_initialElapsed) : 0;
 }

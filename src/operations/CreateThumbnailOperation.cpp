@@ -37,6 +37,7 @@
 #include <QImageReader>
 
 #include "FileUtils.h"
+#include "TimeProfilerSection.h"
 #include "Utils.h"
 
 using namespace vm;
@@ -52,6 +53,9 @@ CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent, const QStrin
 
 void CreateThumbnailOperation::run()
 {
+    const auto profilerSectionName = QLatin1String("CreateThumbnail(%1)").arg(FileUtils::fileName(m_sourcePath));
+    TimeProfilerSection profilerSection(profilerSectionName, timeProfiler());
+
     if (m_sourceImage.isNull()) {
         QImageReader reader(m_sourcePath);
         QImage source;
@@ -59,23 +63,29 @@ void CreateThumbnailOperation::run()
             invalidateAndNotify(tr("Failed to read image for thumbnail"));
             return;
         }
+        profilerSection.printMessage(QLatin1String("Image was read"));
         m_sourceImage = Utils::applyOrientation(source, reader.transformation());
+        profilerSection.printMessage(QLatin1String("Image orientation was applied"));
     }
     const auto size = Utils::calculateThumbnailSize(m_sourceImage.size(), m_maxSize);
     if (size == m_sourceImage.size()) {
         if (FileUtils::fileExt(m_sourcePath) == FileUtils::fileExt(m_destPath)) {
             QFile::copy(m_sourcePath, m_destPath);
+            profilerSection.printMessage(QLatin1String("Image was copied"));
         } else {
             m_sourceImage.save(m_destPath);
+            profilerSection.printMessage(QLatin1String("Image was converted"));
         }
     } else {
         const auto dest =
                 m_sourceImage.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        profilerSection.printMessage(QLatin1String("Image was scaled"));
         if (!QImage(dest).save(m_destPath)) {
             qCDebug(lcOperation) << "Failed to save thumbnail file:" << m_destPath;
             invalidateAndNotify(tr("Failed to save thumbnail file"));
             return;
         }
+        profilerSection.printMessage(QLatin1String("Image was saved"));
     }
     emit thumbnailReady(m_destPath);
     finish();

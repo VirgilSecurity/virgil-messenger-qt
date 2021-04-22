@@ -559,6 +559,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueueListeners.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
@@ -765,6 +766,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueue.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueueListeners.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp

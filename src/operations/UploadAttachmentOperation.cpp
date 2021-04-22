@@ -47,9 +47,8 @@ using namespace vm;
 using Self = UploadAttachmentOperation;
 
 Self::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
-    : LoadAttachmentOperation(parent), m_parent(parent), m_settings(settings)
+    : LoadAttachmentOperation(parent, settings), m_parent(parent)
 {
-    setName(QString("UploadAttachment"));
 }
 
 bool Self::populateChildren()
@@ -88,9 +87,7 @@ void Self::populatePictureOperations()
     const auto factory = m_parent->factory();
 
     // Convert image to preffered format
-    const auto fileName =
-            QLatin1String("%1-%2").arg(m_settings->imageConversionFormat().mid(1),
-                                       attachment->id()); // image format without leading dot + attachment it
+    const auto fileName = QLatin1String("conv-%2").arg(attachment->id());
     auto convertOp = factory->populateConvertImageFormatOperation(this, attachment->localPath(), fileName);
     connect(convertOp, &ConvertImageFormatOperation::fileCreated, [this, message](const QString &filePath) {
         MessageAttachmentLocalPathUpdate update;

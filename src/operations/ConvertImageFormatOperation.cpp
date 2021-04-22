@@ -36,9 +36,10 @@
 
 #include <QImageReader>
 
-#include "Settings.h"
-#include "Utils.h"
 #include "FileUtils.h"
+#include "Settings.h"
+#include "TimeProfilerSection.h"
+#include "Utils.h"
 
 using namespace vm;
 
@@ -53,13 +54,18 @@ ConvertImageFormatOperation::ConvertImageFormatOperation(const Settings *setting
 
 void ConvertImageFormatOperation::run()
 {
+    const auto profilerSectionName = QLatin1String("ConvertImage(%1)").arg(FileUtils::fileName(m_sourcePath));
+    TimeProfilerSection profilerSection(profilerSectionName, timeProfiler());
+
     QImageReader reader(m_sourcePath);
     QImage source;
     if (!Utils::readImage(&reader, &source)) {
         invalidateAndNotify(tr("Failed to read image file"));
         return;
     }
+    profilerSection.printMessage(QLatin1String("Image was read"));
     const auto image = Utils::applyOrientation(source, reader.transformation());
+    profilerSection.printMessage(QLatin1String("Image orientation was applied"));
     emit imageRead(image);
 
     const QString format = m_settings->imageConversionFormat();
@@ -76,6 +82,7 @@ void ConvertImageFormatOperation::run()
             qCWarning(lcOperation) << "Converted image file exceeds file limit";
             invalidateAndNotify(tr("Converted image file exceeds file limit"));
         } else {
+            profilerSection.printMessage(QLatin1String("Image was saved"));
             qCDebug(lcOperation) << "File was converted to format";
             emit converted(filePath);
             emit fileCreated(filePath);
