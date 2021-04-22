@@ -36,6 +36,7 @@
 
 #include <QImageReader>
 
+#include "FileUtils.h"
 #include "Utils.h"
 
 using namespace vm;
@@ -62,7 +63,11 @@ void CreateThumbnailOperation::run()
     }
     const auto size = Utils::calculateThumbnailSize(m_sourceImage.size(), m_maxSize);
     if (size == m_sourceImage.size()) {
-        QFile::copy(m_sourcePath, m_destPath);
+        if (FileUtils::fileExt(m_sourcePath) == FileUtils::fileExt(m_destPath)) {
+            QFile::copy(m_sourcePath, m_destPath);
+        } else {
+            m_sourceImage.save(m_destPath);
+        }
     } else {
         const auto dest =
                 m_sourceImage.scaled(size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);

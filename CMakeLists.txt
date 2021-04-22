@@ -568,7 +568,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CloudFileOperation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ConvertToPngOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ConvertImageFormatOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentPreviewOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentThumbnailOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateCloudFolderOperation.h
@@ -770,7 +770,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CloudFileOperation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ConvertToPngOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ConvertImageFormatOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentPreviewOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentThumbnailOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateCloudFolderOperation.cpp

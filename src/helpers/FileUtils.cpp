@@ -180,6 +180,11 @@ QString FileUtils::fileName(const QString &filePath)
     return QFileInfo(filePath).fileName();
 }
 
+QString FileUtils::fileExt(const QString &filePath)
+{
+    return QFileInfo(filePath).completeSuffix();
+}
+
 QString Self::attachmentFileName(const QUrl &url, bool isPicture)
 {
     QString fileName;

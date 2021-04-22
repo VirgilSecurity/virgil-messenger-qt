@@ -88,13 +88,16 @@ public:
     QDir cloudFilesDownloadsDir(const QString &userName) const;
     QDir cloudFilesCacheDir() const;
 
+    QString imageConversionFormat() const;
     QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 
     // Modes / features
+
     bool devMode() const;
     bool autoSendCrashReport() const;
+    bool timeProfilerEnabled() const;
 
     // Window
     QRect windowGeometry() const;

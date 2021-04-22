@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/ConvertToPngOperation.h"
+#include "operations/ConvertImageFormatOperation.h"
 
 #include <QImageReader>
 
@@ -42,16 +42,16 @@
 
 using namespace vm;
 
-ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath,
-                                             const QString &destFileName, QObject *parent)
-    : Operation(QLatin1String("ConvertToPng"), parent),
+ConvertImageFormatOperation::ConvertImageFormatOperation(const Settings *settings, const QString &sourcePath,
+                                                         const QString &destFileName, QObject *parent)
+    : Operation(QLatin1String("ConvertImageFormat"), parent),
       m_settings(settings),
       m_sourcePath(sourcePath),
       m_destFileName(destFileName)
 {
 }
 
-void ConvertToPngOperation::run()
+void ConvertImageFormatOperation::run()
 {
     QImageReader reader(m_sourcePath);
     QImage source;
@@ -62,20 +62,21 @@ void ConvertToPngOperation::run()
     const auto image = Utils::applyOrientation(source, reader.transformation());
     emit imageRead(image);
 
-    const bool isPngFile = QFileInfo(m_sourcePath).completeSuffix().toLower() == QLatin1String(".png");
-    if (isPngFile) {
+    const QString format = m_settings->imageConversionFormat();
+    const bool isConverted = FileUtils::fileExt(m_sourcePath).toLower() == format;
+    if (isConverted) {
         emit converted(m_sourcePath);
         finish();
     } else {
-        const auto filePath = m_settings->attachmentCacheDir().filePath(m_destFileName + QLatin1String(".png"));
+        const auto filePath = m_settings->attachmentCacheDir().filePath(m_destFileName + format);
         if (!image.save(filePath)) {
-            qCWarning(lcOperation) << "Unable to save png file";
-            invalidateAndNotify(tr("Failed to convert to png"));
+            qCWarning(lcOperation) << "Unable to save converted file";
+            invalidateAndNotify(tr("Failed to convert image file"));
         } else if (!FileUtils::fileExists(filePath)) {
-            qCWarning(lcOperation) << "Png file exceeds file limit";
-            invalidateAndNotify(tr("Png file exceeds file limit"));
+            qCWarning(lcOperation) << "Converted image file exceeds file limit";
+            invalidateAndNotify(tr("Converted image file exceeds file limit"));
         } else {
-            qCDebug(lcOperation) << "File was converted to png";
+            qCDebug(lcOperation) << "File was converted to format";
             emit converted(filePath);
             emit fileCreated(filePath);
             finish();
