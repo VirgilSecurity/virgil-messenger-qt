@@ -54,7 +54,22 @@ bool Self::isStarted() const
     return m_timer.isValid();
 }
 
-void Self::printElapsedTime(const QString &message)
+qint64 Self::elapsed() const
 {
-    qCInfo(lcTimeProfiler) << QLatin1String("Elapsed:") << m_timer.elapsed() << message;
+    return m_timer.elapsed();
+}
+
+void Self::printMessage(const QString &message)
+{
+    printMessageWithOptions(message, elapsed());
+}
+
+void TimeProfiler::printMessageWithOptions(const QString &message, qint64 elapsed)
+{
+    qCInfo(lcTimeProfiler) << "Elapsed:" << elapsed << message;
+}
+
+Self::SectionPtr Self::createSection(const QString &name)
+{
+    return std::make_unique<TimeProfilerSection>(name, this);
 }

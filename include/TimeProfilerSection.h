@@ -32,41 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_TIME_PROFILER_H
-#define VM_TIME_PROFILER_H
+#ifndef VM_TIME_PROFILER_SECTION_H
+#define VM_TIME_PROFILER_SECTION_H
 
-#include "TimeProfilerSection.h"
-
-#include <QElapsedTimer>
-#include <QLoggingCategory>
-
-#include <memory>
-
-Q_DECLARE_LOGGING_CATEGORY(lcTimeProfiler)
+#include <QString>
 
 namespace vm {
-class TimeProfiler
+class TimeProfiler;
+
+class TimeProfilerSection
 {
 public:
-    using SectionPtr = std::unique_ptr<TimeProfilerSection>;
-
-    TimeProfiler() = default;
-    ~TimeProfiler() = default;
-
-    void start();
-    void stop();
-    bool isStarted() const;
-
-    qint64 elapsed() const;
+    TimeProfilerSection(const QString &name, TimeProfiler *profiler);
+    ~TimeProfilerSection();
 
     void printMessage(const QString &message);
-    void printMessageWithOptions(const QString &message, qint64 elapsed);
-
-    SectionPtr createSection(const QString &name);
 
 private:
-    QElapsedTimer m_timer;
+    qint64 elapsed() const;
+
+    QString m_preffix;
+    TimeProfiler *m_profiler = nullptr;
+    qint64 m_initialElapsed = 0;
 };
 } // namespace vm
 
-#endif // VM_TIME_PROFILER_H
+#endif // VM_TIME_PROFILER_SECTION_H
