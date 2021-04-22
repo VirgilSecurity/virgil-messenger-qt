@@ -787,7 +787,7 @@ QFuture<Self::Result> Self::signIn(const QString &username)
             return Self::Result::Error_Offline;
         }
 
-        qCInfo(lcCoreMessenger) << "Authenticate user";
+        qCInfo(lcCoreMessenger) << "Authenticate user during sign-in";
         error.status = vssq_messenger_authenticate(m_impl->messenger.get(), m_impl->creds.get());
 
         if (vssq_error_has_error(&error)) {
@@ -1043,6 +1043,10 @@ void Self::authenticate()
 
     QtConcurrent::run([this] {
         std::scoped_lock<std::mutex> _(m_impl->authMutex);
+        if (isAuthenticated()) {
+            qCWarning(lcCoreMessenger) << "Try to authenticate when already authenticated";
+            return;
+        }
 
         vssq_error_t error;
         vssq_error_reset(&error);
