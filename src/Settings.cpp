@@ -274,7 +274,7 @@ QDir Settings::cloudFilesCacheDir() const
 
 QString Settings::imageConversionFormat() const
 {
-    return QLatin1String(".png");
+    return QLatin1String(".jpg");
 }
 
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
@@ -305,7 +305,7 @@ bool Settings::autoSendCrashReport() const
 
 bool Settings::timeProfilerEnabled() const
 {
-    return true;
+    return false;
 }
 
 QRect Settings::windowGeometry() const

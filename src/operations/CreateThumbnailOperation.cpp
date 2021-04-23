@@ -53,7 +53,7 @@ CreateThumbnailOperation::CreateThumbnailOperation(QObject *parent, const QStrin
 
 void CreateThumbnailOperation::run()
 {
-    const auto profilerSectionName = QLatin1String("CreateThumbnail(%1)").arg(FileUtils::fileName(m_sourcePath));
+    const auto profilerSectionName = QLatin1String("CreateThumbnail(%1)").arg(FileUtils::fileName(m_destPath));
     TimeProfilerSection profilerSection(profilerSectionName, timeProfiler());
 
     if (m_sourceImage.isNull()) {

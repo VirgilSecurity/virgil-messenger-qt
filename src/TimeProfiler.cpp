@@ -66,5 +66,5 @@ void Self::printMessage(const QString &message)
 
 void TimeProfiler::printMessageWithOptions(const QString &message, qint64 elapsed)
 {
-    qCInfo(lcTimeProfiler) << "Elapsed:" << elapsed << message;
+    qCInfo(lcTimeProfiler).noquote() << QString::number(elapsed).rightJustified(6) << QLatin1Char('-') << message;
 }
