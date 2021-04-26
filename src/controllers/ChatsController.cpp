@@ -129,6 +129,9 @@ void Self::loadChats()
 void Self::clearChats()
 {
     qCDebug(lcController) << "Clear chats...";
+    if (m_chatObject->chat()) {
+        closeChat();
+    }
     m_models->chats()->clearChats();
 }
 
