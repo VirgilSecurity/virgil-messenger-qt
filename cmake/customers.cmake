@@ -35,7 +35,7 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 function(vs_customer_prepare)
-    message(STATUS "Prepare confuiguration from templates...")
+    message(STATUS "Prepare configuration from templates...")
     foreach (VS_TMP IN LISTS VS_TEMPLATES)
         string(REPLACE "=" ";" VS_TMP_LIST ${VS_TMP})
         list(GET VS_TMP_LIST 0 VS_TEMPLATE_SRC)
