@@ -64,8 +64,9 @@ Self::UserDatabase(const QDir &databaseDir, QObject *parent)
 {
     setMigration(std::make_unique<UserDatabaseMigration>());
 
-    connect(this, &Self::open, this, &Self::onOpen);
-    connect(this, &Self::close, this, &Self::onClose);
+    connect(this, &Self::openUser, this, &Self::onOpenUser);
+    connect(this, &Self::closeUser, this, &Self::onCloseUser);
+    connect(this, &Self::closed, this, &Self::userClosed);
     connect(this, &Self::writeMessage, this, &Self::onWriteMessage);
     connect(this, &Self::updateMessage, this, &Self::onUpdateMessage);
     connect(this, &Self::writeChatAndLastMessage, this, &Self::onWriteChatAndLastMessage);
@@ -189,7 +190,7 @@ bool Self::create()
     return true;
 }
 
-void Self::onOpen(const QString &username)
+void Self::onOpenUser(const QString &username)
 {
     if (!DatabaseUtils::isValidName(username)) {
         qCCritical(lcDatabase) << "Invalid database id:" << username;
@@ -198,13 +199,15 @@ void Self::onOpen(const QString &username)
         const QString fileName = QString("user-%1.sqlite3").arg(username);
         const QString filePath(m_databaseDir.filePath(fileName));
 
-        if (!Database::open(filePath, username + QLatin1String("-messenger"))) {
+        if (Database::open(filePath, username + QLatin1String("-messenger"))) {
+            emit userOpened(username);
+        } else {
             emit errorOccurred(tr("Can not open database with users"));
         }
     }
 }
 
-void Self::onClose()
+void Self::onCloseUser()
 {
     Database::close();
 }
