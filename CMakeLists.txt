@@ -62,7 +62,6 @@ set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangfo
 # ---------------------------------------------------------------------------
 # Other build options.
 # ---------------------------------------------------------------------------
-set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
 set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
 set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
 
@@ -311,7 +310,6 @@ elseif (VS_PLATFORM STREQUAL "ios")
 
     set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
 
-    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-e,_qt_main_wrapper")
     set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
     set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
 
@@ -319,17 +317,17 @@ elseif (VS_PLATFORM STREQUAL "ios")
 
     # Settings for signing
     if (VS_CODE_SIGN_IDENTITY)
-        SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "${VS_CODE_SIGN_IDENTITY}")
+        set_xcode_property(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "${VS_CODE_SIGN_IDENTITY}")
     endif ()
     if (VS_DEVELOPMENT_TEAM)
-        SET_XCODE_PROPERTY(${VS_TARGET_NAME} DEVELOPMENT_TEAM "${VS_DEVELOPMENT_TEAM}")
+        set_xcode_property(${VS_TARGET_NAME} DEVELOPMENT_TEAM "${VS_DEVELOPMENT_TEAM}")
     endif ()
     if (VS_PROVISIONING_PROFILE_SPECIFIER)
-        SET_XCODE_PROPERTY(${VS_TARGET_NAME} PROVISIONING_PROFILE_SPECIFIER "${VS_PROVISIONING_PROFILE_SPECIFIER}")
+        set_xcode_property(${VS_TARGET_NAME} PROVISIONING_PROFILE_SPECIFIER "${VS_PROVISIONING_PROFILE_SPECIFIER}")
     endif ()
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+    set_xcode_property(${VS_TARGET_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
+    set_xcode_property(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")
+    set_xcode_property(${VS_TARGET_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
 
     set_target_properties(${VS_TARGET_NAME}
             PROPERTIES
@@ -357,31 +355,76 @@ elseif (VS_PLATFORM STREQUAL "ios")
     set_target_properties(${VS_TARGET_NAME}
             PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
-            LINK_FLAGS "-framework Foundation -framework UserNotifications"
+            LINK_FLAGS "-framework Foundation -framework UserNotifications -Wl,-e,_qt_main_wrapper"
             RESOURCE "${STORYBOARD_DEFAULT}"
             )
-    #   IOS extension
-    if (ENABLE_IOS_EXTENSION)
-        set(EXT_SOURCE_FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
-                )
 
-        add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
-        set_target_properties(${VS_TARGET_NAME}_EXT
-                PROPERTIES
-                BUNDLE YES
-                XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
+    #
+    #  IOS Push Notification extension.
+    #
+    set(VS_TARGET_NOTIFICATION_EXTENSION_NAME ${VS_TARGET_NAME}_NotificationExtension)
+    add_executable(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} MACOSX_BUNDLE)
 
-        target_include_directories(${VS_TARGET_NAME}_EXT
-                PUBLIC
-                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
-                )
+    set_target_properties(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+            PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/NotificationExtensionInfo.plist.in"
+            )
 
-        find_library(UN_LIB UserNotifications)
-        find_library(UNUI_LIB UserNotificationsUI)
-        target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
+    if (VS_CODE_SIGN_IDENTITY)
+        set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} CODE_SIGN_IDENTITY "${VS_CODE_SIGN_IDENTITY}")
     endif ()
+
+    if (VS_DEVELOPMENT_TEAM)
+        set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} DEVELOPMENT_TEAM "${VS_DEVELOPMENT_TEAM}")
+    endif ()
+
+    if (VS_PROVISIONING_PROFILE_SPECIFIER)
+        set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} PROVISIONING_PROFILE_SPECIFIER "${VS_PROVISIONING_PROFILE_SPECIFIER}")
+    endif ()
+
+    set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
+    set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+            CODE_SIGN_ENTITLEMENTS
+            "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger_NotificationExtension.entitlements"
+            )
+
+
+    target_sources(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+            PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
+            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
+            )
+
+    set_target_properties(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+            PROPERTIES
+            BUNDLE YES
+            BUNDLE_EXTENSION appex
+            XCODE_ATTRIBUTE_WRAPPER_EXTENSION appex
+            XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY YES
+            XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES
+            XCODE_PRODUCT_TYPE "com.apple.product-type.app-extension"
+            XCODE_EXPLICIT_FILE_TYPE "wrapper.app-extension"
+            )
+
+    target_include_directories(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+            PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
+            )
+
+    find_library(USER_NOTIFICATIONS_LIB UserNotifications)
+    find_library(USER_NOTIFICATIONS_UI_LIB UserNotificationsUI)
+    target_link_libraries(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+                PRIVATE
+                ${USER_NOTIFICATIONS_LIB}
+                ${USER_NOTIFICATIONS_UI_LIB}
+                )
+
+    add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}"
+            ARGS -E copy_directory
+                "$<TARGET_BUNDLE_DIR:${VS_TARGET_NOTIFICATION_EXTENSION_NAME}>"
+                "$<TARGET_FILE_DIR:${VS_TARGET_NAME}>/PlugIns/${VS_TARGET_NOTIFICATION_EXTENSION_NAME}.appex"
+            MAIN_DEPENDENCY ${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
+            )
 
     qt5_import_qml_plugins(${VS_TARGET_NAME})
 else ()
@@ -938,6 +981,7 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
         $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG>>
         $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
         )
 
