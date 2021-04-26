@@ -57,4 +57,16 @@ Item {
         }
         return false
     }
+
+    function refresh() {}
+
+    function processPickedAttachment(fileUrls, attachmentType) {
+        const url = fileUrls[fileUrls.length - 1]
+        if (attachmentType === AttachmentTypes.picture) {
+            controllers.messages.sendPictureMessage(url, attachmentType)
+        }
+        else {
+            controllers.messages.sendFileMessage(url, attachmentType)
+        }
+    }
 }

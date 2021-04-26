@@ -22,11 +22,7 @@ StackView {
     }
 
     function navigateReplace(component) {
-        if (d.components && d.components[0] === component) {
-            root.pop(component, StackView.Immediate)
-        } else {
-            root.replace(null, component, StackView.Immediate)
-        }
+        root.replace(null, component, StackView.Immediate)
         d.components = [component]
     }
 

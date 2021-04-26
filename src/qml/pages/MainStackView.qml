@@ -75,9 +75,8 @@ NavigationStackView {
     }
 
     Component.onCompleted: {
-        var appState = app.stateManager.startState
-        appState.chatListRequested.connect(d.openChatList)
-        appState.accountSelectionRequested.connect(d.openAccountSelection)
-        appState.trySignIn()
+        controllers.users.userLoaded.connect(d.openChatList)
+        controllers.users.userNotLoaded.connect(d.openAccountSelection)
+        controllers.users.loadInitialUser()
     }
 }
