@@ -48,8 +48,6 @@ namespace vm {
 class TimeProfiler
 {
 public:
-    using SectionPtr = std::unique_ptr<TimeProfilerSection>;
-
     TimeProfiler() = default;
     ~TimeProfiler() = default;
 
