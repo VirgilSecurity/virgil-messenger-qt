@@ -45,7 +45,7 @@ class Settings;
 namespace vm {
 class Messenger;
 class CalculateAttachmentFingerprintOperation;
-class ConvertToPngOperation;
+class ConvertImageFormatOperation;
 class CreateAttachmentPreviewOperation;
 class CreateAttachmentThumbnailOperation;
 class CreateThumbnailOperation;
@@ -76,8 +76,8 @@ public:
                                                           const QString &destPath, const QByteArray &decryptionKey,
                                                           const QByteArray &signature, const UserId &senderId);
     EncryptUploadFileOperation *populateEncryptUpload(NetworkOperation *parent, const QString &sourcePath);
-    ConvertToPngOperation *populateConvertToPngOperation(Operation *parent, const QString &sourcePath,
-                                                         const QString &destFileName);
+    ConvertImageFormatOperation *populateConvertImageFormatOperation(Operation *parent, const QString &sourcePath,
+                                                                     const QString &destFileName);
     CreateAttachmentThumbnailOperation *populateCreateAttachmentThumbnail(MessageOperation *messageOp,
                                                                           Operation *parent, const QString &sourcePath,
                                                                           const QString &filePath);

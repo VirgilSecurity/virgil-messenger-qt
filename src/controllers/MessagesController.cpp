@@ -192,8 +192,8 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {
     QString errorString;
-    const auto content =
-            MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->thumbnailMaxSize(), errorString);
+    const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->imageConversionFormat(),
+                                                                    m_settings->thumbnailMaxSize(), errorString);
     if (!content) {
         qCWarning(lcController) << "MessageContentPicture creation error:" << errorString;
         return ModifiableMessageHandler();

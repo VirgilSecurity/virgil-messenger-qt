@@ -34,12 +34,13 @@
 
 #include "models/MessagesQueue.h"
 
-#include "Messenger.h"
-#include "Utils.h"
-#include "MessagesTable.h"
-#include "UserDatabase.h"
+#include "MessagesQueueListeners.h"
 #include "MessageOperation.h"
 #include "MessageOperationFactory.h"
+#include "MessagesTable.h"
+#include "Messenger.h"
+#include "UserDatabase.h"
+#include "Utils.h"
 
 using namespace vm;
 using Self = MessagesQueue;
@@ -59,6 +60,8 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);
     connect(this, &Self::pushMessageDownload, this, &Self::onPushMessageDownload);
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
+
+    addListener(new UniqueMessageDownloadOperationFilter(this));
 }
 
 Self::~MessagesQueue() { }

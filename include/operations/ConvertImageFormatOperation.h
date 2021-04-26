@@ -32,42 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MessageOperation.h"
+#ifndef VM_CONVERTIMAGEFORMATOPERATION_H
+#define VM_CONVERTIMAGEFORMATOPERATION_H
 
-#include "operations/MessageOperationFactory.h"
-#include "operations/SendMessageOperation.h"
-#include "MessageUpdate.h"
+#include "Operation.h"
 
-using namespace vm;
+class Settings;
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
-                                   bool isOnline, QObject *parent)
-    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
+namespace vm {
+class ConvertImageFormatOperation : public Operation
 {
-    setName(message->id());
-}
+    Q_OBJECT
 
-MessageHandler MessageOperation::message() const
-{
-    return m_message;
-}
+public:
+    ConvertImageFormatOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName,
+                                QObject *parent);
 
-MessageOperationFactory *MessageOperation::factory()
-{
-    return m_factory;
-}
+signals:
+    void imageRead(const QImage &image);
+    void converted(const QString &path);
+    void fileCreated(const QString &newPath);
 
-void MessageOperation::apply(const MessageUpdate &update)
-{
-    const auto applied = m_message->applyUpdate(update);
-    emit updateMessage(update);
+private:
+    void run() override;
 
-    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-        MessageAttachmentExtrasJsonUpdate extrasUpdate;
-        const auto attachment = m_message->contentAsAttachment();
-        extrasUpdate.attachmentId = attachment->id();
-        extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = attachment->extrasToJson(true);
-        emit updateMessage(extrasUpdate);
-    }
-}
+    const Settings *m_settings;
+    const QString m_sourcePath;
+    const QString m_destFileName;
+};
+} // namespace vm
+
+#endif // VM_CONVERTIMAGEFORMATOPERATION_H

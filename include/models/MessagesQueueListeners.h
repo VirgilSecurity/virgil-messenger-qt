@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,42 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MessageOperation.h"
+#ifndef VM_MESSAGES_QUEUE_LISTENERS_H
+#define VM_MESSAGES_QUEUE_LISTENERS_H
 
-#include "operations/MessageOperationFactory.h"
-#include "operations/SendMessageOperation.h"
-#include "MessageUpdate.h"
+#include "OperationQueueListener.h"
 
-using namespace vm;
+#include <QLoggingCategory>
+#include <QMutex>
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
-                                   bool isOnline, QObject *parent)
-    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
+Q_DECLARE_LOGGING_CATEGORY(lcMessagesQueueListener);
+
+namespace vm {
+//
+// Listener that skips non-unique message download operations
+//
+class UniqueMessageDownloadOperationFilter : public OperationQueueListener
 {
-    setName(message->id());
-}
+    Q_OBJECT
 
-MessageHandler MessageOperation::message() const
-{
-    return m_message;
-}
+public:
+    using OperationQueueListener::OperationQueueListener;
 
-MessageOperationFactory *MessageOperation::factory()
-{
-    return m_factory;
-}
+private:
+    bool preRun(OperationSourcePtr source) override;
+    void postRun(OperationSourcePtr source) override;
 
-void MessageOperation::apply(const MessageUpdate &update)
-{
-    const auto applied = m_message->applyUpdate(update);
-    emit updateMessage(update);
+    QStringList m_ids;
+    QMutex m_mutex;
+};
+} // namespace vm
 
-    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-        MessageAttachmentExtrasJsonUpdate extrasUpdate;
-        const auto attachment = m_message->contentAsAttachment();
-        extrasUpdate.attachmentId = attachment->id();
-        extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = attachment->extrasToJson(true);
-        emit updateMessage(extrasUpdate);
-    }
-}
+#endif // VM_MESSAGES_QUEUE_LISTENERS_H

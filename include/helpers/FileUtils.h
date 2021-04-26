@@ -61,6 +61,8 @@ public:
 
     static QString fileName(const QString &filePath);
 
+    static QString fileExt(const QString &filePath);
+
     static QString attachmentFileName(const QUrl &url, bool isPicture);
 
     static QString fileMimeType(const QString &filePath);

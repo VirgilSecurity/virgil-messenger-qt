@@ -43,6 +43,8 @@
 Q_DECLARE_LOGGING_CATEGORY(lcOperation)
 
 namespace vm {
+class TimeProfiler;
+
 class Operation : public QObject
 {
     Q_OBJECT
@@ -86,6 +88,9 @@ protected:
 
     void cleanupOnce();
 
+    TimeProfiler *timeProfiler() const;
+    void setTimeProfiler(TimeProfiler *profiler);
+
     virtual bool preRun();
     virtual void run();
     virtual void cleanup();
@@ -102,6 +107,8 @@ private:
 
     std::deque<Operation *> m_children;
     bool m_cleanedUp = false;
+
+    TimeProfiler *m_timeProfiler = nullptr;
 };
 } // namespace vm
 

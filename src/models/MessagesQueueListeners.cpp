@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,34 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CONVERTTOPNGOPERATION_H
-#define VM_CONVERTTOPNGOPERATION_H
+#include "MessagesQueueListeners.h"
 
-#include "Operation.h"
+#include "MessageOperationSource.h"
 
-class Settings;
+Q_LOGGING_CATEGORY(lcMessagesQueueListener, "messages-listener");
 
-namespace vm {
-class ConvertToPngOperation : public Operation
+using namespace vm;
+
+bool UniqueMessageDownloadOperationFilter::preRun(OperationSourcePtr source)
 {
-    Q_OBJECT
+    const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
+    if (messageSource->download()) {
+        const auto id = messageSource->message()->id();
+        QMutexLocker locker(&m_mutex);
+        if (!m_ids.contains(id)) {
+            m_ids.push_back(id);
+            return true;
+        }
+        qCDebug(lcMessagesQueueListener) << "Skipped duplicated download for message" << id;
+        return false;
+    }
+    return true;
+}
 
-public:
-    ConvertToPngOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName,
-                          QObject *parent);
-
-signals:
-    void imageRead(const QImage &image);
-    void converted(const QString &path);
-    void fileCreated(const QString &newPath);
-
-private:
-    void run() override;
-
-    const Settings *m_settings;
-    const QString m_sourcePath;
-    const QString m_destFileName;
-};
-} // namespace vm
-
-#endif // VM_CONVERTTOPNGOPERATION_H
+void UniqueMessageDownloadOperationFilter::postRun(OperationSourcePtr source)
+{
+    const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
+    if (messageSource->download()) {
+        const auto id = messageSource->message()->id();
+        QMutexLocker locker(&m_mutex);
+        m_ids.removeAll(id);
+    }
+}

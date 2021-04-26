@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,42 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MessageOperation.h"
+#ifndef VM_TIME_PROFILER_SECTION_H
+#define VM_TIME_PROFILER_SECTION_H
 
-#include "operations/MessageOperationFactory.h"
-#include "operations/SendMessageOperation.h"
-#include "MessageUpdate.h"
+#include <QString>
 
-using namespace vm;
+namespace vm {
+class TimeProfiler;
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
-                                   bool isOnline, QObject *parent)
-    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
+class TimeProfilerSection
 {
-    setName(message->id());
-}
+public:
+    TimeProfilerSection(const QString &name, TimeProfiler *profiler);
+    ~TimeProfilerSection();
 
-MessageHandler MessageOperation::message() const
-{
-    return m_message;
-}
+    void printMessage(const QString &message);
 
-MessageOperationFactory *MessageOperation::factory()
-{
-    return m_factory;
-}
+private:
+    qint64 elapsed() const;
 
-void MessageOperation::apply(const MessageUpdate &update)
-{
-    const auto applied = m_message->applyUpdate(update);
-    emit updateMessage(update);
+    QString m_preffix;
+    TimeProfiler *m_profiler = nullptr;
+    qint64 m_initialElapsed = 0;
+};
+} // namespace vm
 
-    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-        MessageAttachmentExtrasJsonUpdate extrasUpdate;
-        const auto attachment = m_message->contentAsAttachment();
-        extrasUpdate.attachmentId = attachment->id();
-        extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = attachment->extrasToJson(true);
-        emit updateMessage(extrasUpdate);
-    }
-}
+#endif // VM_TIME_PROFILER_SECTION_H
