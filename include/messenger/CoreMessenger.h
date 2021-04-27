@@ -114,6 +114,11 @@ signals:
     void suspend();
 
     //
+    //  Should be called when application shows and hide system dialog that suspends application.
+    //
+    void setShouldDisconnectWhenSuspended(bool disconnectWhenSuspended);
+
+    //
     //  Info signals.
     //
     void connectionStateChanged(ConnectionState state);
@@ -368,6 +373,7 @@ private slots:
     void onActivate();
     void onDeactivate();
     void onSuspend();
+    void onSetShouldDisconnectWhenSuspended(bool disconnectWhenSuspended);
     void xmppOnConnected();
     void xmppOnDisconnected();
     void xmppOnStateChanged(QXmppClient::State state);

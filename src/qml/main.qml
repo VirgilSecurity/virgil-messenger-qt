@@ -85,7 +85,11 @@ ApplicationWindow {
             }
         }
 
-        AttachmentPicker { id: attachmentPicker }
+        AttachmentPicker {
+            id: attachmentPicker
+            onOpening: messenger.setShouldDisconnectWhenSuspended(false)
+            onClosed: messenger.setShouldDisconnectWhenSuspended(true)
+        }
         NotificationPopup { id: notificationPopup }
         KeyboardHandler { id: keyboardHandler }
         SendReportDialog { id: sendReportDialog }

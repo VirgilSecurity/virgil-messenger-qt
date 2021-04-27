@@ -338,6 +338,11 @@ void Self::suspend()
     m_coreMessenger->suspend();
 }
 
+void Self::setShouldDisconnectWhenSuspended(bool disconnectWhenSuspended)
+{
+    m_coreMessenger->setShouldDisconnectWhenSuspended(disconnectWhenSuspended);
+}
+
 void Self::setCurrentRecipient(const UserId &recipientId)
 {
     m_coreMessenger->setCurrentRecipient(recipientId);
