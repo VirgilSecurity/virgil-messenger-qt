@@ -1,6 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+import "../base"
+
 NavigationStackView {
     id: root
 
@@ -12,12 +14,13 @@ NavigationStackView {
         id: d
         readonly property string chatId: controllers.chats.current.id
         readonly property bool isChatOpened: chatId.length > 0
+        readonly property var stackView: Platform.isDesktop ? root : mainStackView
 
         onIsChatOpenedChanged: {
             if (isChatOpened) {
-                root.navigatePush(chatPageComponent)
+                stackView.navigatePush(chatPageComponent)
             } else {
-                root.navigatePop()
+                stackView.navigatePop()
             }
         }
     }
@@ -40,7 +43,7 @@ NavigationStackView {
     Component.onCompleted: {
         navigateReplace(chatListComponent)
         if (d.isChatOpened) {
-            navigatePush(chatPageComponent, {}, StackView.Immediate)
+            d.stackView.navigatePush(chatPageComponent, {}, StackView.Immediate)
         }
     }
 

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 
 NavigationStackView {
     id: root
+    readonly property alias mainStackView: root
 
     Component {
         id: mainComponent
