@@ -143,6 +143,7 @@ public:
     //
     void setApplicationActive(bool active);
     void suspend();
+    Q_INVOKABLE void setShouldDisconnectWhenSuspended(bool disconnectWhenSuspended);
 
     QPointer<Settings> settings() noexcept;
     QPointer<CloudFileSystem> cloudFileSystem() noexcept;

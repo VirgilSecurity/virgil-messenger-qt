@@ -289,7 +289,10 @@ public:
 
     ConnectionState connectionState = ConnectionState::Disconnected;
 
+    QDateTime startDisconnectAt;
+
     bool suspended = false;
+    bool shouldDisconnectWhenSuspended = true;
 };
 
 // --------------------------------------------------------------------------
@@ -357,6 +360,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_im
     connect(this, &Self::activate, this, &Self::onActivate);
     connect(this, &Self::deactivate, this, &Self::onDeactivate);
     connect(this, &Self::suspend, this, &Self::onSuspend);
+    connect(this, &Self::setShouldDisconnectWhenSuspended, this, &Self::onSetShouldDisconnectWhenSuspended);
     connect(this, &Self::connectionStateChanged, this, &Self::onLogConnectionStateChanged);
     connect(this, &Self::acceptGroupInvitation, this, &Self::onAcceptGroupInvitation);
     connect(this, &Self::rejectGroupInvitation, this, &Self::onRejectGroupInvitation);
@@ -632,6 +636,7 @@ bool Self::isXmppDisconnected() const noexcept
 void Self::onActivate()
 {
     m_impl->suspended = false;
+    m_impl->shouldDisconnectWhenSuspended = true;
 
     if (m_impl->xmpp) {
         m_impl->xmpp->setActive(true);
@@ -662,16 +667,23 @@ void Self::onDeactivate()
 
 void Self::onSuspend()
 {
-    if (m_impl->xmpp) {
+    if (m_impl->xmpp && m_impl->shouldDisconnectWhenSuspended) {
         //
         //  Setting QXmppPresence::Unavailable also call the disconnectFromServer() function underneath.
         //
         QXmppPresence presenceAway(QXmppPresence::Unavailable);
         presenceAway.setAvailableStatusType(QXmppPresence::XA);
         m_impl->xmpp->setClientPresence(presenceAway);
+        m_impl->startDisconnectAt = QDateTime::currentDateTime();
     }
 
     m_impl->suspended = true;
+}
+
+void Self::onSetShouldDisconnectWhenSuspended(bool disconnectWhenSuspended)
+{
+    qCDebug(lcCoreMessenger) << "Should disconnect when suspended:" << disconnectWhenSuspended;
+    m_impl->shouldDisconnectWhenSuspended = disconnectWhenSuspended;
 }
 
 // --------------------------------------------------------------------------
@@ -1075,6 +1087,19 @@ void Self::authenticate()
 
 void Self::connectXmppServer()
 {
+    //
+    //  Prevent XMPP start connection, when disconnect was not completed.
+    //
+    if (m_impl->startDisconnectAt.isValid()) {
+        const auto distance = m_impl->startDisconnectAt.msecsTo(QDateTime::currentDateTime());
+        if (distance < 2000) {
+            QTimer::singleShot(2000 - distance, this, &Self::reconnectXmppServerIfNeeded);
+            qCDebug(lcCoreMessenger) << "Prevent XMPP start connection, when disconnect was not completed.";
+            qCDebug(lcCoreMessenger) << "Emit reconnect in" << 2000 - distance << "ms from: connectXmppServer()";
+            return;
+        }
+    }
+
     vssq_error_t error;
     vssq_error_reset(&error);
 
@@ -1101,13 +1126,14 @@ void Self::connectXmppServer()
     config.setJid(currentUserJid());
     config.setHost(CustomerEnv::xmppServiceUrl());
     config.setPassword(xmppPass);
-    config.setAutoReconnectionEnabled(true);
+    config.setAutoReconnectionEnabled(false);
     config.setAutoAcceptSubscriptions(true);
 
     resetXmppConfiguration();
 
     qCDebug(lcCoreMessenger) << "Connecting to XMPP server...";
     m_impl->xmpp->connectToServer(config);
+    m_impl->startDisconnectAt = QDateTime();
 }
 
 void Self::onReconnectXmppServerIfNeeded()
@@ -1126,8 +1152,10 @@ void Self::onReconnectXmppServerIfNeeded()
 
 void Self::onDisconnectXmppServer()
 {
-    if (m_impl->xmpp != nullptr) {
+    if (m_impl->xmpp != nullptr && (m_impl->xmpp->state() != QXmppClient::DisconnectedState)) {
+        qCDebug(lcCoreMessenger) << "Start XMPP disconnect...";
         m_impl->xmpp->disconnectFromServer();
+        m_impl->startDisconnectAt = QDateTime::currentDateTime();
     }
 }
 
@@ -2193,8 +2221,6 @@ void Self::xmppOnDisconnected()
     m_impl->lastActivityManager->setEnabled(false);
 
     changeConnectionState(Self::ConnectionState::Disconnected);
-
-    reconnectXmppServerIfNeeded();
 }
 
 void Self::xmppOnStateChanged(QXmppClient::State state)
@@ -2209,10 +2235,11 @@ void Self::xmppOnError(QXmppClient::Error error)
     qCWarning(lcCoreMessenger) << "XMPP error:" << error;
     emit connectionStateChanged(Self::ConnectionState::Error);
 
-    //
-    //  Auto-reconnect takes place here.
-    //  See option QXmppConfiguration::setAutoReconnectionEnabled(true).
-    //
+    disconnectXmppServer();
+
+    // Wait 3 second and try to reconnect.
+    qCDebug(lcCoreMessenger) << "Emit reconnect in 3s from: xmppOnError()";
+    QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
 }
 
 void Self::xmppOnPresenceReceived(const QXmppPresence &presence)
@@ -2230,7 +2257,8 @@ void Self::xmppOnSslErrors(const QList<QSslError> &errors)
     qCWarning(lcCoreMessenger) << "XMPP SSL errors:" << errors;
     emit connectionStateChanged(Self::ConnectionState::Error);
 
-    // Wait 3 second and try to reconnect.
+    // Wait 5 second and try to reconnect.
+    qCDebug(lcCoreMessenger) << "Emit reconnect in 3s from: xmppOnSslErrors()";
     QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
 }
 

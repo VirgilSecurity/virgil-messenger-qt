@@ -87,9 +87,8 @@ ApplicationWindow {
 
         AttachmentPicker {
             id: attachmentPicker
-            // TODO(fpohtmeh): add 2 Q_INVOKABLE methods to messenger and uncomment 2 bindings below
-            // onOpening: messenger.methodBeforeDialogOpening()
-            // onClosed: messenger.methodAfterDialogClosing()
+            onOpening: messenger.setShouldDisconnectWhenSuspended(false)
+            onClosed: messenger.setShouldDisconnectWhenSuspended(true)
         }
         NotificationPopup { id: notificationPopup }
         KeyboardHandler { id: keyboardHandler }
