@@ -2237,9 +2237,9 @@ void Self::xmppOnError(QXmppClient::Error error)
 
     disconnectXmppServer();
 
-    // Wait 3 second and try to reconnect.
-    qCDebug(lcCoreMessenger) << "Emit reconnect in 3s from: xmppOnError()";
-    QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
+    // Wait 10 second and try to reconnect.
+    qCDebug(lcCoreMessenger) << "Emit reconnect in 10s from: xmppOnError()";
+    QTimer::singleShot(10000, this, &Self::reconnectXmppServerIfNeeded);
 }
 
 void Self::xmppOnPresenceReceived(const QXmppPresence &presence)
@@ -2257,9 +2257,9 @@ void Self::xmppOnSslErrors(const QList<QSslError> &errors)
     qCWarning(lcCoreMessenger) << "XMPP SSL errors:" << errors;
     emit connectionStateChanged(Self::ConnectionState::Error);
 
-    // Wait 5 second and try to reconnect.
-    qCDebug(lcCoreMessenger) << "Emit reconnect in 3s from: xmppOnSslErrors()";
-    QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
+    // Wait 10 second and try to reconnect.
+    qCDebug(lcCoreMessenger) << "Emit reconnect in 10s from: xmppOnSslErrors()";
+    QTimer::singleShot(10000, this, &Self::reconnectXmppServerIfNeeded);
 }
 
 void Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage)
