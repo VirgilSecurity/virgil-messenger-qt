@@ -666,7 +666,7 @@ void Self::onSuspend()
         //
         //  Setting QXmppPresence::Unavailable also call the disconnectFromServer() function underneath.
         //
-        QXmppPresence presenceAway(QXmppPresence::Available);
+        QXmppPresence presenceAway(QXmppPresence::Unavailable);
         presenceAway.setAvailableStatusType(QXmppPresence::XA);
         m_impl->xmpp->setClientPresence(presenceAway);
     }
@@ -2209,10 +2209,10 @@ void Self::xmppOnError(QXmppClient::Error error)
     qCWarning(lcCoreMessenger) << "XMPP error:" << error;
     emit connectionStateChanged(Self::ConnectionState::Error);
 
-    m_impl->xmpp->disconnectFromServer();
-
-    // Wait 3 second and try to reconnect.
-    QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
+    //
+    //  Auto-reconnect takes place here.
+    //  See option QXmppConfiguration::setAutoReconnectionEnabled(true).
+    //
 }
 
 void Self::xmppOnPresenceReceived(const QXmppPresence &presence)
@@ -2229,8 +2229,6 @@ void Self::xmppOnSslErrors(const QList<QSslError> &errors)
 {
     qCWarning(lcCoreMessenger) << "XMPP SSL errors:" << errors;
     emit connectionStateChanged(Self::ConnectionState::Error);
-
-    m_impl->xmpp->disconnectFromServer();
 
     // Wait 3 second and try to reconnect.
     QTimer::singleShot(3000, this, &Self::reconnectXmppServerIfNeeded);
