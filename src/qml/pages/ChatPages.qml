@@ -50,13 +50,7 @@ Item {
 
     Component.onCompleted: controllers.chats.groupInvitationRejected.connect(window.navigateBack)
 
-    function navigateBack(transition) {
-        if (controllers.chats.current.id.length > 0) {
-            controllers.chats.closeChat()
-            return true
-        }
-        return false
-    }
+    function navigateBack(transition) { return loader.item.navigateBack(transition) }
 
     function refresh() {}
 

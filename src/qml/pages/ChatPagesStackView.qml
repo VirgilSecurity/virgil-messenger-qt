@@ -4,12 +4,23 @@ import QtQuick.Controls 2.15
 NavigationStackView {
     id: root
 
-    readonly property string chatId: controllers.chats.current.id
-    readonly property bool isChatOpened: chatId.length > 0
-
     signal newChatRequested()
     signal newGroupChatRequested()
     signal infoRequested()
+
+    QtObject {
+        id: d
+        readonly property string chatId: controllers.chats.current.id
+        readonly property bool isChatOpened: chatId.length > 0
+
+        onIsChatOpenedChanged: {
+            if (isChatOpened) {
+                root.navigatePush(chatPageComponent)
+            } else {
+                root.navigatePop()
+            }
+        }
+    }
 
     Component {
         id: chatListComponent
@@ -28,16 +39,10 @@ NavigationStackView {
 
     Component.onCompleted: {
         navigateReplace(chatListComponent)
-        if (isChatOpened) {
+        if (d.isChatOpened) {
             navigatePush(chatPageComponent, {}, StackView.Immediate)
         }
     }
 
-    onIsChatOpenedChanged: {
-        if (isChatOpened) {
-            navigatePush(chatPageComponent)
-        } else {
-            navigateBack()
-        }
-    }
+    function navigateBack(transition) { return d.isChatOpened && currentItem.navigateBack(transition) }
 }
