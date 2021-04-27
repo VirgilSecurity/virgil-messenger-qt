@@ -57,18 +57,28 @@ class UsersController : public QObject
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
+    Q_INVOKABLE void loadInitialUser();
+    Q_INVOKABLE void loadUser(const QString &username);
+
 signals:
-    void notificationCreated(const QString &notification, const bool error) const;
+    void userLoaded();
+    void userNotLoaded();
 
     void currentUserIdChanged(const QString &userId);
     void currentUsernameChanged(const QString &username);
+
+    void notificationCreated(const QString &notification, const bool error) const;
 
 private:
     QString currentUserId() const;
     QString currentUsername() const;
 
+    void unloadUser();
     void updateCurrentUser();
-    void updateContactsWithUser(const UserHandler &user);
+    void writeContactToDatabase(const UserHandler &user);
+
+    void onUserDatabaseOpened(const QString &username);
+    void onUserDatabaseErrorOccurred();
 
     void onChatAdded(const ChatHandler &chat);
 

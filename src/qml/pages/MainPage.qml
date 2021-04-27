@@ -52,7 +52,10 @@ Page {
                 onSharingRequested: root.cloudFileSharingRequested()
             }
 
-            function navigateBack(transition) { return itemAt(currentIndex).navigateBack(transition) }
+            function currentItem() { return itemAt(currentIndex) }
+
+            onCurrentIndexChanged: currentItem().refresh()
+            Component.onCompleted: currentItem().refresh()
         }
     }
 
@@ -60,20 +63,9 @@ Page {
         target: attachmentPicker
 
         function onPicked(fileUrls, attachmentType) {
-            if (sidebarPanel.buttonIndex == 0) {
-                const url = fileUrls[fileUrls.length - 1]
-                if (attachmentType === AttachmentTypes.picture) {
-                    controllers.messages.sendPictureMessage(url, attachmentType)
-                }
-                else {
-                    controllers.messages.sendFileMessage(url, attachmentType)
-                }
-            }
-            else {
-                controllers.cloudFiles.addFiles(fileUrls)
-            }
+            stackLayout.currentItem().processPickedAttachment(fileUrls, attachmentType)
         }
     }
 
-    function navigateBack(transition) { return stackLayout.navigateBack(transition) }
+    function navigateBack(transition) { return stackLayout.currentItem().navigateBack(transition) }
 }

@@ -6,17 +6,19 @@ import "../theme"
 SplitView {
     id: root
 
-    readonly property string chatId: controllers.chats.current.id
-    readonly property bool isChatOpened: chatId.length > 0
-    readonly property var lm: Theme.landscapeMode
-
     signal newChatRequested()
     signal newGroupChatRequested()
     signal infoRequested()
 
+    QtObject {
+        id: d
+        readonly property string chatId: controllers.chats.current.id
+        readonly property bool isChatOpened: chatId.length > 0
+    }
+
     handle: Rectangle {
-        implicitWidth: lm.splitHandleSize
-        implicitHeight: lm.splitHandleSize
+        implicitWidth: Theme.landscapeMode.splitHandleSize
+        implicitHeight: Theme.landscapeMode.splitHandleSize
         color: Theme.chatBackgroundColor
     }
 
@@ -24,9 +26,10 @@ SplitView {
         id: chatListPage
         SplitView.fillHeight: true
         SplitView.fillWidth: false
-        SplitView.preferredWidth: settings.chatListLandscapeWidth ? settings.chatListLandscapeWidth : lm.listMinimumWidth
-        SplitView.minimumWidth: lm.listMinimumWidth
-        SplitView.maximumWidth: Math.min(lm.listMaximumWidth, root.width - lm.chatMinimumWidth - lm.splitHandleSize)
+        SplitView.preferredWidth: settings.chatListLandscapeWidth ? settings.chatListLandscapeWidth : Theme.landscapeMode.listMinimumWidth
+        SplitView.minimumWidth: Theme.landscapeMode.listMinimumWidth
+        SplitView.maximumWidth: Math.min(Theme.landscapeMode.listMaximumWidth,
+                                         root.width - Theme.landscapeMode.chatMinimumWidth - Theme.landscapeMode.splitHandleSize)
 
         onNewChatRequested: root.newChatRequested()
         onNewGroupChatRequested: root.newGroupChatRequested()
@@ -36,9 +39,9 @@ SplitView {
 
     ChatPage {
         id: chatPage
-        visible: isChatOpened
+        visible: d.isChatOpened
         showBackButton: false
-        SplitView.minimumWidth: lm.chatMinimumWidth
+        SplitView.minimumWidth: Theme.landscapeMode.chatMinimumWidth
         SplitView.fillHeight: true
         SplitView.fillWidth: true
 
@@ -46,10 +49,12 @@ SplitView {
     }
 
     Rectangle {
-        visible: !isChatOpened
+        visible: !d.isChatOpened
         color: Theme.chatBackgroundColor
-        SplitView.minimumWidth: lm.chatMinimumWidth
+        SplitView.minimumWidth: Theme.landscapeMode.chatMinimumWidth
         SplitView.fillHeight: true
         SplitView.fillWidth: true
     }
+
+    function navigateBack(transition) { return d.isChatOpened && chatPage.navigateBack(transition) }
 }

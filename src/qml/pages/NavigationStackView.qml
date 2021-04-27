@@ -11,34 +11,26 @@ StackView {
         color: Theme.contactsBackgroundColor
     }
 
-    QtObject {
-        id: d
-        property var components: []
-    }
-
     function navigatePush(component, params, transition) {
         root.push(component, params, transition)
-        d.components.push(component)
     }
 
     function navigateReplace(component) {
-        if (d.components && d.components[0] === component) {
-            root.pop(component, StackView.Immediate)
-        } else {
-            root.replace(null, component, StackView.Immediate)
-        }
-        d.components = [component]
+        root.replace(null, component, StackView.Immediate)
     }
 
     function navigateBack(transition) {
         if (currentItem.navigateBack && currentItem.navigateBack(transition)) {
             return true
         } else if (depth > 1) {
-            root.pop(transition)
-            d.components.pop()
+            navigatePop(transition)
             return true
         } else {
             return false
         }
+    }
+
+    function navigatePop(transition) {
+        root.pop(transition)
     }
 }

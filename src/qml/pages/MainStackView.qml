@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 
 NavigationStackView {
     id: root
+    readonly property alias mainStackView: root
 
     Component {
         id: mainComponent
@@ -75,9 +76,8 @@ NavigationStackView {
     }
 
     Component.onCompleted: {
-        var appState = app.stateManager.startState
-        appState.chatListRequested.connect(d.openChatList)
-        appState.accountSelectionRequested.connect(d.openAccountSelection)
-        appState.trySignIn()
+        controllers.users.userLoaded.connect(d.openChatList)
+        controllers.users.userNotLoaded.connect(d.openAccountSelection)
+        controllers.users.loadInitialUser()
     }
 }

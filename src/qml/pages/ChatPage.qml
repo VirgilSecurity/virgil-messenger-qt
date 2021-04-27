@@ -100,5 +100,10 @@ Page {
         target: models.messages
         function onMessagesReset() { messageInput.clear() }
     }
+
+    function navigateBack(transition) {
+        controllers.chats.closeChat()
+        return true
+    }
 }
 

@@ -48,7 +48,6 @@
 #include "RestoreAccountUsernameState.h"
 #include "CloudFolderMembersState.h"
 #include "SignUpState.h"
-#include "StartState.h"
 #include "VerifyProfileState.h"
 
 class Settings;
@@ -74,7 +73,6 @@ class ApplicationStateManager : public QStateMachine
     Q_PROPERTY(GroupChatMembersState *groupChatMembersState MEMBER m_groupChatMembersState CONSTANT)
     Q_PROPERTY(RestoreAccountUsernameState *restoreAccountUsernameState MEMBER m_restoreAccountUsernameState CONSTANT)
     Q_PROPERTY(SignUpState *signUpState MEMBER m_signUpState CONSTANT)
-    Q_PROPERTY(StartState *startState MEMBER m_startState CONSTANT)
 
 public:
     ApplicationStateManager(Messenger *messenger, Controllers *controllers, Models *models, Validator *validator,
@@ -99,7 +97,6 @@ private:
     GroupChatMembersState *m_groupChatMembersState;
     RestoreAccountUsernameState *m_restoreAccountUsernameState;
     SignUpState *m_signUpState;
-    StartState *m_startState;
 };
 } // namespace vm
 

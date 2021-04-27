@@ -159,7 +159,6 @@ signals:
     //--
     // Sign-in.
     //
-    void signInStarted(const QString &username);
     void signedIn(const QString &username);
     void signInErrorOccured(const QString &errorText);
     void signedUp(const QString &username);
