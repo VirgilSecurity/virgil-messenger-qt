@@ -95,9 +95,9 @@ bool Self::isValidUrl(const QUrl &url)
 QString Self::urlToLocalFile(const QUrl &url)
 {
 #if VS_ANDROID
-    qCDebug(lcFileUtils) << "Android file url (before encoding):" << url.toString();
-    auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
-    qCDebug(lcFileUtils) << "Android file url:" << res;
+    qCDebug(lcFileUtils) << "Android file url (before urlToLocalFile):" << url.toString();
+    auto res = QUrl::fromPercentEncoding(url.toString(QUrl::RemoveScheme).toUtf8());
+    qCDebug(lcFileUtils) << "Android file url path:" << res;
     return res;
 #else
     qCDebug(lcFileUtils) << "File url:" << url.toLocalFile();
