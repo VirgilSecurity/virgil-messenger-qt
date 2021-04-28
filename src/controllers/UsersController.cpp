@@ -35,7 +35,6 @@
 #include "controllers/UsersController.h"
 
 #include "Messenger.h"
-#include "android/VSQAndroid.h"
 #include "database/UserDatabase.h"
 #include "database/ContactsTable.h"
 #include "models/Models.h"
@@ -63,6 +62,9 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
 
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 
+    connect(this, &Self::userLoaded, this, &Self::hideSplashScreen);
+    connect(this, &Self::userNotLoaded, this, &Self::hideSplashScreen);
+
     // Notifications
     auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
     connect(messenger, &Messenger::signInErrorOccured, notifyAboutError);
@@ -73,10 +75,6 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
 
 void Self::initialSignIn()
 {
-#if VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
-
     const auto settings = m_messenger->settings();
     const auto username = settings->lastSignedInUser();
     if (username.isEmpty() || settings->userCredential(username).isEmpty()) {
@@ -112,6 +110,16 @@ void Self::writeContactToDatabase(const UserHandler &user)
     Contact contact(user->id());
     contact.setUsername(user->username());
     m_userDatabase->contactsTable()->addContact(contact);
+}
+
+void Self::hideSplashScreen()
+{
+#if VS_ANDROID
+    if (m_splashScreenVisible) {
+        VSQAndroid::hideSplashScreen();
+        m_splashScreenVisible = false;
+    }
+#endif
 }
 
 void Self::onMessengerSignedOut()
