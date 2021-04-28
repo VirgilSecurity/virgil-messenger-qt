@@ -113,7 +113,7 @@ void VSQAndroid::hideSplashScreen()
 static void *loggingFunction(void *)
 {
     ssize_t readSize;
-    char buf[128];
+    char buf[4096];
 
     while ((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
         if (buf[readSize - 1] == '\n') {
@@ -130,7 +130,8 @@ static void *loggingFunction(void *)
 
 /******************************************************************************/
 int VSQAndroid::runLoggingThread()
-{ // run this function to redirect your output to android log
+{
+    // run this function to redirect your output to android log
     setvbuf(stdout, nullptr, _IOLBF, 0); // make stdout line-buffered
     setvbuf(stderr, nullptr, _IONBF, 0); // make stderr unbuffered
 
