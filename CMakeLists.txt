@@ -468,6 +468,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFilesUpdate.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/TimeProfiler.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/TimeProfilerSection.h
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
@@ -549,7 +551,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/states/RestoreAccountUsernameState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SelectContactsState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/SignUpState.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/states/StartState.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/VerifyProfileState.h
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/include/database/core/Database.h
@@ -600,6 +601,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesProxyModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueue.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/models/MessagesQueueListeners.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Models.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/Model.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/OperationQueue.h
@@ -610,7 +612,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateAttachmentFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CalculateFileFingerprintOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CloudFileOperation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ConvertToPngOperation.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/operations/ConvertImageFormatOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentPreviewOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateAttachmentThumbnailOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/CreateCloudFolderOperation.h
@@ -680,6 +682,8 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfiler.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfilerSection.cpp
         # Messenger Core
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
@@ -753,7 +757,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/states/RestoreAccountUsernameState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SelectContactsState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/SignUpState.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/states/StartState.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/VerifyProfileState.cpp
         # Database
         ${CMAKE_CURRENT_LIST_DIR}/src/database/core/Database.cpp
@@ -804,6 +807,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesProxyModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueue.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/models/MessagesQueueListeners.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Models.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/Model.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/OperationQueue.cpp
@@ -811,7 +815,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateAttachmentFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CalculateFileFingerprintOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CloudFileOperation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ConvertToPngOperation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/operations/ConvertImageFormatOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentPreviewOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateAttachmentThumbnailOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/CreateCloudFolderOperation.cpp

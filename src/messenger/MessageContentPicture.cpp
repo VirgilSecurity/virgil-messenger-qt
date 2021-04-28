@@ -109,8 +109,8 @@ void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
     m_thumbnail = std::move(thumbnail);
 }
 
-std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl &localUrl, const QSize &thumbnailMaxSize,
-                                                               QString &errorString)
+std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl &localUrl, const QString &imageFormat,
+                                                               const QSize &thumbnailMaxSize, QString &errorString)
 {
     MessageContentPicture picture;
     if (!picture.readLocalFile(localUrl, errorString)) {
@@ -118,7 +118,7 @@ std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl &local
     }
 
     const auto fileName = FileUtils::attachmentFileName(localUrl, true);
-    picture.setFileName(fileName.section('.', 0, 0) + QLatin1String(".png"));
+    picture.setFileName(fileName.section('.', 0, 0) + imageFormat);
     picture.readImage(thumbnailMaxSize, errorString);
     return picture;
 }

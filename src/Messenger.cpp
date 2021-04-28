@@ -134,7 +134,6 @@ bool Self::isOnline() const noexcept
 
 void Self::signIn(const QString &username)
 {
-    emit signInStarted(username);
     FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
         m_settings->setLastSignedInUser((result == CoreMessengerStatus::Success) ? username : QString());
 
@@ -337,6 +336,11 @@ void Self::setApplicationActive(bool active)
 void Self::suspend()
 {
     m_coreMessenger->suspend();
+}
+
+void Self::setShouldDisconnectWhenSuspended(bool disconnectWhenSuspended)
+{
+    m_coreMessenger->setShouldDisconnectWhenSuspended(disconnectWhenSuspended);
 }
 
 void Self::setCurrentRecipient(const UserId &recipientId)

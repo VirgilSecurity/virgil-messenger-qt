@@ -33,14 +33,29 @@ NavigationStackView {
     Component {
         id: newChatComponent
         NewChatPage {
-            onCreated: d.openChatList()
+            onCreated: {
+                if (window.useDesktopView) {
+                    d.closeNewChatDialog()
+                }
+            }
         }
     }
 
     Component {
         id: newGroupChatComponent
         NewGroupChatPages {
-            onCreated: d.openChatList()
+            onCreated: {
+                if (window.useDesktopView) {
+                    d.closeNewChatDialog()
+                }
+            }
+        }
+    }
+
+    Component {
+        id: chatPageComponent
+        ChatPage {
+            onInfoRequested: root.navigatePush(chatInfoComponent)
         }
     }
 
@@ -70,14 +85,34 @@ NavigationStackView {
 
     QtObject {
         id: d
+        readonly property string chatId: controllers.chats.current.id
+        readonly property bool isChatOpened: chatId.length > 0
+
+        onIsChatOpenedChanged: {
+            if (window.useDesktopView) {
+                return
+            }
+
+            if (isChatOpened) {
+                if (root.depth === 2) {
+                    closeNewChatDialog()
+                }
+                root.navigatePush(chatPageComponent)
+            } else {
+                root.navigatePop()
+            }
+        }
+
         function openChatList() { navigateReplace(mainComponent) }
+
         function openAccountSelection() { navigateReplace(accountSelectionComponent) }
+
+        function closeNewChatDialog() { root.navigatePop(StackView.ReplaceTransition) }
     }
 
     Component.onCompleted: {
-        var appState = app.stateManager.startState
-        appState.chatListRequested.connect(d.openChatList)
-        appState.accountSelectionRequested.connect(d.openAccountSelection)
-        appState.trySignIn()
+        controllers.users.userLoaded.connect(d.openChatList)
+        controllers.users.userNotLoaded.connect(d.openAccountSelection)
+        controllers.users.initialSignIn()
     }
 }

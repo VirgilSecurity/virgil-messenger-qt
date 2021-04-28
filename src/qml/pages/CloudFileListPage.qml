@@ -136,5 +136,9 @@ Rectangle {
         return false
     }
 
-    Component.onCompleted: appState.switchToRootFolder()
+    function refresh() { appState.switchToRootFolder() }
+
+    function processPickedAttachment(fileUrls, attachmentType) {
+        controllers.cloudFiles.addFiles(fileUrls)
+    }
 }

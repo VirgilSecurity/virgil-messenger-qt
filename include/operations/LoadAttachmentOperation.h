@@ -36,6 +36,9 @@
 #define VM_LOADATTACHMENTOPERATION_H
 
 #include "NetworkOperation.h"
+#include "TimeProfiler.h"
+
+class Settings;
 
 namespace vm {
 class MessageOperation;
@@ -45,13 +48,16 @@ class LoadAttachmentOperation : public NetworkOperation
     Q_OBJECT
 
 public:
-    explicit LoadAttachmentOperation(MessageOperation *parent);
+    LoadAttachmentOperation(MessageOperation *parent, const Settings *settings);
 
     void startLoadOperation(quint64 bytesTotal);
     void setLoadOperationProgress(quint64 bytesLoaded);
 
 signals:
     void totalProgressChanged(quint64 bytesLoaded, quint64 bytesTotal);
+
+protected:
+    const Settings *m_settings;
 
 private:
     void cleanup() override;
@@ -60,6 +66,8 @@ private:
     quint64 m_bytesTotal = 0;
     quint64 m_previousBytesTotal = 0;
     quint64 m_currentBytesLoaded = 0;
+
+    TimeProfiler m_loadTimeProfiler;
 };
 } // namespace vm
 

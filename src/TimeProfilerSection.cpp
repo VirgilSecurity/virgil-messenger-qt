@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,42 +32,34 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MessageOperation.h"
+#include "TimeProfilerSection.h"
 
-#include "operations/MessageOperationFactory.h"
-#include "operations/SendMessageOperation.h"
-#include "MessageUpdate.h"
+#include "TimeProfiler.h"
 
 using namespace vm;
+using Self = TimeProfilerSection;
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
-                                   bool isOnline, QObject *parent)
-    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
+TimeProfilerSection::TimeProfilerSection(const QString &name, TimeProfiler *profiler)
+    : m_preffix(QString("[%1] ").arg(name)), m_profiler(profiler), m_initialElapsed(profiler ? profiler->elapsed() : 0)
 {
-    setName(message->id());
-}
-
-MessageHandler MessageOperation::message() const
-{
-    return m_message;
-}
-
-MessageOperationFactory *MessageOperation::factory()
-{
-    return m_factory;
-}
-
-void MessageOperation::apply(const MessageUpdate &update)
-{
-    const auto applied = m_message->applyUpdate(update);
-    emit updateMessage(update);
-
-    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-        MessageAttachmentExtrasJsonUpdate extrasUpdate;
-        const auto attachment = m_message->contentAsAttachment();
-        extrasUpdate.attachmentId = attachment->id();
-        extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = attachment->extrasToJson(true);
-        emit updateMessage(extrasUpdate);
+    if (profiler) {
+        profiler->printMessageWithOptions(m_preffix + QLatin1String("Section started"), 0);
     }
+}
+
+TimeProfilerSection::~TimeProfilerSection()
+{
+    printMessage(QLatin1String("Section ended"));
+}
+
+void Self::printMessage(const QString &message)
+{
+    if (m_profiler) {
+        m_profiler->printMessageWithOptions(m_preffix + message, elapsed());
+    }
+}
+
+qint64 TimeProfilerSection::elapsed() const
+{
+    return m_profiler ? (m_profiler->elapsed() - m_initialElapsed) : 0;
 }

@@ -38,7 +38,7 @@
 #include "Utils.h"
 #include "Messenger.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
-#include "operations/ConvertToPngOperation.h"
+#include "operations/ConvertImageFormatOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/CreateThumbnailOperation.h"
@@ -102,11 +102,11 @@ EncryptUploadFileOperation *MessageOperationFactory::populateEncryptUpload(Netwo
     return op;
 }
 
-ConvertToPngOperation *MessageOperationFactory::populateConvertToPngOperation(Operation *parent,
-                                                                              const QString &sourcePath,
-                                                                              const QString &destFileName)
+ConvertImageFormatOperation *MessageOperationFactory::populateConvertImageFormatOperation(Operation *parent,
+                                                                                          const QString &sourcePath,
+                                                                                          const QString &destFileName)
 {
-    auto op = new ConvertToPngOperation(settings(), sourcePath, destFileName, parent);
+    auto op = new ConvertImageFormatOperation(settings(), sourcePath, destFileName, parent);
     parent->appendChild(op);
     return op;
 }

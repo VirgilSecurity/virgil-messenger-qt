@@ -32,35 +32,36 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_STARTSTATE_H
-#define VM_STARTSTATE_H
+#include "MessagesQueueListeners.h"
 
-#include <QState>
+#include "MessageOperationSource.h"
 
-class Settings;
+Q_LOGGING_CATEGORY(lcMessagesQueueListener, "messages-listener");
 
-namespace vm {
-class Messenger;
+using namespace vm;
 
-class StartState : public QState
+bool UniqueMessageDownloadOperationFilter::preRun(OperationSourcePtr source)
 {
-    Q_OBJECT
+    const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
+    if (messageSource->download()) {
+        const auto id = messageSource->message()->id();
+        QMutexLocker locker(&m_mutex);
+        if (!m_ids.contains(id)) {
+            m_ids.push_back(id);
+            return true;
+        }
+        qCDebug(lcMessagesQueueListener) << "Skipped duplicated download for message" << id;
+        return false;
+    }
+    return true;
+}
 
-public:
-    StartState(Messenger *messenger, Settings *settings, QState *parent);
-
-    Q_INVOKABLE void trySignIn();
-
-signals:
-    void chatListRequested();
-    void accountSelectionRequested();
-
-private:
-    void hideNativeSplashScreen();
-
-    Messenger *m_messenger;
-    Settings *m_settings;
-};
-} // namespace vm
-
-#endif // VM_STARTSTATE_H
+void UniqueMessageDownloadOperationFilter::postRun(OperationSourcePtr source)
+{
+    const auto messageSource = dynamic_cast<MessageOperationSource *>(source.get());
+    if (messageSource->download()) {
+        const auto id = messageSource->message()->id();
+        QMutexLocker locker(&m_mutex);
+        m_ids.removeAll(id);
+    }
+}

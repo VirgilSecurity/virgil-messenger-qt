@@ -38,8 +38,6 @@
 #include "LoadAttachmentOperation.h"
 #include "MessageContentDownloadStage.h"
 
-class Settings;
-
 namespace vm {
 class DownloadAttachmentOperation : public LoadAttachmentOperation
 {
@@ -65,7 +63,6 @@ private:
     void updateStage(MessageContentDownloadStage downloadStage);
 
     MessageOperation *m_parent;
-    const Settings *m_settings;
     Parameter m_parameter;
 };
 } // namespace vm

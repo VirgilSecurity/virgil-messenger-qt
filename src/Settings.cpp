@@ -66,6 +66,8 @@ Q_LOGGING_CATEGORY(lcSettings, "settings")
 Settings::Settings(QObject *parent)
     : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
 {
+    Q_ASSERT(imageConversionFormat() == imageConversionFormat().toLower());
+
     if (deviceId().isEmpty()) {
         createDeviceId();
         removeGroup(kUsersGroup);
@@ -270,10 +272,15 @@ QDir Settings::cloudFilesCacheDir() const
     return m_cloudFilesCacheDir;
 }
 
+QString Settings::imageConversionFormat() const
+{
+    return QLatin1String(".jpg");
+}
+
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
     return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId
-                                    + QLatin1String(".png"));
+                                    + imageConversionFormat());
 }
 
 QSize Settings::thumbnailMaxSize() const
@@ -294,6 +301,11 @@ bool Settings::devMode() const
 bool Settings::autoSendCrashReport() const
 {
     return !devMode();
+}
+
+bool Settings::timeProfilerEnabled() const
+{
+    return false;
 }
 
 QRect Settings::windowGeometry() const

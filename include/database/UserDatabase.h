@@ -85,8 +85,11 @@ signals:
     //
     //  Control signals.
     //
-    void open(const QString &username);
-    void close();
+    void openUser(const QString &username);
+    void closeUser();
+
+    void userOpened(const QString &username);
+    void userClosed();
 
     void writeMessage(const MessageHandler &message);
     void updateMessage(const MessageUpdate &messageUpdate);
@@ -98,8 +101,8 @@ signals:
 
 private:
     bool create() override;
-    void onOpen(const QString &username);
-    void onClose();
+    void onOpenUser(const QString &username);
+    void onCloseUser();
 
     void onWriteMessage(const MessageHandler &message);
     void onUpdateMessage(const MessageUpdate &messageUpdate);

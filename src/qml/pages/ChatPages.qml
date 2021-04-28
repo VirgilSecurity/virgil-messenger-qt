@@ -42,19 +42,36 @@ Item {
         }
     }
 
+    Component {
+        id: listViewComponent
+        ChatListPage {
+            anchors.fill: parent
+
+            onNewChatRequested: root.newChatRequested()
+            onNewGroupChatRequested: root.newGroupChatRequested()
+        }
+    }
+
     Loader {
         id: loader
         anchors.fill: parent
-        sourceComponent: d.isLandscapeMode ? splitViewComponent : stackViewComponent
+        sourceComponent: window.useDesktopView ? (d.isLandscapeMode ? splitViewComponent : stackViewComponent) :
+                                                 listViewComponent
     }
 
     Component.onCompleted: controllers.chats.groupInvitationRejected.connect(window.navigateBack)
 
-    function navigateBack(transition) {
-        if (controllers.chats.current.id.length > 0) {
-            controllers.chats.closeChat()
-            return true
+    function navigateBack(transition) { return loader.item.navigateBack(transition) }
+
+    function refresh() {}
+
+    function processPickedAttachment(fileUrls, attachmentType) {
+        const url = fileUrls[fileUrls.length - 1]
+        if (attachmentType === AttachmentTypes.picture) {
+            controllers.messages.sendPictureMessage(url, attachmentType)
         }
-        return false
+        else {
+            controllers.messages.sendFileMessage(url, attachmentType)
+        }
     }
 }

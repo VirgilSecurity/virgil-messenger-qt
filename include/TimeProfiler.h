@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,42 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MessageOperation.h"
+#ifndef VM_TIME_PROFILER_H
+#define VM_TIME_PROFILER_H
 
-#include "operations/MessageOperationFactory.h"
-#include "operations/SendMessageOperation.h"
-#include "MessageUpdate.h"
+#include "TimeProfilerSection.h"
 
-using namespace vm;
+#include <QElapsedTimer>
+#include <QLoggingCategory>
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
-                                   bool isOnline, QObject *parent)
-    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
+#include <memory>
+
+Q_DECLARE_LOGGING_CATEGORY(lcTimeProfiler)
+
+namespace vm {
+class TimeProfiler
 {
-    setName(message->id());
-}
+public:
+    TimeProfiler() = default;
+    ~TimeProfiler() = default;
 
-MessageHandler MessageOperation::message() const
-{
-    return m_message;
-}
+    void start();
+    void stop();
+    bool isStarted() const;
 
-MessageOperationFactory *MessageOperation::factory()
-{
-    return m_factory;
-}
+    qint64 elapsed() const;
 
-void MessageOperation::apply(const MessageUpdate &update)
-{
-    const auto applied = m_message->applyUpdate(update);
-    emit updateMessage(update);
+    void printMessage(const QString &message);
+    void printMessageWithOptions(const QString &message, qint64 elapsed);
 
-    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-        MessageAttachmentExtrasJsonUpdate extrasUpdate;
-        const auto attachment = m_message->contentAsAttachment();
-        extrasUpdate.attachmentId = attachment->id();
-        extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = attachment->extrasToJson(true);
-        emit updateMessage(extrasUpdate);
-    }
-}
+private:
+    QElapsedTimer m_timer;
+};
+} // namespace vm
+
+#endif // VM_TIME_PROFILER_H

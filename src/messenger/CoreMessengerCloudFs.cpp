@@ -196,6 +196,10 @@ Self::FutureResult<CloudFsNewFile> Self::createFile(const QString &sourceFilePat
                               parentFolderPublicKey]() -> Result<CloudFsNewFile> {
         qCDebug(lcCoreMessengerCloudFs) << "Trying to create file" << FileUtils::fileName(sourceFilePath);
 
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         //
         //  Encrypt file.
         //
@@ -248,6 +252,10 @@ Self::FutureStatus Self::deleteFile(const CloudFsFileId &fileId)
 {
 
     return QtConcurrent::run([this, fileId]() -> CoreMessengerStatus {
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         auto fileIdStd = QString(fileId).toStdString();
 
         const auto status = vssq_messenger_cloud_fs_delete_file(m_coreMessenger->cloudFsC(), vsc_str_from(fileIdStd));
@@ -267,6 +275,10 @@ Self::FutureResult<CloudFsFileDownloadInfo> Self::getFileDownloadInfo(const Clou
 {
 
     return QtConcurrent::run([this, fileId]() -> Result<CloudFsFileDownloadInfo> {
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         vssq_error_t error;
         vssq_error_reset(&error);
 
@@ -300,6 +312,10 @@ Self::FutureResult<CloudFsFolder> Self::createFolder(const QString &folderName, 
 {
     return QtConcurrent::run([this, folderName, members, parentFolderId,
                               parentFolderPublicKey]() -> Result<CloudFsFolder> {
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         //
         //  Request folder creation.
         //
@@ -353,6 +369,10 @@ Self::FutureStatus Self::deleteFolder(const CloudFsFolderId &folderId)
 {
 
     return QtConcurrent::run([this, folderId]() -> CoreMessengerStatus {
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         auto folderIdStd = QString(folderId).toStdString();
 
         const auto status =
@@ -373,6 +393,10 @@ Self::FutureResult<CloudFsFolder> Self::listFolder(const CloudFsFolderId &folder
 {
 
     return QtConcurrent::run([this, folderId]() -> Result<CloudFsFolder> {
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         vssq_error_t error;
         vssq_error_reset(&error);
 
@@ -727,6 +751,10 @@ Self::FutureResult<CloudFileMembers> Self::getSharedGroupUsers(const CloudFsShar
     return QtConcurrent::run([this, sharedGroupId]() -> Result<CloudFileMembers> {
         qCDebug(lcCoreMessengerCloudFs) << "Get group shared users:" << sharedGroupId;
 
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
+
         vssq_error_t error;
         vssq_error_reset(&error);
 
@@ -764,6 +792,10 @@ Self::FutureStatus Self::setSharedGroupUsers(const CloudFsSharedGroupId &sharedG
 {
     return QtConcurrent::run([this, sharedGroupId, encryptedKey, keyIssuer, members]() -> CoreMessengerStatus {
         qCDebug(lcCoreMessengerCloudFs) << "Set group shared users:" << sharedGroupId;
+
+        if (!m_coreMessenger || !m_coreMessenger->isOnline()) {
+            return CoreMessengerStatus::Error_Offline;
+        }
 
         auto usersAccess = vssq_messenger_cloud_fs_access_list_wrap_ptr(vssq_messenger_cloud_fs_access_list_new());
         for (const auto &member : members) {

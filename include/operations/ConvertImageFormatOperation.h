@@ -32,21 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_CONVERTTOPNGOPERATION_H
-#define VM_CONVERTTOPNGOPERATION_H
+#ifndef VM_CONVERTIMAGEFORMATOPERATION_H
+#define VM_CONVERTIMAGEFORMATOPERATION_H
 
 #include "Operation.h"
 
 class Settings;
 
 namespace vm {
-class ConvertToPngOperation : public Operation
+class ConvertImageFormatOperation : public Operation
 {
     Q_OBJECT
 
 public:
-    ConvertToPngOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName,
-                          QObject *parent);
+    ConvertImageFormatOperation(const Settings *settings, const QString &sourcePath, const QString &destFileName,
+                                QObject *parent);
 
 signals:
     void imageRead(const QImage &image);
@@ -62,4 +62,4 @@ private:
 };
 } // namespace vm
 
-#endif // VM_CONVERTTOPNGOPERATION_H
+#endif // VM_CONVERTIMAGEFORMATOPERATION_H

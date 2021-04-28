@@ -232,7 +232,9 @@ void VSQNetworkAnalyzer::onAnalyzeNetwork()
 
         m_networkInterfaceData = currenNetworkInterfaceData;
         stateChanged = true;
-        emit connectedChanged(m_isConnected);
+        if (stateChanged) {
+            emit connectedChanged(m_isConnected);
+        }
     }
 
     if (!stateChanged && m_isConnected) {

@@ -32,50 +32,58 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/ConvertToPngOperation.h"
+#include "operations/ConvertImageFormatOperation.h"
 
 #include <QImageReader>
 
-#include "Settings.h"
-#include "Utils.h"
 #include "FileUtils.h"
+#include "Settings.h"
+#include "TimeProfilerSection.h"
+#include "Utils.h"
 
 using namespace vm;
 
-ConvertToPngOperation::ConvertToPngOperation(const Settings *settings, const QString &sourcePath,
-                                             const QString &destFileName, QObject *parent)
-    : Operation(QLatin1String("ConvertToPng"), parent),
+ConvertImageFormatOperation::ConvertImageFormatOperation(const Settings *settings, const QString &sourcePath,
+                                                         const QString &destFileName, QObject *parent)
+    : Operation(QLatin1String("ConvertImageFormat"), parent),
       m_settings(settings),
       m_sourcePath(sourcePath),
       m_destFileName(destFileName)
 {
 }
 
-void ConvertToPngOperation::run()
+void ConvertImageFormatOperation::run()
 {
+    const auto profilerSectionName = QLatin1String("ConvertImage(%1)").arg(FileUtils::fileName(m_sourcePath));
+    TimeProfilerSection profilerSection(profilerSectionName, timeProfiler());
+
     QImageReader reader(m_sourcePath);
     QImage source;
     if (!Utils::readImage(&reader, &source)) {
         invalidateAndNotify(tr("Failed to read image file"));
         return;
     }
+    profilerSection.printMessage(QLatin1String("Image was read"));
     const auto image = Utils::applyOrientation(source, reader.transformation());
+    profilerSection.printMessage(QLatin1String("Image orientation was applied"));
     emit imageRead(image);
 
-    const bool isPngFile = QFileInfo(m_sourcePath).completeSuffix().toLower() == QLatin1String(".png");
-    if (isPngFile) {
+    const QString format = m_settings->imageConversionFormat();
+    const bool isConverted = FileUtils::fileExt(m_sourcePath).toLower() == format;
+    if (isConverted) {
         emit converted(m_sourcePath);
         finish();
     } else {
-        const auto filePath = m_settings->attachmentCacheDir().filePath(m_destFileName + QLatin1String(".png"));
+        const auto filePath = m_settings->attachmentCacheDir().filePath(m_destFileName + format);
         if (!image.save(filePath)) {
-            qCWarning(lcOperation) << "Unable to save png file";
-            invalidateAndNotify(tr("Failed to convert to png"));
+            qCWarning(lcOperation) << "Unable to save converted file";
+            invalidateAndNotify(tr("Failed to convert image file"));
         } else if (!FileUtils::fileExists(filePath)) {
-            qCWarning(lcOperation) << "Png file exceeds file limit";
-            invalidateAndNotify(tr("Png file exceeds file limit"));
+            qCWarning(lcOperation) << "Converted image file exceeds file limit";
+            invalidateAndNotify(tr("Converted image file exceeds file limit"));
         } else {
-            qCDebug(lcOperation) << "File was converted to png";
+            profilerSection.printMessage(QLatin1String("Image was saved"));
+            qCDebug(lcOperation) << "File was converted to format";
             emit converted(filePath);
             emit fileCreated(filePath);
             finish();

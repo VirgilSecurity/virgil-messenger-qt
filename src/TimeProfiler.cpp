@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,42 +32,39 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/MessageOperation.h"
+#include "TimeProfiler.h"
 
-#include "operations/MessageOperationFactory.h"
-#include "operations/SendMessageOperation.h"
-#include "MessageUpdate.h"
+Q_LOGGING_CATEGORY(lcTimeProfiler, "time-profiler")
 
 using namespace vm;
+using Self = TimeProfiler;
 
-MessageOperation::MessageOperation(const ModifiableMessageHandler &message, MessageOperationFactory *factory,
-                                   bool isOnline, QObject *parent)
-    : NetworkOperation(parent, isOnline), m_factory(factory), m_message(message)
+void Self::start()
 {
-    setName(message->id());
+    m_timer.start();
 }
 
-MessageHandler MessageOperation::message() const
+void Self::stop()
 {
-    return m_message;
+    m_timer.invalidate();
 }
 
-MessageOperationFactory *MessageOperation::factory()
+bool Self::isStarted() const
 {
-    return m_factory;
+    return m_timer.isValid();
 }
 
-void MessageOperation::apply(const MessageUpdate &update)
+qint64 Self::elapsed() const
 {
-    const auto applied = m_message->applyUpdate(update);
-    emit updateMessage(update);
+    return m_timer.elapsed();
+}
 
-    if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
-        MessageAttachmentExtrasJsonUpdate extrasUpdate;
-        const auto attachment = m_message->contentAsAttachment();
-        extrasUpdate.attachmentId = attachment->id();
-        extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = attachment->extrasToJson(true);
-        emit updateMessage(extrasUpdate);
-    }
+void Self::printMessage(const QString &message)
+{
+    printMessageWithOptions(message, elapsed());
+}
+
+void TimeProfiler::printMessageWithOptions(const QString &message, qint64 elapsed)
+{
+    qCInfo(lcTimeProfiler).noquote() << QString::number(elapsed).rightJustified(6) << QLatin1Char('-') << message;
 }

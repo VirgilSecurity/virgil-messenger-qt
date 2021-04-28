@@ -32,42 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "StartState.h"
+#ifndef VM_TIME_PROFILER_SECTION_H
+#define VM_TIME_PROFILER_SECTION_H
 
-#include "android/VSQAndroid.h"
-#include "Messenger.h"
-#include "Settings.h"
+#include <QString>
 
-using namespace vm;
-using Self = StartState;
+namespace vm {
+class TimeProfiler;
 
-Self::StartState(Messenger *messenger, Settings *settings, QState *parent)
-    : QState(parent), m_messenger(messenger), m_settings(settings)
+class TimeProfilerSection
 {
-    connect(messenger, &Messenger::signedIn, this, &Self::chatListRequested);
-    connect(messenger, &Messenger::signedUp, this, &Self::chatListRequested);
-    connect(messenger, &Messenger::keyDownloaded, this, &Self::chatListRequested);
+public:
+    TimeProfilerSection(const QString &name, TimeProfiler *profiler);
+    ~TimeProfilerSection();
 
-    connect(messenger, &Messenger::signedOut, this, &Self::accountSelectionRequested);
-    connect(messenger, &Messenger::signInErrorOccured, this, &Self::accountSelectionRequested);
-}
+    void printMessage(const QString &message);
 
-void Self::hideNativeSplashScreen()
-{
-#if VS_ANDROID
-    VSQAndroid::hideSplashScreen();
-#endif
-}
+private:
+    qint64 elapsed() const;
 
-void Self::trySignIn()
-{
-    hideNativeSplashScreen();
+    QString m_preffix;
+    TimeProfiler *m_profiler = nullptr;
+    qint64 m_initialElapsed = 0;
+};
+} // namespace vm
 
-    const auto username = m_settings->lastSignedInUser();
-    if (username.isEmpty() || m_settings->userCredential(username).isEmpty()) {
-        emit accountSelectionRequested();
-    } else {
-        m_messenger->signIn(username);
-        emit chatListRequested();
-    }
-}
+#endif // VM_TIME_PROFILER_SECTION_H

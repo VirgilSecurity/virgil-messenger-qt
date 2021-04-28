@@ -67,8 +67,7 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
       m_newChatState(new NewChatState(controllers->chats(), models->discoveredContacts(), this)),
       m_groupChatMembersState(new GroupChatMembersState(controllers->chats(), models->discoveredContacts(), this)),
       m_restoreAccountUsernameState(new RestoreAccountUsernameState(validator, this)),
-      m_signUpState(new SignUpState(messenger, validator, this)),
-      m_startState(new StartState(messenger, m_settings, this))
+      m_signUpState(new SignUpState(messenger, validator, this))
 {
 }
 

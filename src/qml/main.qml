@@ -14,6 +14,7 @@ ApplicationWindow {
     id: root
 
     property alias window: root
+    readonly property bool useDesktopView: Platform.isDesktop
 
     visible: true
     title: (!settings.devMode || !controllers.users.currentUsername) ? app.applicationDisplayName : controllers.users.currentUsername
@@ -85,7 +86,11 @@ ApplicationWindow {
             }
         }
 
-        AttachmentPicker { id: attachmentPicker }
+        AttachmentPicker {
+            id: attachmentPicker
+            onOpening: messenger.setShouldDisconnectWhenSuspended(false)
+            onClosed: messenger.setShouldDisconnectWhenSuspended(true)
+        }
         NotificationPopup { id: notificationPopup }
         KeyboardHandler { id: keyboardHandler }
         SendReportDialog { id: sendReportDialog }
