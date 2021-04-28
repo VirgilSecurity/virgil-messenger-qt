@@ -54,4 +54,6 @@ Rectangle {
             onChatDeselected: controllers.chats.closeChat()
         }
     }
+
+    function navigateBack(transition) { return false }
 }
