@@ -42,10 +42,21 @@ Item {
         }
     }
 
+    Component {
+        id: listViewComponent
+        ChatListPage {
+            anchors.fill: parent
+
+            onNewChatRequested: root.newChatRequested()
+            onNewGroupChatRequested: root.newGroupChatRequested()
+        }
+    }
+
     Loader {
         id: loader
         anchors.fill: parent
-        sourceComponent: d.isLandscapeMode ? splitViewComponent : stackViewComponent
+        sourceComponent: window.useDesktopView ? (d.isLandscapeMode ? splitViewComponent : stackViewComponent) :
+                                                 listViewComponent
     }
 
     Component.onCompleted: controllers.chats.groupInvitationRejected.connect(window.navigateBack)

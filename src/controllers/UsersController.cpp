@@ -50,15 +50,17 @@ using Self = UsersController;
 Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent), m_messenger(messenger), m_userDatabase(userDatabase)
 {
-    connect(userDatabase, &UserDatabase::userOpened, this, &Self::onUserDatabaseOpened);
-    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::onUserDatabaseErrorOccurred);
-    connect(messenger, &Messenger::signedUp, this, &Self::loadUser);
-    connect(messenger, &Messenger::keyDownloaded, this, &Self::loadUser);
-    connect(messenger, &Messenger::signedOut, this, &Self::unloadUser);
-    connect(messenger, &Messenger::signInErrorOccured, this, &Self::unloadUser);
+    connect(messenger, &Messenger::signedIn, userDatabase, &UserDatabase::openUser);
+    connect(messenger, &Messenger::signedUp, userDatabase, &UserDatabase::openUser);
+    connect(messenger, &Messenger::keyDownloaded, userDatabase, &UserDatabase::openUser);
 
+    connect(messenger, &Messenger::signedOut, this, &Self::onMessengerSignedOut);
+    connect(messenger, &Messenger::signInErrorOccured, this, &Self::userNotLoaded);
     connect(messenger, &Messenger::userWasFound, this, &Self::writeContactToDatabase);
-    connect(messenger, &Messenger::signedIn, this, &Self::updateCurrentUser);
+
+    connect(userDatabase, &UserDatabase::opened, this, &Self::onUserDatabaseOpened);
+    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::onUserDatabaseErrorOccurred);
+
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
 
     // Notifications
@@ -69,7 +71,7 @@ Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDa
     connect(userDatabase, &UserDatabase::errorOccurred, notifyAboutError);
 }
 
-void Self::loadInitialUser()
+void Self::initialSignIn()
 {
 #if VS_ANDROID
     VSQAndroid::hideSplashScreen();
@@ -80,13 +82,8 @@ void Self::loadInitialUser()
     if (username.isEmpty() || settings->userCredential(username).isEmpty()) {
         emit userNotLoaded();
     } else {
-        loadUser(username);
+        m_messenger->signIn(username);
     }
-}
-
-void Self::loadUser(const QString &username)
-{
-    m_userDatabase->openUser(username);
 }
 
 QString Self::currentUserId() const
@@ -99,12 +96,6 @@ QString Self::currentUsername() const
 {
     const auto user = m_messenger->currentUser();
     return user ? user->username() : QString();
-}
-
-void Self::unloadUser()
-{
-    m_userDatabase->closeUser();
-    emit userNotLoaded();
 }
 
 void Self::updateCurrentUser()
@@ -123,22 +114,24 @@ void Self::writeContactToDatabase(const UserHandler &user)
     m_userDatabase->contactsTable()->addContact(contact);
 }
 
-void Self::onUserDatabaseOpened(const QString &username)
+void Self::onMessengerSignedOut()
 {
+    m_userDatabase->closeUser();
+    emit userNotLoaded();
+}
+
+void Self::onUserDatabaseOpened()
+{
+    updateCurrentUser();
     emit userLoaded();
-    if (m_messenger->currentUser()) {
-        updateCurrentUser();
-    } else {
-        m_messenger->signIn(username);
-    }
 }
 
 void Self::onUserDatabaseErrorOccurred()
 {
-    if (!m_messenger->currentUser()) {
-        emit userNotLoaded();
-    } else {
+    if (m_messenger->currentUser()) {
         m_messenger->signOut();
+    } else {
+        emit userNotLoaded();
     }
 }
 

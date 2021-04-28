@@ -14,13 +14,12 @@ NavigationStackView {
         id: d
         readonly property string chatId: controllers.chats.current.id
         readonly property bool isChatOpened: chatId.length > 0
-        readonly property var stackView: Platform.isDesktop ? root : mainStackView
 
         onIsChatOpenedChanged: {
             if (isChatOpened) {
-                stackView.navigatePush(chatPageComponent)
+                root.navigatePush(chatPageComponent)
             } else {
-                stackView.navigatePop()
+                root.navigatePop()
             }
         }
     }
@@ -43,7 +42,7 @@ NavigationStackView {
     Component.onCompleted: {
         navigateReplace(chatListComponent)
         if (d.isChatOpened) {
-            d.stackView.navigatePush(chatPageComponent, {}, StackView.Immediate)
+            root.navigatePush(chatPageComponent, {}, StackView.Immediate)
         }
     }
 

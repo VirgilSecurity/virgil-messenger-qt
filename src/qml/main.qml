@@ -14,6 +14,7 @@ ApplicationWindow {
     id: root
 
     property alias window: root
+    readonly property bool useDesktopView: Platform.isDesktop
 
     visible: true
     title: (!settings.devMode || !controllers.users.currentUsername) ? app.applicationDisplayName : controllers.users.currentUsername
