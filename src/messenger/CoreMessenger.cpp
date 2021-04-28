@@ -2314,6 +2314,9 @@ void Self::onProcessNetworkState(bool isOnline)
 {
     if (isOnline) {
         qCDebug(lcCoreMessenger) << "Network go online.";
+        qCDebug(lcCoreMessenger) << "Emit reconnect when network changed";
+
+        emit disconnectXmppServer();
         emit reconnectXmppServerIfNeeded();
     } else {
         qCDebug(lcCoreMessenger) << "Network go offline.";
