@@ -78,6 +78,6 @@ NavigationStackView {
     Component.onCompleted: {
         controllers.users.userLoaded.connect(d.openChatList)
         controllers.users.userNotLoaded.connect(d.openAccountSelection)
-        controllers.users.loadInitialUser()
+        controllers.users.initialSignIn()
     }
 }

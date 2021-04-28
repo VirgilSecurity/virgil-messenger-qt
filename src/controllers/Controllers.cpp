@@ -73,7 +73,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     connect(m_cloudFiles, &CloudFilesController::openUrlRequested, m_documentInteraction,
             &DocumentInteractionController::openUrl);
 
-    connect(userDatabase, &UserDatabase::opened, m_chats, &ChatsController::loadChats, Qt::QueuedConnection);
+    connect(userDatabase, &UserDatabase::opened, m_chats, &ChatsController::loadChats);
     connect(userDatabase, &UserDatabase::closed, m_chats, &ChatsController::clearChats);
     connect(userDatabase, &UserDatabase::closed, m_cloudFiles, &CloudFilesController::clearFiles);
     connect(m_chats, &ChatsController::chatOpened, m_messages, &MessagesController::loadChat);

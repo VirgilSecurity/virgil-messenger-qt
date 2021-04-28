@@ -57,8 +57,7 @@ class UsersController : public QObject
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    Q_INVOKABLE void loadInitialUser();
-    Q_INVOKABLE void loadUser(const QString &username);
+    Q_INVOKABLE void initialSignIn();
 
 signals:
     void userLoaded();
@@ -73,13 +72,12 @@ private:
     QString currentUserId() const;
     QString currentUsername() const;
 
-    void unloadUser();
     void updateCurrentUser();
     void writeContactToDatabase(const UserHandler &user);
 
-    void onUserDatabaseOpened(const QString &username);
+    void onMessengerSignedOut();
+    void onUserDatabaseOpened();
     void onUserDatabaseErrorOccurred();
-
     void onChatAdded(const ChatHandler &chat);
 
 private:
