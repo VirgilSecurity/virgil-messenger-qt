@@ -87,6 +87,8 @@ Self::VSQApplication()
 
 #if VS_MACOS
     VSQMacos::instance().startUpdatesTimer();
+#elif VS_WINDOWS && VS_WINSPARKLE
+    VSQWindows::instance().startUpdatesTimer();
 #endif
 }
 
@@ -116,15 +118,6 @@ void Self::initialize()
     // Loggers
 #if !ENABLE_XMPP_LOGS && !ENABLE_XMPP_EXTRA_LOGS
     QLoggingCategory::setFilterRules("core-messenger-xmpp.debug=false");
-#endif
-
-    // Platforms
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-#endif
-
-#if (VS_WINDOWS)
-    WindowsPlatform::prepare();
 #endif
 
 #if (VSQ_WEBDRIVER_DEBUG)
@@ -167,8 +160,14 @@ int Self::run(const QString &basePath, VSQLogging *logging)
 
     reloadQml();
 
-#if VS_ANDROID
+    // Platforms
+#if (VS_ANDROID)
+    VSQAndroid::prepare();
     notifications::android::FirebaseListener::instance().init();
+#endif
+
+#if (VS_WINDOWS)
+    WindowsPlatform::prepare();
 #endif
 
     const auto result = QGuiApplication::instance()->exec();
@@ -189,6 +188,8 @@ void Self::checkUpdates()
 {
 #if VS_MACOS
     VSQMacos::instance().checkUpdates();
+#elif VS_WINDOWS
+    VSQWindows::instance().checkUpdates();
 #endif
 }
 

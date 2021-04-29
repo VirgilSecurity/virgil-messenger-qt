@@ -48,6 +48,7 @@ class Messenger;
 class ChatObject : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString id READ id NOTIFY idChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString lastActivityText MEMBER m_lastActivityText NOTIFY lastActivityTextChanged)
     Q_PROPERTY(bool isGroup READ isGroup NOTIFY isGroupChanged)
@@ -58,23 +59,20 @@ class ChatObject : public QObject
 public:
     ChatObject(Messenger *messenger, QObject *parent);
 
-    void setChat(const ChatHandler &chat);
+    void setChat(const ModifiableChatHandler &chat);
     ChatHandler chat() const;
 
+    QString id() const;
     QString title() const;
     bool isGroup() const;
-
-    void setGroupInvitationOwnerId(const UserId &ownerId);
-    UserId groupInvitationOwnerId() const;
 
     void setGroupMembers(const GroupMembers &groupMembers);
     GroupMembers selectedGroupMembers() const;
 
-    UserId groupOwnerId() const;
-
     void updateGroup(const GroupUpdate &groupUpdate);
 
 signals:
+    void idChanged(const QString &id);
     void titleChanged(const QString &title);
     void lastActivityTextChanged(const QString &text);
     void isGroupChanged(bool isGroup);
@@ -86,10 +84,9 @@ private:
     void setLastActivityText(const QString &text);
 
     QPointer<Messenger> m_messenger;
-    ChatHandler m_chat;
+    ModifiableChatHandler m_chat;
     GroupMembersModel *m_groupMembersModel;
     QString m_lastActivityText;
-    UserId m_groupInvitationOwnerId;
     bool m_userIsOwner = false;
     bool m_userCanEdit = false;
 };

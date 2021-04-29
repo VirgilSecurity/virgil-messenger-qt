@@ -1,0 +1,136 @@
+;--------------------------------
+;General
+
+!include "MUI2.nsh"
+
+!define APPNAME "@PROJECT_NAME@"
+!define COMPANYNAME "@VS_ORGANIZATION_NAME@"
+!define DESCRIPTION "@VS_APPLICATION_DISPLAY_NAME@"
+!define VERSIONMAJOR @VERSIONMAJOR@
+!define VERSIONMINOR @VERSIONMINOR@
+!define VERSIONBUILD @VERSIONBUILD@
+;!define HELPURL "http://..."
+;!define UPDATEURL "http://..."
+;!define ABOUTURL "http://..."
+
+!define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}"
+Name "${APPNAME} ${VERSION}"
+OutFile "${APPNAME}-installer-${VERSION}.exe"
+InstallDir "$LOCALAPPDATA\${COMPANYNAME}\${APPNAME}"
+InstallDirRegKey HKCU "Software\${COMPANYNAME}\${APPNAME}" "install"
+RequestExecutionLevel user
+
+;--------------------------------
+; Functions
+Function .onInit
+  SetShellVarContext Current
+FunctionEnd
+
+Function un.onInit
+  SetShellVarContext Current
+FunctionEnd
+
+;--------------------------------
+  !include FileFunc.nsh
+  !insertmacro GetParameters
+  !insertmacro GetOptions
+
+;--------------------------------
+;Variables
+
+  Var StartMenuFolder
+
+;--------------------------------
+;Interface Settings
+
+  !define MUI_ABORTWARNING
+
+;--------------------------------
+;Pages
+
+  !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${COMPANYNAME}\${APPNAME}"
+  !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
+  !define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APPNAME}"
+
+  !insertmacro MUI_PAGE_COMPONENTS
+  !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
+  !insertmacro MUI_PAGE_INSTFILES
+  !insertmacro MUI_UNPAGE_CONFIRM
+  !insertmacro MUI_UNPAGE_INSTFILES
+
+;--------------------------------
+;Languages
+ 
+  !insertmacro MUI_LANGUAGE "English"
+
+;--------------------------------
+;Installer Sections
+
+Section "${APPNAME} (required)" SecMain
+
+  SectionIn RO
+  SetOutPath "$INSTDIR"
+  File /r  "${APPNAME}.dist\*.*"
+
+  ;Store installation folder
+  WriteRegStr HKCU "Software\${COMPANYNAME}\${APPNAME}" "install" $INSTDIR
+
+  ;Create uninstaller
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\${APPNAME}.lnk" "$INSTDIR\${APPNAME}.exe" "" "$INSTDIR\Logo.ico" 0
+  !insertmacro MUI_STARTMENU_WRITE_END
+
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayName" "${COMPANYNAME} - ${APPNAME} - ${DESCRIPTION}"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "InstallLocation" "$\"$INSTDIR$\""
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\Logo.ico$\""
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "Publisher" "$\"${COMPANYNAME}$\""
+;  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "HelpLink" "$\"${HELPURL}$\""
+;  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLUpdateInfo" "$\"${UPDATEURL}$\""
+;  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLInfoAbout" "$\"${ABOUTURL}$\""
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayVersion" "$\"${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}$\""
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "VersionMajor" ${VERSIONMAJOR}
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "VersionMinor" ${VERSIONMINOR}
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "NoModify" 1
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "NoRepair" 1
+
+SectionEnd
+
+;--------------------------------
+; Desktop shortcut
+Section "Desktop Shortcut" SecDeskShortcut
+  SectionIn 1
+  CreateShortcut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\${APPNAME}.exe" "" "$INSTDIR\Logo.ico" 0
+SectionEnd
+
+;--------------------------------
+; Section description
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecMain} "Core messenger component"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDeskShortcut} "Desktop shortcut"
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+;--------------------------------
+;Uninstaller Section
+
+Section "Uninstall"
+  !insertmacro MUI_STARTMENU_GETFOLDER Application $R0
+  Delete "$SMPROGRAMS\$R0\${APPNAME}.lnk"
+  Delete "$SMPROGRAMS\$R0\Uninstall.lnk"
+  RMDir /r "$SMPROGRAMS\$R0"
+
+  Delete "$DESKTOP\${APPNAME}.lnk"
+
+  RMDir /r "$INSTDIR"
+
+  DeleteRegKey HKCU "Software\${COMPANYNAME}"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}"
+
+SectionEnd

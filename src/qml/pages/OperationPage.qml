@@ -1,11 +1,11 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 import "../theme"
 import "../components"
 
 Page {
-    property var appState
+    property var appState: null
     property bool loadingUsed: true
     property string loadingText: ""
     property alias footerText: footerItem.text
@@ -36,7 +36,7 @@ Page {
         function onOperationErrorOccurred(errorText) {
             if (loadingUsed) {
                 form.isLoading = false
-                showPopupError(errorText) // TODO(fpohtmeh): don't use parent method directly
+                notificationPopup.showError(errorText)
             }
         }
     }

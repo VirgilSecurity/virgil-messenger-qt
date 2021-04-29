@@ -85,19 +85,17 @@ QString Self::findUniqueFileName(const QString &fileName)
 
 bool Self::isValidUrl(const QUrl &url)
 {
-    bool isValid = url.isValid();
-#if !defined(Q_OS_ANDROID)
-    isValid = isValid && url.isLocalFile();
-#endif
-    return isValid;
+    // TODO(fpohtmeh): review previous implementation
+    return url.isValid();
 }
 
 QString Self::urlToLocalFile(const QUrl &url)
 {
 #if VS_ANDROID
-    qCDebug(lcFileUtils) << "Android file url (before encoding):" << url.toString();
-    auto res = QUrl::fromPercentEncoding(url.toString().toUtf8());
-    qCDebug(lcFileUtils) << "Android file url:" << res;
+    qCDebug(lcFileUtils) << "Android file url (before urlToLocalFile):" << url.toString();
+    const auto options = url.isLocalFile() ? QUrl::FormattingOptions(QUrl::RemoveScheme) : QUrl::PrettyDecoded;
+    const auto res = QUrl::fromPercentEncoding(url.toString(options).toUtf8());
+    qCDebug(lcFileUtils) << "Android file url path:" << res;
     return res;
 #else
     qCDebug(lcFileUtils) << "File url:" << url.toLocalFile();
@@ -105,7 +103,7 @@ QString Self::urlToLocalFile(const QUrl &url)
 #endif
 }
 
-bool Self::forceCreateDir(const QString &absolutePath)
+bool Self::forceCreateDir(const QString &absolutePath, bool isFatal)
 {
     const QFileInfo info(absolutePath);
     if (info.exists()) {
@@ -118,7 +116,11 @@ bool Self::forceCreateDir(const QString &absolutePath)
     if (QDir().mkpath(absolutePath)) {
         return true;
     }
-    qFatal("Failed to create directory: %s", qPrintable(absolutePath));
+    if (isFatal) {
+        qFatal("Failed to create directory: %s", qPrintable(absolutePath));
+    } else {
+        qWarning(lcFileUtils()) << "Failed to create directory:" << absolutePath;
+    }
     return false;
 }
 
@@ -174,6 +176,11 @@ void FileUtils::removeDir(const QString &dirPath)
 QString FileUtils::fileName(const QString &filePath)
 {
     return QFileInfo(filePath).fileName();
+}
+
+QString FileUtils::fileExt(const QString &filePath)
+{
+    return QFileInfo(filePath).completeSuffix();
 }
 
 QString Self::attachmentFileName(const QUrl &url, bool isPicture)

@@ -77,8 +77,6 @@ void VSQLastActivityIq::parseElementFromChild(const QDomElement &element)
         m_seconds = std::chrono::seconds(secondsStr.toUInt(&m_valid));
         if (!m_valid) {
             qCWarning(lcLastActivity) << "Convertation error:" << secondsStr;
-        } else {
-            qCDebug(lcLastActivity) << "Time sincle last activity (sec):" << secondsStr;
         }
     } else {
         if (type() == QXmppIq::Type::Error) {

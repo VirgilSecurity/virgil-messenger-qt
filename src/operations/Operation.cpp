@@ -34,6 +34,8 @@
 
 #include "operations/Operation.h"
 
+#include "TimeProfiler.h"
+
 #include <QEventLoop>
 
 Q_LOGGING_CATEGORY(lcOperation, "operation")
@@ -182,6 +184,16 @@ void Operation::cleanupOnce()
     cleanup();
 }
 
+TimeProfiler *Operation::timeProfiler() const
+{
+    return m_timeProfiler;
+}
+
+void Operation::setTimeProfiler(TimeProfiler *profiler)
+{
+    m_timeProfiler = profiler;
+}
+
 bool Operation::preRun()
 {
     return true;
@@ -209,6 +221,9 @@ bool Operation::populateChildren()
 void Operation::connectChild(Operation *child)
 {
     child->setParent(this);
+    if (m_timeProfiler) {
+        child->setTimeProfiler(m_timeProfiler);
+    }
     connect(child, &Operation::failed, this, &Operation::fail);
     connect(child, &Operation::invalidated, this, &Operation::invalidate);
     connect(child, &Operation::finished, this, &Operation::startNextChild);

@@ -25,7 +25,6 @@ Menu {
             if (!dropdown || !contextMenu.visible) {
                 return Qt.point(0, 0);
             }
-            var window = mainView.parent // TODO(fpohtmeh): remove this trick
             var button = contextMenu.parent
             var coord = button.mapToItem(null, 0, 0)
             var centerX = coord.x + 0.5 * button.width

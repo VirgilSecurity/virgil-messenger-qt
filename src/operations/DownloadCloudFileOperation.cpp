@@ -37,6 +37,7 @@
 #include "CloudFileOperation.h"
 #include "CloudFileSystem.h"
 #include "FileUtils.h"
+#include "Messenger.h"
 
 using namespace vm;
 
@@ -63,12 +64,16 @@ DownloadCloudFileOperation::DownloadCloudFileOperation(CloudFileOperation *paren
 
 void DownloadCloudFileOperation::run()
 {
-    transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
+    if (!m_parent->messenger()->isOnline()) {
+        failAndNotify(tr("Can not download file when offline"));
+    } else {
+        transferUpdate(TransferCloudFileUpdate::Stage::Started, 0);
 
-    m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
-        m_parentFolder = folder;
-        m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
-    });
+        m_parent->watchFolderAndRun(m_parentFolder, this, [this](auto folder) {
+            m_parentFolder = folder;
+            m_requestId = m_parent->cloudFileSystem()->getDownloadInfo(m_file);
+        });
+    }
 }
 
 CloudFileId DownloadCloudFileOperation::cloudFileId() const
@@ -157,5 +162,5 @@ void DownloadCloudFileOperation::transferUpdate(const TransferCloudFileUpdate::S
 
 bool DownloadCloudFileOperation::createLocalDir()
 {
-    return FileUtils::forceCreateDir(m_parentFolder->localPath());
+    return FileUtils::forceCreateDir(m_parentFolder->localPath(), false);
 }

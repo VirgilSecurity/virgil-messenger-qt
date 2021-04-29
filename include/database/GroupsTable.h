@@ -38,8 +38,11 @@
 #include "core/DatabaseTable.h"
 #include "GroupUpdate.h"
 #include "Chat.h"
+#include "Group.h"
 
 #include <QString>
+
+class QSqlQuery;
 
 namespace vm {
 class GroupsTable : public DatabaseTable
@@ -49,24 +52,34 @@ class GroupsTable : public DatabaseTable
 public:
     explicit GroupsTable(Database *database);
 
+    static GroupHandler readGroup(const QSqlQuery &query, const QString &preffix = QString());
+
 signals:
     //
     //  Control signals.
     //
-    void addGroupForChat(const ChatHandler &chat);
+    void add(const GroupHandler &group);
+    void fetch();
     void updateGroup(const GroupUpdate &groupUpdate);
     void deleteGroup(const GroupId &groupId);
 
     //
     //  Notification signals.
     //
+    void fetched(const Groups &groups);
+    void added(const GroupHandler &group);
     void errorOccurred(const QString &errorText);
 
 private:
-    void onAddGroupForChat(const ChatHandler &chat);
+    void onAdd(const GroupHandler &group);
+    void onFetch();
     void onUpdateGroup(const GroupUpdate &groupUpdate);
     void onDeleteGroup(const GroupId &groupId);
-    void insertGroup(const GroupId &groupId);
+
+    void insertGroup(const GroupId &groupId, const UserId &superOwnerId);
+    void updateGroupName(const GroupId &groupId, const QString &name);
+    void updateGroupCache(const GroupId &groupId, const QString &cache);
+    void updateGroupInvitation(const GroupId &groupId, GroupInvitationStatus status);
 
     bool create() override;
 };

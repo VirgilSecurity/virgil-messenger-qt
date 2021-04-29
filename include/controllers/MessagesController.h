@@ -52,8 +52,9 @@ public:
     MessagesController(Messenger *messenger, const Settings *settings, Models *models, UserDatabase *userDatabase,
                        QObject *parent);
 
-    void loadMessages(const ChatHandler &chat);
-    void clearMessages();
+    void loadChat(const ChatHandler &chat);
+    void loadNewChat(const ChatHandler &chat);
+    void closeChat();
 
     Q_INVOKABLE void sendTextMessage(const QString &body);
     Q_INVOKABLE void sendFileMessage(const QVariant &attachmentUrl);
@@ -85,11 +86,6 @@ private:
     //  Create outgoing message without content.
     //
     std::unique_ptr<OutgoingMessage> createOutgoingMessage();
-
-    //
-    //  Return new unread message count based on destination chat and current chat.
-    //
-    qsizetype calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const;
 
     //
     //  Connect to the database.

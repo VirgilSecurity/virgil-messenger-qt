@@ -64,8 +64,10 @@ void MessageOperation::apply(const MessageUpdate &update)
 
     if (applied && MessageUpdateHasAttachmentExtrasJsonUpdate(update)) {
         MessageAttachmentExtrasJsonUpdate extrasUpdate;
+        const auto attachment = m_message->contentAsAttachment();
+        extrasUpdate.attachmentId = attachment->id();
         extrasUpdate.messageId = m_message->id();
-        extrasUpdate.extrasJson = m_message->contentAsAttachment()->extrasToJson(true);
+        extrasUpdate.extrasJson = attachment->extrasToJson(true);
         emit updateMessage(extrasUpdate);
     }
 }

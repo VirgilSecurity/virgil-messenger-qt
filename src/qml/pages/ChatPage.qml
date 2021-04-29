@@ -1,7 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
 import QtMultimedia 5.15
 
 import "../base"
@@ -10,15 +8,16 @@ import "../components"
 import "../components/Dialogs"
 
 Page {
-    id: chatPage
+    id: root
 
     readonly property var appState: app.stateManager.chatState
-    property real chatListViewHeight: 0
+    property alias showBackButton: pageHeader.showBackButton
+
+    signal infoRequested()
 
     QtObject {
         id: d
         readonly property var chat: controllers.chats.current
-        readonly property real listSpacing: 5
     }
 
     background: Rectangle {
@@ -26,20 +25,25 @@ Page {
     }
 
     header: PageHeader {
+        id: pageHeader
         title: d.chat.title
-        description: d.chat.lastActivityText
+        description: (!d.chat.isGroup && !d.chat.lastActivityText) ? " " : d.chat.lastActivityText
         showSeparator: !groupInvitationDialog.visible
+        titleClickable: true
+
         contextMenuVisible: !groupInvitationDialog.visible
         contextMenu: ContextMenu {
             ContextMenuItem {
                 text: d.chat.isGroup ? qsTr("Group info") : qsTr("Chat info")
-                onTriggered: appState.requestInfo()
+                onTriggered: root.infoRequested()
             }
         }
+
+        onTitleClicked: root.infoRequested()
     }
 
     footer: ChatMessageInput {
-        id: footerControl
+        id: messageInput
         visible: !groupInvitationDialog.visible
     }
 
@@ -75,8 +79,31 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        appState.messageSent.connect(messageSentAudio.play)
+    Timer {
+        interval: 10
+
+        function runSetFocus() {
+            if (root) {
+                running = Platform.isDesktop && root.visible
+            }
+        }
+
+        Component.onCompleted: {
+            triggered.connect(messageInput.setFocus)
+            root.visibleChanged.connect(runSetFocus);
+        }
+    }
+
+    Component.onCompleted: appState.messageSent.connect(messageSentAudio.play)
+
+    Connections {
+        target: models.messages
+        function onMessagesReset() { messageInput.clear() }
+    }
+
+    function navigateBack(transition) {
+        controllers.chats.closeChat()
+        return true
     }
 }
 

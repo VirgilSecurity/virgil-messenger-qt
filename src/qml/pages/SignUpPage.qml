@@ -1,11 +1,11 @@
-import QtQuick 2.12
+import QtQuick 2.15
 
 import "../theme"
 import "../components"
 
 OperationPage {
     appState: app.stateManager.signUpState
-    loadingText: qsTr("Registering %1...").arg(controllers.users.nextUsername)
+    loadingText: qsTr("Registering %1...").arg(username.text)
 
     readonly property string terms:
         "By creating an account, you agree to Virgil's " +
@@ -22,7 +22,7 @@ OperationPage {
 
         UserNameFormInput {
             id: username
-            placeholder: qsTr('Username')
+            placeholder: qsTr("Username")
         }
 
         FormPrimaryButton {

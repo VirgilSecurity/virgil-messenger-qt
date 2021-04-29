@@ -52,6 +52,8 @@ public:
 
     static bool prepare();
 
+    static bool checkWriteExternalStoragePermission();
+
     static void hideSplashScreen();
 
     static QString getDisplayName(const QUrl &url);

@@ -45,6 +45,8 @@
 #include "Settings.h"
 #if VS_MACOS
 #    include <macos/VSQMacos.h>
+#elif VS_WINDOWS
+#    include <windows/VSQWindows.h>
 #endif // VS_MACOS
 #include "Controllers.h"
 #include "UserDatabase.h"

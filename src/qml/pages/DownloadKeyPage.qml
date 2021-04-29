@@ -1,10 +1,14 @@
-import QtQuick 2.12
+import QtQuick 2.15
 
 import "../components"
 
 OperationPage {
+    id: root
+
     appState: app.stateManager.downloadKeyState
     loadingText: qsTr("Downloading your private key...")
+
+    property string username: ""
 
     header: Header {
         title: qsTr("Download from the Cloud")
@@ -30,7 +34,7 @@ OperationPage {
 
         FormPrimaryButton {
             text: qsTr("Decrypt")
-            onClicked: appState.downloadKey(password.text)
+            onClicked: messenger.downloadKey(root.username, password.text)
         }
     }
 }

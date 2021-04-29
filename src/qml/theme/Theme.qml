@@ -46,9 +46,21 @@ Item {
     readonly property real avatarHeight: 40
     readonly property real avatarWidth: avatarHeight
     readonly property real avatarRadius: avatarWidth / 2
+    readonly property real bigAvatarDiameter: 80
 
     readonly property real headerHeight: 60
     readonly property real formMaximumWidth: 260
+
+    // landscape mode
+    readonly property alias landscapeMode: landscapeMode
+
+    QtObject {
+        id: landscapeMode
+        readonly property real listMinimumWidth: 240
+        readonly property real listMaximumWidth: 400
+        readonly property real chatMinimumWidth: 500
+        readonly property real splitHandleSize: 4
+    }
 
     // icons
     readonly property url mainLogo: "../resources/icons/Logo-Big.png"

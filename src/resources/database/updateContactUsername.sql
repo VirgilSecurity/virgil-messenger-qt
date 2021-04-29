@@ -1,3 +1,5 @@
-UPDATE contacts
-SET username = :username
-WHERE userId = :userId AND username != :username
+INSERT INTO contacts (userId, username)
+VALUES (:userId, :username)
+ON CONFLICT (userId) DO UPDATE SET
+    username = :username;
+

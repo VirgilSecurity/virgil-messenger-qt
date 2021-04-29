@@ -44,11 +44,9 @@ using Self = CloudFileListState;
 Self::CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent)
     : QState(parent), m_messenger(messenger), m_controller(controller)
 {
-    connect(this, &Self::requestNewFolder, this,
-            [controller](auto name) { controller->createFolder(name, CloudFileMembers()); });
 }
 
-void Self::onEntry(QEvent *)
+void Self::switchToRootFolder()
 {
     if (m_lastUser == m_messenger->currentUser()) {
         return;

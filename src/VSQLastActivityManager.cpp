@@ -115,7 +115,6 @@ QString Self::requestInfo()
     if (m_jid.isEmpty()) {
         return QString();
     }
-    qCDebug(lcLastActivityManager) << "Requesting info for: " << m_jid;
 
     VSQLastActivityIq request;
     request.setType(QXmppIq::Get);
@@ -138,7 +137,7 @@ void Self::startUpdates(bool reset)
     stopUpdates(reset);
     if (canStart()) {
         requestInfo();
-        m_timerId = startTimer(m_settings->nowInterval() * 1000);
+        m_timerId = startTimer(m_settings->nowInterval());
         if (m_timerId == 0) {
             emit errorOccured(tr("Failed to start timer"));
         }
@@ -154,7 +153,7 @@ void Self::stopUpdates(bool reset)
     m_timerId = 0;
 
     if (reset) {
-        emit lastActivityMissing(QChar(' '));
+        emit lastActivityMissing(QString());
     }
 }
 

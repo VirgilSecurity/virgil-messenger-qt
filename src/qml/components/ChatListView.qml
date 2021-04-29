@@ -5,21 +5,22 @@ import QtQuick.Layouts 1.15
 import "../theme"
 
 ModelListView {
-    id: chatListView
-    model: d.model.proxy
+    id: root
+    model: models.chats.proxy
     emptyIcon: "../resources/icons/Chats.png"
     emptyText: qsTr("Create your first chat<br/>by pressing the dots<br/>button above")
 
     signal chatSelected(string chatId)
-
-    QtObject {
-        id: d
-        readonly property var model: models.chats
-    }
+    signal chatDeselected(string chatId)
 
     delegate: ChatListDelegate {
-        width: chatListView.width
-        onSelectItem: chatListView.chatSelected(model.id)
+        width: root.width
+        onSelectItem: {
+            model.isSelected ? root.chatDeselected(model.id) : root.chatSelected(model.id)
+            if (root.searchHeader) {
+                root.searchHeader.closeSearch()
+            }
+        }
     }
 
     onPlaceholderClicked: appState.requestNewChat()

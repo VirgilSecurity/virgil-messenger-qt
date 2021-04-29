@@ -38,6 +38,7 @@
 #include "UserId.h"
 #include "Chat.h"
 #include "Messenger.h"
+#include "android/VSQAndroid.h"
 
 #include <QObject>
 #include <QPointer>
@@ -53,51 +54,40 @@ class UsersController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
     Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
-    Q_PROPERTY(QString nextUsername READ nextUsername NOTIFY nextUsernameChanged)
 
 public:
     UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
 
-    void signIn(const QString &username);
-    void signUp(const QString &username);
-
-    Q_INVOKABLE void signOut();
-    Q_INVOKABLE void requestAccountSettings(const QString &username);
-
-    void downloadKey(const QString &username, const QString &password);
-
-    QString currentUserId() const;
-    QString currentUsername() const;
-    void setNextUsername(const QString &username);
-    QString nextUsername() const;
+    Q_INVOKABLE void initialSignIn();
 
 signals:
-    void signedIn(const QString &username);
-    void signedOut();
-    void signInErrorOccured(const QString &errorText);
-    void signUpErrorOccured(const QString &errorText);
-    void downloadKeyFailed(const QString &errorText);
-    void databaseErrorOccurred(const QString &errorText);
-
-    void accountSettingsRequested(const QString &username);
+    void userLoaded();
+    void userNotLoaded();
 
     void currentUserIdChanged(const QString &userId);
     void currentUsernameChanged(const QString &username);
-    void nextUsernameChanged(const QString &username);
+
+    void notificationCreated(const QString &notification, const bool error) const;
 
 private:
-    void onSignedIn(const QString &username);
-    void onSignedOut();
-    void onFinishSignIn();
-    void onFinishSignOut();
-    void onUpdateContactsWithUser(const UserHandler &user);
+    QString currentUserId() const;
+    QString currentUsername() const;
 
+    void updateCurrentUser();
+    void writeContactToDatabase(const UserHandler &user);
+    void hideSplashScreen();
+
+    void onMessengerSignedOut();
+    void onUserDatabaseOpened();
+    void onUserDatabaseErrorOccurred();
     void onChatAdded(const ChatHandler &chat);
 
 private:
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
-    QString m_nextUsername;
+#if VS_ANDROID
+    bool m_splashScreenVisible = true;
+#endif
 };
 } // namespace vm
 

@@ -62,7 +62,10 @@ public:
 
     CloudFilesModel *model();
     void switchToRootFolder();
+    void clearFiles();
+    bool createLocalRootFolder();
 
+    Q_INVOKABLE void checkPermissions();
     Q_INVOKABLE void openFile(const QVariant &proxyRow);
     Q_INVOKABLE void switchToFolder(const QVariant &proxyRow);
     Q_INVOKABLE void switchToParentFolder();
@@ -70,10 +73,10 @@ public:
 
     Q_INVOKABLE void addFiles(const QVariant &fileUrls);
     Q_INVOKABLE void deleteFiles();
-    void createFolder(const QString &name, const CloudFileMembers &members);
+    Q_INVOKABLE void createFolder(const QString &name, const CloudFileMembers &members);
 
-    void loadCloudFileMembers();
-    void addMembers(const CloudFileMembers &members);
+    Q_INVOKABLE void loadCloudFileMembers();
+    Q_INVOKABLE void addMembers(const CloudFileMembers &members);
     Q_INVOKABLE void removeSelectedMembers();
 
 signals:
@@ -84,6 +87,7 @@ signals:
     void notificationCreated(const QString &notification, const bool error) const;
     void errorOccurred(const QString &errorText);
 
+    void permissionsChecked();
     void displayPathChanged(const QString &path);
     void isRootChanged(bool isRoot);
     void isListUpdatingChanged(bool isUpdating);
@@ -92,12 +96,14 @@ private:
     using FoldersHierarchy = ModifiableCloudFiles;
 
     void switchToHierarchy(const FoldersHierarchy &hierarchy);
+    void refreshIfOnline(bool isOnline);
 
     QString displayPath() const;
     bool isRoot() const;
     ModifiableCloudFileHandler rootFolder() const;
     CloudFileHandler parentFolder() const;
 
+    void onOnlineListingFailed();
     void onUpdateCloudFiles(const CloudFilesUpdate &update);
 
     QPointer<Messenger> m_messenger;
@@ -109,6 +115,7 @@ private:
     FoldersHierarchy m_hierarchy;
     FoldersHierarchy m_requestedHierarchy;
     bool m_isListUpdating = false;
+    bool m_onlineRefreshNeeded = false;
 };
 } // namespace vm
 

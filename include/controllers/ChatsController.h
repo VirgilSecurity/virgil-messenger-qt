@@ -70,17 +70,18 @@ public:
     void createChatWithUserId(const UserId &userId);
     void createGroupChat(const QString &groupName, const Contacts &contacts);
 
-    void openChat(const ChatHandler &chat);
+    void openChat(const ModifiableChatHandler &chat);
     Q_INVOKABLE void openChat(const QString &chatId); // can be used within QML only
+    void createChat(const ModifiableChatHandler &chat);
     Q_INVOKABLE void closeChat();
     ChatHandler currentChat() const;
 
-    void loadGroupMembers();
-    Q_INVOKABLE void acceptGroupInvitation();
-    Q_INVOKABLE void rejectGroupInvitation();
-    void addMembers(const Contacts &contacts);
+    Q_INVOKABLE void acceptGroupInvitation(const MessageHandler &invitationMessage);
+    Q_INVOKABLE void rejectGroupInvitation(const MessageHandler &invitationMessage);
+
+    Q_INVOKABLE void loadGroupMembers();
+    Q_INVOKABLE void addMembers(const Contacts &contacts);
     Q_INVOKABLE void removeSelectedMembers();
-    Q_INVOKABLE void leaveGroup();
 
 signals:
     void errorOccurred(const QString &errorText); // TODO(fpohtmeh): remove this signal everywhere?
@@ -92,24 +93,28 @@ signals:
     void chatClosed();
 
     void createChatWithUser(const UserHandler &user, QPrivateSignal);
-    void createChatWithGroup(const GroupHandler &group, QPrivateSignal);
 
-    void groupInvitationAccepted();
     void groupInvitationRejected();
+    void groupMembersAdded();
 
 private:
     void setupTableConnections();
-    void setCurrentChat(ChatHandler chat);
+    void setCurrentChat(ModifiableChatHandler chat);
 
     void onChatsLoaded(ModifiableChats chats);
     void onCreateChatWithUser(const UserHandler &user);
-    void onCreateChatWithGroup(const GroupHandler &group);
-    void onGroupMembersFetchedByMemberId(const UserId &memberId, const GroupMembers &groupMembers);
-    void onGroupMembersFetchedByGroupId(const GroupId &groupId, const GroupMembers &groupMembers);
+    void onGroupsFetched(const Groups &groups);
+    void onGroupMembersFetched(const GroupId &groupId, const GroupMembers &groupMembers);
 
-    void onGroupChatCreated(const GroupId &groupId);
+    void onGroupChatCreated(const GroupHandler &group, const GroupMembers &groupMembers);
     void onGroupChatCreateFailed(const GroupId &chatId, const QString &errorText);
     void onUpdateGroup(const GroupUpdate &groupUpdate);
+    void onNewGroupChatLoaded(const GroupHandler &group);
+    void onDatabaseGroupAdded(const GroupHandler &group);
+
+    void onMessageAdded(const MessageHandler &message);
+    void onChatUnreadMessageCountUpdated(const ChatId &chatId, qsizetype unreadMessageCount);
+    void onLastUnreadMessageBeforeItWasRead(const MessageHandler &message);
 
     QPointer<Messenger> m_messenger;
     QPointer<Models> m_models;

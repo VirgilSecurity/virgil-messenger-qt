@@ -41,7 +41,6 @@
 #include <QSize>
 
 #include "AttachmentId.h"
-#include "UserId.h"
 
 class Settings : public QSettings
 {
@@ -50,6 +49,8 @@ class Settings : public QSettings
     Q_PROPERTY(QStringList usersList READ usersList WRITE setUsersList NOTIFY usersListChanged)
     Q_PROPERTY(bool devMode READ devMode CONSTANT)
     Q_PROPERTY(QRect windowGeometry READ windowGeometry WRITE setWindowGeometry NOTIFY windowGeometryChanged)
+    Q_PROPERTY(int chatListLandscapeWidth READ chatListLandscapeWidth WRITE setChatListLandscapeWidth NOTIFY
+                       chatListLandscapeWidthChanged)
 
 public:
     explicit Settings(QObject *parent);
@@ -65,8 +66,11 @@ public:
     void setUsersList(const QStringList &users);
     QStringList usersList() const;
 
-    QString userCredential(const QString &user) const;
-    void setUserCredential(const QString &user, const QString &userCredential);
+    QString userCredential(const QString &username) const;
+    void setUserCredential(const QString &username, const QString &userCredential);
+
+    QString userInfo(const QString &username) const;
+    void setUserInfo(const QString &username, const QString &userInfo);
 
     // Device id, run flags
     QString deviceId() const;
@@ -84,25 +88,36 @@ public:
     QDir cloudFilesDownloadsDir(const QString &userName) const;
     QDir cloudFilesCacheDir() const;
 
+    QString imageConversionFormat() const;
     QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 
     // Modes / features
+
     bool devMode() const;
     bool autoSendCrashReport() const;
+    bool timeProfilerEnabled() const;
 
     // Window
     QRect windowGeometry() const;
     void setWindowGeometry(const QRect &geometry);
 
+    int chatListLandscapeWidth();
+    void setChatListLandscapeWidth(int width);
+
     // Short interval for elapsed seconds that means now
     std::chrono::seconds nowInterval() const;
+
+    // Chats history sync info
+    QDateTime chatHistoryLastSyncDate(const QString &chatId = {}) const;
+    void setChatHistoryLastSyncDate(const QString &chatId = {});
 
 signals:
     void lastSignedInUserChanged(const QString &username);
     void usersListChanged(const QStringList &);
     void windowGeometryChanged(const QRect &); // Required by QML, not used
+    void chatListLandscapeWidthChanged(int width); // Required by QML, not used
 
 private:
     QString makeGroupKey(const QString &group, const QString &key) const;
@@ -114,6 +129,7 @@ private:
     void createDeviceId();
     void addUserToList(const QString &user);
     static QString settingsFileName();
+    static Format settingsFormat();
 
     QString m_sessionId;
     static QDir m_logsDir;

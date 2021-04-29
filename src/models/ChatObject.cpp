@@ -45,13 +45,16 @@ Self::ChatObject(Messenger *messenger, QObject *parent)
     connect(messenger, &Messenger::lastActivityTextChanged, this, &ChatObject::setLastActivityText);
 }
 
-void Self::setChat(const ChatHandler &chat)
+void Self::setChat(const ModifiableChatHandler &chat)
 {
+    const auto oldId = id();
     const auto oldTitle = title();
     const auto oldIsGroup = isGroup();
     m_chat = chat;
-    m_groupInvitationOwnerId = UserId();
     m_groupMembersModel->setGroupMembers({});
+    if (oldId != id()) {
+        emit idChanged(id());
+    }
     if (oldTitle != title()) {
         emit titleChanged(title());
     }
@@ -65,6 +68,11 @@ ChatHandler Self::chat() const
     return m_chat;
 }
 
+QString Self::id() const
+{
+    return m_chat ? m_chat->id() : QString();
+}
+
 QString Self::title() const
 {
     return m_chat ? m_chat->title() : QString();
@@ -73,16 +81,6 @@ QString Self::title() const
 bool Self::isGroup() const
 {
     return m_chat && m_chat->type() == ChatType::Group;
-}
-
-void Self::setGroupInvitationOwnerId(const UserId &ownerId)
-{
-    m_groupInvitationOwnerId = ownerId;
-}
-
-UserId Self::groupInvitationOwnerId() const
-{
-    return m_groupInvitationOwnerId;
 }
 
 void Self::setGroupMembers(const GroupMembers &groupMembers)
@@ -107,14 +105,16 @@ GroupMembers Self::selectedGroupMembers() const
     return m_groupMembersModel->selectedGroupMembers();
 }
 
-UserId Self::groupOwnerId() const
-{
-    return FindGroupOwner(m_groupMembersModel->groupMembers())->memberId();
-}
-
 void Self::updateGroup(const GroupUpdate &groupUpdate)
 {
     m_groupMembersModel->updateGroup(groupUpdate);
+
+    if (auto nameUpdate = std::get_if<GroupNameUpdate>(&groupUpdate); nameUpdate && m_chat) {
+        if (nameUpdate->groupId == m_chat->id()) {
+            m_chat->setTitle(nameUpdate->name);
+            emit titleChanged(nameUpdate->name);
+        }
+    }
 }
 
 void Self::setLastActivityText(const QString &text)

@@ -49,7 +49,7 @@ public:
 
     static QString findUniqueFileName(const QString &fileName);
 
-    static bool forceCreateDir(const QString &absolutePath);
+    static bool forceCreateDir(const QString &absolutePath, bool isFatal);
 
     static std::optional<QString> readTextFile(const QString &filePath);
 
@@ -60,6 +60,8 @@ public:
     static void removeDir(const QString &dirPath);
 
     static QString fileName(const QString &filePath);
+
+    static QString fileExt(const QString &filePath);
 
     static QString attachmentFileName(const QUrl &url, bool isPicture);
 

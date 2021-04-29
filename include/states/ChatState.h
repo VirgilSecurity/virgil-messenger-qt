@@ -35,9 +35,9 @@
 #ifndef VM_CHATSTATE_H
 #define VM_CHATSTATE_H
 
-#include <QState>
-
 #include "Message.h"
+
+#include <QState>
 
 class Messenger;
 
@@ -53,9 +53,6 @@ public:
     ChatState(Controllers *controllers, Messenger *messenger, QState *parent);
 
 signals:
-    void requestPreview(const QUrl &url);
-    void requestInfo();
-
     void messageSent();
 
 private:

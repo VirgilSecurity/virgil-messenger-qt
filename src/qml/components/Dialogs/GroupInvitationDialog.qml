@@ -19,6 +19,7 @@ Rectangle {
         readonly property real margin: Theme.smallMargin
         property string groupTitle: ""
         property string helloText: ""
+        property var message: null
     }
 
     Column {
@@ -61,7 +62,7 @@ Rectangle {
             FormSecondaryButton {
                 text: qsTr("Reject")
                 onClicked: {
-                    controllers.chats.rejectGroupInvitation()
+                    controllers.chats.rejectGroupInvitation(d.message)
                     root.visible = false
                 }
             }
@@ -69,16 +70,16 @@ Rectangle {
             FormPrimaryButton {
                 text: qsTr("Accept")
                 onClicked: {
-                    controllers.chats.acceptGroupInvitation()
+                    controllers.chats.acceptGroupInvitation(d.message)
                     root.visible = false
                 }
             }
         }
     }
 
-    function open(ownerId, ownerUsername, helloText) {
+    function open(ownerUsername, message) {
         d.groupTitle = qsTr("%1 invites you to the group").arg(ownerUsername)
-        //d.helloText = qsTr("Message: %1").arg(helloText) // TODO(fpohtmeh): uncomment once helloText is customizable
+        d.message = message
         root.visible = true
     }
 
@@ -88,5 +89,11 @@ Rectangle {
 
     Component.onDestruction: {
         models.messages.groupInvitationReceived.disconnect(open)
+    }
+
+    Connections {
+        target: models.messages
+
+        function onMessagesReset() { root.visible = false }
     }
 }

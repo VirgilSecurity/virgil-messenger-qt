@@ -172,7 +172,7 @@ bool UploadCloudFileOperation::localFileExists() const
 
 bool UploadCloudFileOperation::createLocalDir()
 {
-    return FileUtils::forceCreateDir(m_parentFolder->localPath());
+    return FileUtils::forceCreateDir(m_parentFolder->localPath(), false);
 }
 
 void UploadCloudFileOperation::createLocalFile()

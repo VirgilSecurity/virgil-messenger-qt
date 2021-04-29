@@ -35,23 +35,43 @@
 #include "Group.h"
 
 using namespace vm;
+using Self = Group;
 
-Group::Group(GroupId id, QString name, Contacts contacts)
-    : m_id(std::move(id)), m_name(std::move(name)), m_contacts(std::move(contacts))
+Self::Group(GroupId id, UserId superOwnerId, QString name, GroupInvitationStatus invitationStatus, QString cache)
+    : m_id(std::move(id)),
+      m_superOwnerId(std::move(superOwnerId)),
+      m_name(std::move(name)),
+      m_invitationStatus(std::move(invitationStatus)),
+      m_cache(std::move(cache))
 {
 }
 
-GroupId Group::id() const
+GroupId Self::id() const
 {
     return m_id;
 }
 
-QString Group::name() const
+UserId Self::superOwnerId() const
+{
+    return m_superOwnerId;
+}
+
+QString Self::name() const
 {
     return m_name;
 }
 
-Contacts Group::contacts() const
+GroupInvitationStatus Self::invitationStatus() const
 {
-    return m_contacts;
+    return m_invitationStatus;
+}
+
+QString Self::cache() const
+{
+    return m_cache;
+}
+
+void Self::setInvitationStatus(GroupInvitationStatus status)
+{
+    m_invitationStatus = status;
 }

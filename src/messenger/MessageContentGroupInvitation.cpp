@@ -37,12 +37,18 @@
 using namespace vm;
 using Self = MessageContentGroupInvitation;
 
+constexpr static const auto kJsonKey_Owner = "owner";
 constexpr static const auto kJsonKey_Tile = "title";
 constexpr static const auto kJsonKey_HelloText = "greetings";
 
-Self::MessageContentGroupInvitation(QString title, QString helloText)
-    : m_title(std::move(title)), m_helloText(std::move(helloText))
+Self::MessageContentGroupInvitation(UserId superOwnerId, QString title, QString helloText)
+    : m_superOwnerId(std::move(superOwnerId)), m_title(std::move(title)), m_helloText(std::move(helloText))
 {
+}
+
+UserId Self::superOwnerId() const
+{
+    return m_superOwnerId;
 }
 
 QString Self::title() const
@@ -57,21 +63,28 @@ QString Self::helloText() const
 
 void Self::writeJson(QJsonObject &json) const
 {
+    json[kJsonKey_Owner] = QString(m_superOwnerId);
     json[kJsonKey_Tile] = m_title;
     json[kJsonKey_HelloText] = m_helloText;
 }
 
 bool Self::readJson(const QJsonObject &json)
 {
+    auto ownerValue = json[kJsonKey_Owner];
     auto titleValue = json[kJsonKey_Tile];
     auto helloTextValue = json[kJsonKey_HelloText];
 
-    if (!titleValue.isString() || !helloTextValue.isString()) {
+    if (!ownerValue.isString() || !titleValue.isString()) {
         return false;
     }
 
+    m_superOwnerId = UserId(ownerValue.toString());
     m_title = titleValue.toString();
     m_helloText = helloTextValue.toString();
+
+    if (!m_superOwnerId.isValid()) {
+        return false;
+    }
 
     return true;
 }

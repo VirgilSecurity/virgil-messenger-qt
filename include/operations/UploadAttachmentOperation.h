@@ -38,8 +38,6 @@
 #include "LoadAttachmentOperation.h"
 #include "MessageContentUploadStage.h"
 
-class Settings;
-
 namespace vm {
 class EncryptUploadFileOperation;
 
@@ -60,7 +58,6 @@ private:
     void updateStage(MessageContentUploadStage uploadStage);
 
     MessageOperation *m_parent;
-    const Settings *m_settings;
 };
 } // namespace vm
 

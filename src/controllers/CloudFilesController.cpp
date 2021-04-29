@@ -74,9 +74,12 @@ Self::CloudFilesController(Messenger *messenger, Models *models, UserDatabase *u
 
     connect(this, &Self::updateCloudFiles, this, &Self::onUpdateCloudFiles);
 
+    // Messenger connections
+    connect(messenger, &Messenger::onlineStatusChanged, this, &Self::refreshIfOnline);
     // Queue connections
     auto queue = models->cloudFilesQueue();
     connect(queue, &CloudFilesQueue::updateCloudFiles, this, &Self::updateCloudFiles);
+    connect(queue, &CloudFilesQueue::onlineListingFailed, this, &Self::onOnlineListingFailed);
     connect(models->cloudFilesTransfers(), &CloudFilesTransfersModel::interruptByCloudFileId, queue,
             &CloudFilesQueue::interruptFileOperation);
     // Cloud file system connections
@@ -103,6 +106,31 @@ CloudFilesModel *Self::model()
 void Self::switchToRootFolder()
 {
     switchToHierarchy({ rootFolder() });
+}
+
+void Self::clearFiles()
+{
+    qCDebug(lcController) << "Clear cloud files...";
+    m_models->cloudFiles()->clearFiles();
+}
+
+bool Self::createLocalRootFolder()
+{
+    if (!m_cloudFileSystem->checkPermissions()) {
+        return false;
+    }
+    if (m_cloudFileSystem->createDownloadsDir()) {
+        return true;
+    }
+    emit notificationCreated(tr("Failed to create local folder"), true);
+    return false;
+}
+
+void Self::checkPermissions()
+{
+    if (createLocalRootFolder()) {
+        emit permissionsChecked();
+    }
 }
 
 void Self::openFile(const QVariant &proxyRow)
@@ -208,7 +236,15 @@ void Self::removeSelectedMembers()
 void Self::switchToHierarchy(const FoldersHierarchy &hierarchy)
 {
     m_requestedHierarchy = hierarchy;
+    m_onlineRefreshNeeded = false;
     m_models->cloudFilesQueue()->pushListFolder(hierarchy.back());
+}
+
+void Self::refreshIfOnline(bool isOnline)
+{
+    if (m_onlineRefreshNeeded && isOnline) {
+        refresh();
+    }
 }
 
 QString Self::displayPath() const
@@ -234,6 +270,11 @@ CloudFileHandler Self::parentFolder() const
 {
     const auto size = m_hierarchy.size();
     return (size < 2) ? CloudFileHandler() : m_hierarchy[size - 2];
+}
+
+void Self::onOnlineListingFailed()
+{
+    m_onlineRefreshNeeded = true;
 }
 
 void Self::onUpdateCloudFiles(const CloudFilesUpdate &update)

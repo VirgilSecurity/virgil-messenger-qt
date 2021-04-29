@@ -28,15 +28,6 @@ Control {
                 controllers.messages.sendTextMessage(text)
             }
         }
-
-        function sendFileMessage(attachmentUrl, attachmentType) {
-            if (attachmentType === AttachmentTypes.picture) {
-                controllers.messages.sendPictureMessage(attachmentUrl, attachmentType)
-            }
-            else {
-                controllers.messages.sendFileMessage(attachmentUrl, attachmentType)
-            }
-        }
     }
 
     RowLayout {
@@ -128,7 +119,7 @@ Control {
                         if (text.length > maximumLength) {
                             stateSaver(function() {
                                 text = previousText
-                                showPopupInform("Message length limit: %1".arg(maximumLength))
+                                notificationPopup.showInform("Message length limit: %1".arg(maximumLength))
                             }, previousText.length - text.length)
                         }
                         previousText = text
@@ -192,23 +183,15 @@ Control {
         }
     }
 
-    Connections {
-        target: attachmentPicker
-
-        function onPicked(fileUrls, attachmentType) {
-            if (manager.currentState !== manager.chatState) {
-                return;
-            }
-            const url = fileUrls[fileUrls.length - 1]
-            d.sendFileMessage(url, attachmentType)
-        }
-    }
-
     Component.onCompleted: {
         if (Platform.isDesktop) {
-            messageField.forceActiveFocus();
-        } else if (Platform.isIos) {
+            setFocus();
+        }
+        else if (Platform.isIos) {
             app.keyboardEventFilter.install(messageField)
         }
     }
+
+    function clear() { messageField.clear() }
+    function setFocus() { messageField.forceActiveFocus() }
 }

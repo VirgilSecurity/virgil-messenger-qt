@@ -1,3 +1,3 @@
 UPDATE chats
-SET lastMessageId = :lastMessageId, unreadMessageCount = :unreadMessageCount
+SET lastMessageId = :lastMessageId
 WHERE id = :id

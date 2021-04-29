@@ -62,9 +62,19 @@ Self::Type Self::type() const
     return m_type;
 }
 
-void Self::setType(Self::Type type)
+void Self::setType(Type type)
 {
     m_type = type;
+}
+
+GroupHandler Self::group() const
+{
+    return m_group;
+}
+
+void Self::setGroup(GroupHandler group)
+{
+    m_group = std::move(group);
 }
 
 QDateTime Self::createdAt() const

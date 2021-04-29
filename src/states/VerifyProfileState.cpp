@@ -38,22 +38,9 @@ using namespace vm;
 
 VerifyProfileState::VerifyProfileState(QState *parent) : OperationState(parent) { }
 
-void VerifyProfileState::verify(const QString &code)
+void VerifyProfileState::verify(const int codeType, const QString &code)
 {
+    // TODO(fpohtmeh): rework ConfirmationCodeType
     const auto success = code == QLatin1String("0000");
-    emit verificationFinished(m_codeType, success);
-}
-
-ConfirmationCodeType VerifyProfileState::codeType() const
-{
-    return m_codeType;
-}
-
-void VerifyProfileState::setCodeType(const ConfirmationCodeType codeType)
-{
-    if (m_codeType == codeType) {
-        return;
-    }
-    m_codeType = codeType;
-    emit codeTypeChanged(codeType);
+    emit verificationFinished(codeType, success);
 }

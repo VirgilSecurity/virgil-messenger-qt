@@ -56,11 +56,7 @@ class EditProfileState : public OperationState
 public:
     EditProfileState(UsersController *usersController, QState *parent);
 
-    void processVerificationResponse(const ConfirmationCodeType &codeType, const bool isVerified);
-
 signals:
-    void verify(const ConfirmationCodeType &codeType);
-
     void phoneNumberChanged(const QString &phoneNumber);
     void emailChanged(const QString &email);
     void isPhoneNumberConfirmedChanged(const bool confirmed);
@@ -73,9 +69,9 @@ private:
     QString email() const;
     void setEmail(const QString &email);
     bool isPhoneNumberConfirmed() const;
-    void setIsPhoneNumberConfirmed(const bool confirmed);
+    void setIsPhoneNumberConfirmed(bool confirmed);
     bool isEmailConfirmed() const;
-    void setIsEmailConfirmed(const bool confirmed);
+    void setIsEmailConfirmed(bool confirmed);
     QUrl avatarUrl() const;
     void setAvatarUrl(const QUrl &avatarUrl);
 

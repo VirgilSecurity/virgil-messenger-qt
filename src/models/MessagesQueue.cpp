@@ -34,12 +34,13 @@
 
 #include "models/MessagesQueue.h"
 
-#include "Messenger.h"
-#include "Utils.h"
-#include "MessagesTable.h"
-#include "UserDatabase.h"
+#include "MessagesQueueListeners.h"
 #include "MessageOperation.h"
 #include "MessageOperationFactory.h"
+#include "MessagesTable.h"
+#include "Messenger.h"
+#include "UserDatabase.h"
+#include "Utils.h"
 
 using namespace vm;
 using Self = MessagesQueue;
@@ -59,6 +60,8 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     connect(this, &Self::pushMessage, this, &Self::onPushMessage);
     connect(this, &Self::pushMessageDownload, this, &Self::onPushMessageDownload);
     connect(this, &Self::pushMessagePreload, this, &Self::onPushMessagePreload);
+
+    addListener(new UniqueMessageDownloadOperationFilter(this));
 }
 
 Self::~MessagesQueue() { }
@@ -155,6 +158,12 @@ void Self::onPushMessageDownload(const ModifiableMessageHandler &message, const 
 void Self::onPushMessagePreload(const ModifiableMessageHandler &message)
 {
     Q_ASSERT(message->contentType() == MessageContentType::Picture);
+    if (message->createdAt().addDays(6) <= QDateTime::currentDateTime()) {
+        qCDebug(lcMessagesQueue) << "Message preload is outdated. Id:" << message->id()
+                                 << "Date:" << message->createdAt();
+        return;
+    }
+
     DownloadParameter parameter;
     parameter.type = DownloadParameter::Type::Preload;
     addSource(std::make_shared<MessageOperationSource>(message, std::move(parameter)));

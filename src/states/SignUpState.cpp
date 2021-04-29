@@ -34,36 +34,27 @@
 
 #include "states/SignUpState.h"
 
+#include "Messenger.h"
 #include "Validator.h"
-#include "controllers/UsersController.h"
 
 using namespace vm;
 
-SignUpState::SignUpState(UsersController *usersController, Validator *validator, QState *parent)
-    : OperationState(parent), m_usersController(usersController), m_validator(validator)
+SignUpState::SignUpState(Messenger *messenger, Validator *validator, QState *parent)
+    : OperationState(parent), m_messenger(messenger), m_validator(validator)
 {
-    connect(usersController, &UsersController::signedIn, this, &SignUpState::operationFinished);
-    connect(usersController, &UsersController::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
-
-    connect(usersController, &UsersController::databaseErrorOccurred, [this](const auto &errorText) {
-        m_usersController->signOut();
-        emit operationErrorOccurred(errorText);
-    });
-
-    connect(this, &SignUpState::signUp, this, &SignUpState::processSignUp);
+    connect(messenger, &Messenger::signedUp, this, &SignUpState::operationFinished);
+    connect(messenger, &Messenger::signUpErrorOccured, this, &SignUpState::operationErrorOccurred);
 }
 
-void SignUpState::processSignUp(const QString &username)
+void SignUpState::signUp(const QString &username)
 {
+    emit operationStarted();
+
     QString errorText;
     const auto validUsername = m_validator->validatedUsername(username, &errorText);
-
     if (validUsername) {
-        emit operationStarted();
-        m_usersController->signUp(*validUsername);
-
+        m_messenger->signUp(*validUsername);
     } else {
-        emit operationStarted();
         emit operationErrorOccurred(errorText);
     }
 }

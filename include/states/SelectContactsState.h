@@ -48,6 +48,7 @@ class SelectContactsState : public OperationState
 public:
     SelectContactsState(DiscoveredContactsModel *contactsModel, QState *parent);
 
+    Q_INVOKABLE void reload();
     Q_INVOKABLE void finishSelection();
 
 signals:
@@ -58,8 +59,6 @@ protected:
     void setMultiSelect(bool multiSelect);
 
 private:
-    void onEntry(QEvent *event);
-
     DiscoveredContactsModel *m_contactsModel;
     bool m_multiSelect = false;
 };

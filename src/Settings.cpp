@@ -45,11 +45,14 @@
 static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
 static const QString kCredenitalsGroup = "Credentials";
+static const QString kUsersInfoGroup = "UsersInfo";
+static const QString kChatsLastSyncDateGroup = "ChatsLastSyncDateGroup";
 
 static const QString kDeviceId = "DeviceId";
 
 static const QString kLastSessionGroup = "LastSession";
 static const QString kWindowGeometryId = "WindowGeometry";
+static const QString kChatListLandscapeWidth = "ChatListLandscapeWidth";
 static const QString kSessionId = "SessionId";
 static const QString kSignedInUsername = "SignedInUsername";
 
@@ -61,10 +64,9 @@ bool Settings::m_logsDirInitialized = false;
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 Settings::Settings(QObject *parent)
-    : QSettings(settingsFileName(), QSettings::NativeFormat, parent), m_sessionId(Utils::createUuid())
+    : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
 {
-
-    qCDebug(lcSettings) << "Settings are written to: " << fileName();
+    Q_ASSERT(imageConversionFormat() == imageConversionFormat().toLower());
 
     if (deviceId().isEmpty()) {
         createDeviceId();
@@ -84,6 +86,7 @@ Settings::~Settings() { }
 
 void Settings::print()
 {
+    qCDebug(lcSettings) << "Settings filename:" << fileName();
     qCDebug(lcSettings) << "Device id:" << deviceId();
     qCDebug(lcSettings) << "Database dir:" << databaseDir().absolutePath();
     qCDebug(lcSettings) << "Attachment cache dir:" << attachmentCacheDir().absolutePath();
@@ -145,20 +148,40 @@ QString Settings::settingsFileName()
     QString ext;
 #if VS_MACOS || VS_IOS
     ext = QLatin1String(".plist");
-#elif VS_LINUX
+#elif VS_LINUX || VS_WINDOWS
     ext = QLatin1String(".ini");
 #endif
     return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
 }
 
-QString Settings::userCredential(const QString &user) const
+QSettings::Format Settings::settingsFormat()
 {
-    return groupValue(kCredenitalsGroup, user).toString();
+#if VS_WINDOWS
+    return Format::IniFormat;
+#else
+    return Format::NativeFormat;
+#endif
 }
 
-void Settings::setUserCredential(const QString &user, const QString &credential)
+QString Settings::userCredential(const QString &username) const
 {
-    setGroupValue(kCredenitalsGroup, user, credential);
+    return groupValue(kCredenitalsGroup, username).toString();
+}
+
+void Settings::setUserCredential(const QString &username, const QString &credential)
+{
+    setGroupValue(kCredenitalsGroup, username, credential);
+    sync();
+}
+
+QString Settings::userInfo(const QString &username) const
+{
+    return groupValue(kUsersInfoGroup, username).toString();
+}
+
+void Settings::setUserInfo(const QString &username, const QString &userInfo)
+{
+    setGroupValue(kUsersInfoGroup, username, userInfo);
     sync();
 }
 
@@ -200,7 +223,7 @@ QDir Settings::logsDir()
 QDir Settings::databaseDir() const
 {
     if (!m_databaseDir.exists()) {
-        FileUtils::forceCreateDir(m_databaseDir.absolutePath());
+        FileUtils::forceCreateDir(m_databaseDir.absolutePath(), true);
     }
     return m_databaseDir;
 }
@@ -213,7 +236,7 @@ quint64 Settings::attachmentMaxFileSize() const
 QDir Settings::attachmentCacheDir() const
 {
     if (!m_attachmentCacheDir.exists()) {
-        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_attachmentCacheDir.absolutePath(), true);
     }
     return m_attachmentCacheDir;
 }
@@ -221,7 +244,7 @@ QDir Settings::attachmentCacheDir() const
 QDir Settings::thumbnailsDir() const
 {
     if (!m_thumbnaisDir.exists()) {
-        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath());
+        FileUtils::forceCreateDir(m_thumbnaisDir.absolutePath(), true);
     }
     return m_thumbnaisDir;
 }
@@ -229,7 +252,7 @@ QDir Settings::thumbnailsDir() const
 QDir Settings::downloadsDir() const
 {
     if (!m_downloadsDir.exists()) {
-        FileUtils::forceCreateDir(m_downloadsDir.absolutePath());
+        FileUtils::forceCreateDir(m_downloadsDir.absolutePath(), false);
     }
     return m_downloadsDir;
 }
@@ -237,9 +260,6 @@ QDir Settings::downloadsDir() const
 QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
 {
     const QDir dir = m_downloadsDir.filePath(QLatin1String("VirgilCloudFiles/") + userName);
-    if (!dir.exists()) {
-        FileUtils::forceCreateDir(dir.absolutePath());
-    }
     qCDebug(lcSettings) << "Cloud files dir:" << dir.absolutePath();
     return dir;
 }
@@ -247,15 +267,20 @@ QDir Settings::cloudFilesDownloadsDir(const QString &userName) const
 QDir Settings::cloudFilesCacheDir() const
 {
     if (!m_cloudFilesCacheDir.exists()) {
-        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath());
+        FileUtils::forceCreateDir(m_cloudFilesCacheDir.absolutePath(), true);
     }
     return m_cloudFilesCacheDir;
+}
+
+QString Settings::imageConversionFormat() const
+{
+    return QLatin1String(".jpg");
 }
 
 QString Settings::makeThumbnailPath(const AttachmentId &attachmentId, bool isPreview) const
 {
     return thumbnailsDir().filePath((isPreview ? QLatin1String("p-") : QLatin1String("t-")) + attachmentId
-                                    + QLatin1String(".png"));
+                                    + imageConversionFormat());
 }
 
 QSize Settings::thumbnailMaxSize() const
@@ -278,6 +303,11 @@ bool Settings::autoSendCrashReport() const
     return !devMode();
 }
 
+bool Settings::timeProfilerEnabled() const
+{
+    return false;
+}
+
 QRect Settings::windowGeometry() const
 {
     return groupValue(kLastSessionGroup, kWindowGeometryId).toRect();
@@ -286,6 +316,17 @@ QRect Settings::windowGeometry() const
 void Settings::setWindowGeometry(const QRect &geometry)
 {
     setGroupValue(kLastSessionGroup, kWindowGeometryId, geometry);
+    sync();
+}
+
+int Settings::chatListLandscapeWidth()
+{
+    return groupValue(kLastSessionGroup, kChatListLandscapeWidth).toInt();
+}
+
+void Settings::setChatListLandscapeWidth(int width)
+{
+    setGroupValue(kLastSessionGroup, kChatListLandscapeWidth, width);
     sync();
 }
 
@@ -326,5 +367,26 @@ void Settings::removeGroup(const QString &group)
 void Settings::createDeviceId()
 {
     setValue(kDeviceId, Utils::createUuid());
+    sync();
+}
+
+QDateTime Settings::chatHistoryLastSyncDate(const QString &chatId) const
+{
+    if (chatId.isEmpty()) {
+        return groupValue(kChatsLastSyncDateGroup, lastSignedInUser()).toDateTime();
+    } else {
+        return groupValue(makeGroupKey(kChatsLastSyncDateGroup, lastSignedInUser()), chatId).toDateTime();
+    }
+}
+
+void Settings::setChatHistoryLastSyncDate(const QString &chatId)
+{
+    if (chatId.isEmpty()) {
+        setGroupValue(kChatsLastSyncDateGroup, lastSignedInUser(), QDateTime::currentDateTimeUtc());
+    } else {
+        setGroupValue(makeGroupKey(kChatsLastSyncDateGroup, lastSignedInUser()), chatId,
+                      QDateTime::currentDateTimeUtc());
+    }
+
     sync();
 }

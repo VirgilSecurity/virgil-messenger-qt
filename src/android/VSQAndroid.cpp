@@ -48,7 +48,7 @@
 
 using namespace vm;
 
-// TODO(fpohtmeh): Remove it
+// TODO(fpohtmeh): refactor
 static int pfd[2];
 static pthread_t loggingThread;
 
@@ -59,16 +59,26 @@ QString VSQAndroid::caBundlePath()
 }
 
 /******************************************************************************/
+static bool _checkPermission(const QString &permission)
+{
+    auto result = QtAndroid::checkPermission(permission);
+    if (result == QtAndroid::PermissionResult::Denied) {
+        auto resultHash = QtAndroid::requestPermissionsSync(QStringList({ permission }));
+        if (resultHash[permission] == QtAndroid::PermissionResult::Denied) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/******************************************************************************/
 static bool _checkPermissions()
 {
     const QStringList permissions({ "android.permission.WRITE_EXTERNAL_STORAGE",
                                     "android.permission.READ_EXTERNAL_STORAGE", "android.permission.READ_CONTACTS" });
     for (const QString &permission : permissions) {
-        auto result = QtAndroid::checkPermission(permission);
-        if (result == QtAndroid::PermissionResult::Denied) {
-            auto resultHash = QtAndroid::requestPermissionsSync(QStringList({ permission }));
-            if (resultHash[permission] == QtAndroid::PermissionResult::Denied)
-                return false;
+        if (!_checkPermission(permission)) {
+            return false;
         }
     }
 
@@ -88,6 +98,12 @@ bool VSQAndroid::prepare()
 }
 
 /******************************************************************************/
+bool VSQAndroid::checkWriteExternalStoragePermission()
+{
+    return _checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+}
+
+/******************************************************************************/
 void VSQAndroid::hideSplashScreen()
 {
     QtAndroid::hideSplashScreen();
@@ -97,7 +113,7 @@ void VSQAndroid::hideSplashScreen()
 static void *loggingFunction(void *)
 {
     ssize_t readSize;
-    char buf[128];
+    char buf[4096];
 
     while ((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
         if (buf[readSize - 1] == '\n') {
@@ -114,7 +130,8 @@ static void *loggingFunction(void *)
 
 /******************************************************************************/
 int VSQAndroid::runLoggingThread()
-{ // run this function to redirect your output to android log
+{
+    // run this function to redirect your output to android log
     setvbuf(stdout, nullptr, _IOLBF, 0); // make stdout line-buffered
     setvbuf(stderr, nullptr, _IONBF, 0); // make stderr unbuffered
 

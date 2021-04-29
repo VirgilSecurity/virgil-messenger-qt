@@ -13,7 +13,8 @@ import "theme"
 ApplicationWindow {
     id: root
 
-    property alias mainView: mainView
+    property alias window: root
+    readonly property bool useDesktopView: Platform.isDesktop
 
     visible: true
     title: (!settings.devMode || !controllers.users.currentUsername) ? app.applicationDisplayName : controllers.users.currentUsername
@@ -50,36 +51,30 @@ ApplicationWindow {
 
     onClosing: {
         if (Platform.isAndroid) {
-            close.accepted = false
-            app.stateManager.goBack()
+            close.accepted = !window.navigateBack()
         }
         else if (Platform.isDesktop) {
             settings.windowGeometry = Qt.rect(x, y, width, height)
         }
     }
 
+    Shortcut {
+        sequence: "Esc"
+        onActivated: window.navigateBack()
+        enabled: settings.devMode
+    }
+
     MainView {
         id: mainView
         anchors.fill: parent
-        attachmentPreview: attachmentPreview
     }
 
     Item {
         anchors.fill: parent
 
-        // TODO(fpohtmeh): rename to NotificationPopup, move logic inside
-        Popup {
-            id: inform
-        }
-
         AttachmentPreview {
             id: attachmentPreview
             anchors.fill: parent
-            visible: false
-        }
-
-        AttachmentPicker {
-            id: attachmentPicker
         }
 
         NetworkStatusControl {
@@ -89,51 +84,34 @@ ApplicationWindow {
                 bottomMargin: Theme.smallMargin
                 leftMargin: Theme.smallMargin
             }
-            z: Theme.overlayZ
         }
 
-        KeyboardHandler {
-            id: keyboardHandler
+        AttachmentPicker {
+            id: attachmentPicker
+            onOpening: messenger.setShouldDisconnectWhenSuspended(false)
+            onClosed: messenger.setShouldDisconnectWhenSuspended(true)
         }
+        NotificationPopup { id: notificationPopup }
+        KeyboardHandler { id: keyboardHandler }
+        SendReportDialog { id: sendReportDialog }
     }
 
-    function showPopup(message, popupBackgroundColor, textColor, interval) {
-        inform.popupBackgroundColor = popupBackgroundColor
-        inform.popupColorText = textColor
-        inform.popupText = message
-        inform.popupInterval = interval
-        inform.open()
-    }
-
-    function showPopupError(message, interval = 3000) {
-        showPopup(message, "#b44", "#ffffff", interval)
-    }
-
-    function showPopupInform(message, interval = 3000) {
-        showPopup(message, "#FFFACD", "#00", interval)
-    }
-
-    function showPopupSuccess(message, interval = 3000) {
-        showPopup(message, "#66CDAA", "#00", interval)
+    function navigateBack(transition) {
+        return attachmentPreview.navigateBack(transition) || mainView.navigateBack(transition)
     }
 
     Component.onCompleted: {
         app.notificationCreated.connect(function(text, error) {
             if (error) {
-                showPopupError(text)
-            }
-            else {
-                showPopupInform(text)
+                notificationPopup.showError(text)
+            } else {
+                notificationPopup.showInform(text)
             }
         })
-        crashReporter.reportSent.connect(showPopupSuccess)
-        crashReporter.reportErrorOccurred.connect(showPopupError)
+        crashReporter.crashReportRequested.connect(sendReportDialog.open)
+        crashReporter.reportSent.connect(notificationPopup.showSuccess)
+        crashReporter.reportErrorOccurred.connect(notificationPopup.showError)
 
         Platform.detect()
-        app.stateManager.setUiState()
-    }
-
-    onActiveFocusItemChanged: {
-//        console.log(activeFocusItem, activeFocusItem ? activeFocusItem.objectName : undefined)
     }
 }

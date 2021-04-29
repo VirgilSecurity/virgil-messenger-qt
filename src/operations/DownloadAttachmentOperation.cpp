@@ -47,7 +47,7 @@ using namespace vm;
 using Self = DownloadAttachmentOperation;
 
 Self::DownloadAttachmentOperation(MessageOperation *parent, const Settings *settings, const Parameter &parameter)
-    : LoadAttachmentOperation(parent), m_parent(parent), m_settings(settings), m_parameter(parameter)
+    : LoadAttachmentOperation(parent, settings), m_parent(parent), m_parameter(parameter)
 {
     setName((parameter.type == Parameter::Type::Download) ? QLatin1String("DownloadAttachment")
                                                           : QLatin1String("PreloadAttachment"));

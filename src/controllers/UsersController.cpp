@@ -49,104 +49,98 @@ using Self = UsersController;
 Self::UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent)
     : QObject(parent), m_messenger(messenger), m_userDatabase(userDatabase)
 {
-    connect(messenger, &Messenger::signedIn, this, &Self::onSignedIn);
-    connect(messenger, &Messenger::signedUp, this, &Self::onSignedIn);
-    connect(messenger, &Messenger::keyDownloaded, this, &Self::onSignedIn);
-    connect(messenger, &Messenger::signedOut, this, &Self::onSignedOut);
+    connect(messenger, &Messenger::signedIn, userDatabase, &UserDatabase::openUser);
+    connect(messenger, &Messenger::signedUp, userDatabase, &UserDatabase::openUser);
+    connect(messenger, &Messenger::keyDownloaded, userDatabase, &UserDatabase::openUser);
 
-    connect(messenger, &Messenger::signInErrorOccured, this, &Self::signInErrorOccured);
-    connect(messenger, &Messenger::signUpErrorOccured, this, &Self::signUpErrorOccured);
-    connect(messenger, &Messenger::downloadKeyFailed, this, &Self::downloadKeyFailed);
+    connect(messenger, &Messenger::signedOut, this, &Self::onMessengerSignedOut);
+    connect(messenger, &Messenger::signInErrorOccured, this, &Self::userNotLoaded);
+    connect(messenger, &Messenger::userWasFound, this, &Self::writeContactToDatabase);
 
-    connect(messenger, &Messenger::userWasFound, this, &Self::onUpdateContactsWithUser);
-
-    connect(userDatabase, &UserDatabase::opened, this, &Self::onFinishSignIn);
-    connect(userDatabase, &UserDatabase::closed, this, &Self::onFinishSignOut);
-    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::databaseErrorOccurred);
+    connect(userDatabase, &UserDatabase::opened, this, &Self::onUserDatabaseOpened);
+    connect(userDatabase, &UserDatabase::errorOccurred, this, &Self::onUserDatabaseErrorOccurred);
 
     connect(models->chats(), &ChatsModel::chatAdded, this, &Self::onChatAdded);
+
+    connect(this, &Self::userLoaded, this, &Self::hideSplashScreen);
+    connect(this, &Self::userNotLoaded, this, &Self::hideSplashScreen);
+
+    // Notifications
+    auto notifyAboutError = [this](const QString &text) { emit notificationCreated(text, true); };
+    connect(messenger, &Messenger::signInErrorOccured, notifyAboutError);
+    connect(messenger, &Messenger::signUpErrorOccured, notifyAboutError);
+    connect(messenger, &Messenger::downloadKeyFailed, notifyAboutError);
+    connect(userDatabase, &UserDatabase::errorOccurred, notifyAboutError);
 }
 
-void Self::signIn(const QString &username)
+void Self::initialSignIn()
 {
-    setNextUsername(username);
-    m_messenger->signIn(username);
+    const auto settings = m_messenger->settings();
+    const auto username = settings->lastSignedInUser();
+    if (username.isEmpty() || settings->userCredential(username).isEmpty()) {
+        emit userNotLoaded();
+    } else {
+        m_messenger->signIn(username);
+    }
 }
 
-void Self::signUp(const QString &username)
-{
-    setNextUsername(username);
-    m_messenger->signUp(username);
-}
-
-void Self::signOut()
-{
-    m_messenger->signOut();
-}
-
-void Self::requestAccountSettings(const QString &username)
-{
-    emit accountSettingsRequested(username);
-}
-
-void Self::downloadKey(const QString &username, const QString &password)
-{
-    m_messenger->downloadKey(username, password);
-}
-
-QString UsersController::currentUserId() const
-{
-    const auto currentUser = m_messenger->currentUser();
-    return currentUser ? currentUser->id() : QString();
-}
-
-QString UsersController::currentUsername() const
-{
-    const auto currentUser = m_messenger->currentUser();
-    return currentUser ? currentUser->username() : QString();
-}
-
-void UsersController::setNextUsername(const QString &username)
-{
-    m_nextUsername = username;
-    emit nextUsernameChanged(username);
-}
-
-QString UsersController::nextUsername() const
-{
-    return m_nextUsername;
-}
-
-void Self::onSignedIn(const QString &username)
-{
-    m_userDatabase->open(username);
-}
-
-void Self::onSignedOut()
-{
-    m_userDatabase->close();
-}
-
-void Self::onFinishSignIn()
+QString Self::currentUserId() const
 {
     const auto user = m_messenger->currentUser();
-
-    Contact contact;
-    contact.setUserId(user->id());
-    contact.setUsername(user->username());
-
-    m_userDatabase->contactsTable()->addContact(contact);
-
-    // TODO: Do we really need to duplicate signals?
-    emit signedIn(user->username());
-
-    emit currentUserIdChanged(user->id());
-    emit currentUsernameChanged(user->username());
+    return user ? user->id() : QString();
 }
 
-void Self::onFinishSignOut()
+QString Self::currentUsername() const
 {
-    emit signedOut();
+    const auto user = m_messenger->currentUser();
+    return user ? user->username() : QString();
+}
+
+void Self::updateCurrentUser()
+{
+    const auto user = m_messenger->currentUser();
+    emit currentUserIdChanged(user->id());
+    emit currentUsernameChanged(user->username());
+
+    writeContactToDatabase(user);
+}
+
+void Self::writeContactToDatabase(const UserHandler &user)
+{
+    Contact contact(user->id());
+    contact.setUsername(user->username());
+    m_userDatabase->contactsTable()->addContact(contact);
+}
+
+void Self::hideSplashScreen()
+{
+#if VS_ANDROID
+    if (m_splashScreenVisible) {
+        VSQAndroid::hideSplashScreen();
+        m_splashScreenVisible = false;
+    }
+#endif
+}
+
+void Self::onMessengerSignedOut()
+{
+    m_userDatabase->closeUser();
+    emit userNotLoaded();
+}
+
+void Self::onUserDatabaseOpened()
+{
+    updateCurrentUser();
+    emit userLoaded();
+}
+
+void Self::onUserDatabaseErrorOccurred()
+{
+    if (m_messenger->currentUser()) {
+        m_messenger->signOut();
+    } else {
+        emit userNotLoaded();
+    }
 }
 
 void Self::onChatAdded(const ChatHandler &chat)
@@ -154,14 +148,4 @@ void Self::onChatAdded(const ChatHandler &chat)
     if (chat->type() == Chat::Type::Personal) {
         m_messenger->subscribeToUser(UserId(chat->id()));
     }
-}
-
-void Self::onUpdateContactsWithUser(const UserHandler &user)
-{
-
-    Contact contact;
-    contact.setUserId(user->id());
-    contact.setUsername(user->username());
-
-    m_userDatabase->contactsTable()->addContact(contact);
 }

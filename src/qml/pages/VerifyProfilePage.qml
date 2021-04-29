@@ -1,27 +1,31 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
+import "../base"
 import "../theme"
 import "../components"
 
 OperationPage {
-    id: editProfilePage
+    id: root
     appState: app.stateManager.verifyProfileState
-
     loadingText: qsTr("Opening confirmation page...")
 
+    property int codeType: ConfirmationCodeTypes.phoneNumber
+
+    signal verified()
+
     header: Header {
-        showBackButton: !confirmForm.isLoading
+        showBackButton: !form.isLoading
         title: qsTr("Confirm")
     }
 
     Form {
-        id: confirmForm
+        id: form
 
         FormInput {
             id: confirmInput
-            label: [qsTr("Confirm phone"), qsTr("Confirm email")][appState.codeType]
+            label: [qsTr("Confirm phone"), qsTr("Confirm email")][root.codeType]
             password: false
             placeholder: qsTr("Enter code")
         }
@@ -29,7 +33,7 @@ OperationPage {
         FormPrimaryButton {
             text: qsTr("Verify")
             enabled: confirmInput.text
-            onClicked: appState.verify(confirmInput.text)
+            onClicked: appState.verify(root.codeType, confirmInput.text)
         }
     }
 
@@ -38,10 +42,10 @@ OperationPage {
 
         function onVerificationFinished(codeType, success) {
             if (success) {
-                root.showPopupSuccess([qsTr("Phone was confirmed"), qsTr("Email was confirmed")][codeType]);
-                app.stateManager.goBack()
+                notificationPopup.showError([qsTr("Phone was confirmed"), qsTr("Email was confirmed")][root.codeType]);
+                root.verified()
             } else {
-                root.showPopupError(qsTr("Verification code isn't valid"))
+                notificationPopup.showError(qsTr("Verification code isn't valid"))
             }
         }
     }

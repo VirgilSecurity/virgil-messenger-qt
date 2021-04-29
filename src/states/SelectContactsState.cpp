@@ -45,6 +45,12 @@ Self::SelectContactsState(DiscoveredContactsModel *contactsModel, QState *parent
 {
 }
 
+void Self::reload()
+{
+    m_contactsModel->reload();
+    m_contactsModel->selection()->setMultiSelect(m_multiSelect);
+}
+
 void Self::finishSelection()
 {
     emit contactsSelected(m_contactsModel->getSelectedContacts());
@@ -53,11 +59,4 @@ void Self::finishSelection()
 void Self::setMultiSelect(bool multiSelect)
 {
     m_multiSelect = multiSelect;
-}
-
-void Self::onEntry(QEvent *event)
-{
-    Q_UNUSED(event)
-    m_contactsModel->reload();
-    m_contactsModel->selection()->setMultiSelect(m_multiSelect);
 }

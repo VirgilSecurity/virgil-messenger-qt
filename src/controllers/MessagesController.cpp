@@ -60,8 +60,6 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
                          QObject *parent)
     : QObject(parent), m_settings(settings), m_messenger(messenger), m_models(models), m_userDatabase(userDatabase)
 {
-    qRegisterMetaType<MessageUpdate>("MessageUpdate");
-
     auto messagesQueue = m_models->messagesQueue();
     // User database
     connect(userDatabase, &UserDatabase::opened, this, &Self::setupTableConnections);
@@ -75,23 +73,30 @@ Self::MessagesController(Messenger *messenger, const Settings *settings, Models 
     connect(m_messenger, &Messenger::updateMessage, this, &Self::onUpdateMessage);
 }
 
-void Self::loadMessages(const ChatHandler &chat)
+void Self::loadChat(const ChatHandler &chat)
 {
     m_models->messages()->setChat(chat);
     m_userDatabase->messagesTable()->fetchChatMessages(chat->id());
 }
 
-void Self::clearMessages()
+void Self::loadNewChat(const ChatHandler &chat)
 {
-    m_models->messages()->clearChat();
+    m_models->messages()->setChat(chat);
+    m_models->messages()->clearMessages();
+}
+
+void Self::closeChat()
+{
+    auto messages = m_models->messages();
+    messages->clearChat();
+    messages->clearMessages();
 }
 
 void Self::sendTextMessage(const QString &body)
 {
     auto message = createTextMessage(body);
-    const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_userDatabase->writeMessage(message, unreadCount);
-    m_models->chats()->updateLastMessage(message, unreadCount);
+    m_userDatabase->writeMessage(message);
+    m_models->chats()->updateLastMessage(message);
     m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
@@ -110,9 +115,8 @@ void Self::sendFileMessage(const QVariant &attachmentUrl)
         return;
     }
 
-    const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_models->chats()->updateLastMessage(message, unreadCount);
-    m_userDatabase->writeMessage(message, unreadCount);
+    m_models->chats()->updateLastMessage(message);
+    m_userDatabase->writeMessage(message);
     m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
@@ -131,9 +135,8 @@ void Self::sendPictureMessage(const QVariant &attachmentUrl)
         return;
     }
 
-    const qsizetype unreadCount = 0; // message can be created in current chat only
-    m_models->chats()->updateLastMessage(message, unreadCount);
-    m_userDatabase->writeMessage(message, unreadCount);
+    m_models->chats()->updateLastMessage(message);
+    m_userDatabase->writeMessage(message);
     m_models->messages()->addMessage(message);
     emit messageCreated(message);
 }
@@ -189,8 +192,8 @@ ModifiableMessageHandler Self::createFileMessage(const QUrl &localFileUrl)
 ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
 {
     QString errorString;
-    const auto content =
-            MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->thumbnailMaxSize(), errorString);
+    const auto content = MessageContentPicture::createFromLocalFile(localFileUrl, m_settings->imageConversionFormat(),
+                                                                    m_settings->thumbnailMaxSize(), errorString);
     if (!content) {
         qCWarning(lcController) << "MessageContentPicture creation error:" << errorString;
         return ModifiableMessageHandler();
@@ -200,21 +203,6 @@ ModifiableMessageHandler Self::createPictureMessage(const QUrl &localFileUrl)
     message->setContent(std::move(*content));
 
     return message;
-}
-
-qsizetype Self::calculateUnreadMessageCount(const ChatHandler &destinationChat, const MessageHandler &message) const
-{
-    auto currentChat = m_models->messages()->chat();
-
-    if ((nullptr == currentChat) || (currentChat->id() != destinationChat->id())) {
-        if (message->isOutgoingCopyFromOtherDevice()) {
-            return destinationChat->unreadMessageCount();
-        } else {
-            return destinationChat->unreadMessageCount() + 1;
-        }
-    }
-
-    return 0;
 }
 
 void Self::setupTableConnections()
@@ -265,10 +253,9 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
         //
         //  Update existing chat.
         //
-        const auto unreadMessageCount = calculateUnreadMessageCount(destChat, message);
-        chats->updateLastMessage(message, unreadMessageCount);
+        chats->updateLastMessage(message);
 
-        m_userDatabase->writeMessage(message, unreadMessageCount);
+        m_userDatabase->writeMessage(message);
     } else {
         //
         //  Create a new chat.
@@ -288,4 +275,17 @@ void Self::onMessageReceived(ModifiableMessageHandler message)
     messages->addMessage(message);
 
     emit messageCreated(message);
+
+    //
+    //  Mark message as "read" if posting the message to the current chat.
+    //
+    if (message->isIncoming()) {
+        if (auto currentChat = messages->chat(); currentChat && (currentChat->id() == message->chatId())) {
+            m_messenger->sendMessageStatusDisplayed(message);
+            IncomingMessageStageUpdate update;
+            update.messageId = message->id();
+            update.stage = IncomingMessageStage::Read;
+            onUpdateMessage(update);
+        }
+    }
 }

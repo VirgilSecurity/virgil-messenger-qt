@@ -12,11 +12,17 @@ Control {
 
     property alias title: headerTitle.title
     property alias description: headerTitle.description
+
     property alias titleHorizontalAlignment: headerTitle.horizontalAlignment
+    property alias showSeparator: headerBackground.showSeparator
+    property alias showBackButton: backButton.visible
+    property alias titleClickable: headerTitle.clickable
+
+    property alias rightControl: rightControlLoader.sourceComponent
     property alias contextMenu: menuButton.contextMenu
     property alias contextMenuVisible: menuButton.visible
-    property alias showSeparator: headerBackground.showSeparator
-    property alias rightControl: rightControlLoader.sourceComponent
+
+    signal titleClicked()
 
     background: HeaderBackground {
         id: headerBackground
@@ -34,14 +40,17 @@ Control {
         anchors.rightMargin: Theme.smallMargin
 
         ImageButton {
+            id: backButton
             image: "Arrow-Left"
-            onClicked: app.stateManager.goBack()
+            onClicked: window.navigateBack()
         }
 
         HeaderTitle {
             id: headerTitle
             Layout.fillWidth: true
             Layout.leftMargin: Theme.smallMargin
+
+            onClicked: root.titleClicked()
         }
 
         ImageButton {
@@ -50,13 +59,10 @@ Control {
             onClicked: contextMenu.open()
             visible: contextMenu.count > 0
 
-            property var contextMenu: ContextMenu {
-            }
+            property var contextMenu: ContextMenu {}
         }
 
-        Loader {
-            id: rightControlLoader
-        }
+        Loader { id: rightControlLoader }
     }
 
     onContextMenuChanged: {

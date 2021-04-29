@@ -36,7 +36,7 @@
 
 #include "FileUtils.h"
 #include "operations/CalculateAttachmentFingerprintOperation.h"
-#include "operations/ConvertToPngOperation.h"
+#include "operations/ConvertImageFormatOperation.h"
 #include "operations/CreateAttachmentPreviewOperation.h"
 #include "operations/CreateAttachmentThumbnailOperation.h"
 #include "operations/EncryptUploadFileOperation.h"
@@ -47,9 +47,8 @@ using namespace vm;
 using Self = UploadAttachmentOperation;
 
 Self::UploadAttachmentOperation(MessageOperation *parent, const Settings *settings)
-    : LoadAttachmentOperation(parent), m_parent(parent), m_settings(settings)
+    : LoadAttachmentOperation(parent, settings), m_parent(parent)
 {
-    setName(QString("UploadAttachment"));
 }
 
 bool Self::populateChildren()
@@ -87,10 +86,10 @@ void Self::populatePictureOperations()
     const auto attachment = std::get_if<MessageContentPicture>(&message->content());
     const auto factory = m_parent->factory();
 
-    // Convert to png
-    auto convertOp = factory->populateConvertToPngOperation(this, attachment->localPath(),
-                                                            QLatin1String("png-%1").arg(attachment->id()));
-    connect(convertOp, &ConvertToPngOperation::fileCreated, [this, message](const QString &filePath) {
+    // Convert image to preffered format
+    const auto fileName = QLatin1String("conv-%2").arg(attachment->id());
+    auto convertOp = factory->populateConvertImageFormatOperation(this, attachment->localPath(), fileName);
+    connect(convertOp, &ConvertImageFormatOperation::fileCreated, [this, message](const QString &filePath) {
         MessageAttachmentLocalPathUpdate update;
         update.messageId = message->id();
         update.attachmentId = message->contentAsAttachment()->id();
@@ -102,14 +101,14 @@ void Self::populatePictureOperations()
     const auto previewFilePath = m_settings->makeThumbnailPath(attachment->id(), true);
     auto createPreviewOp =
             factory->populateCreateAttachmentPreview(m_parent, this, attachment->localPath(), previewFilePath);
-    connect(convertOp, &ConvertToPngOperation::converted, createPreviewOp,
+    connect(convertOp, &ConvertImageFormatOperation::converted, createPreviewOp,
             &CreateAttachmentPreviewOperation::setSourcePath);
 
     // Create thumbnail
     const auto thumbnailFilePath = m_settings->makeThumbnailPath(attachment->id(), false);
     auto createThumbnailOp =
             factory->populateCreateAttachmentThumbnail(m_parent, this, attachment->localPath(), thumbnailFilePath);
-    connect(convertOp, &ConvertToPngOperation::converted, createThumbnailOp,
+    connect(convertOp, &ConvertImageFormatOperation::converted, createThumbnailOp,
             &CreateAttachmentThumbnailOperation::setSourcePath);
 
     // Encrypt/Upload thumbnail
@@ -140,7 +139,7 @@ void Self::populatePictureOperations()
 
     // Calculate attachment fingerprint
     auto fingerprintOp = factory->populateCalculateAttachmentFingerprint(m_parent, this, attachment->localPath());
-    connect(convertOp, &ConvertToPngOperation::converted, fingerprintOp,
+    connect(convertOp, &ConvertImageFormatOperation::converted, fingerprintOp,
             &CalculateAttachmentFingerprintOperation::setSourcePath);
     connect(fingerprintOp, &Operation::finished, [this]() {
         // Stage update
@@ -149,7 +148,8 @@ void Self::populatePictureOperations()
 
     // Encrypt/Upload attachment
     auto encUploadOp = populateEncryptUpload();
-    connect(convertOp, &ConvertToPngOperation::converted, encUploadOp, &EncryptUploadFileOperation::setSourcePath);
+    connect(convertOp, &ConvertImageFormatOperation::converted, encUploadOp,
+            &EncryptUploadFileOperation::setSourcePath);
 }
 
 EncryptUploadFileOperation *Self::populateEncryptUpload()

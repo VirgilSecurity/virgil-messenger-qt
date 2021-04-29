@@ -43,9 +43,9 @@ using Self = GroupMembersTable;
 
 Self::GroupMembersTable(Database *database) : DatabaseTable(QLatin1String("groupMembers"), database)
 {
+    connect(this, &Self::add, this, &Self::onAdd);
+    connect(this, &Self::fetch, this, &Self::onFetch);
     connect(this, &Self::updateGroup, this, &Self::onUpdateGroup);
-    connect(this, &Self::fetchByMemberId, this, &Self::onFetchByMemberId);
-    connect(this, &Self::fetchByGroupId, this, &Self::onFetchByGroupId);
     connect(this, &Self::deleteGroupMembers, this, &Self::onDeleteGroupMembers);
 }
 
@@ -61,36 +61,56 @@ bool Self::create()
     }
 }
 
+void Self::onAdd(const GroupMembers &groupMembers)
+{
+    qCDebug(lcDatabase) << "Start adding group members";
+
+    ScopedConnection connection(*database());
+
+    for (const auto &member : groupMembers) {
+        qCDebug(lcDatabase) << "Start adding group member" << member->memberId();
+
+        DatabaseUtils::BindValues bindValues;
+        bindValues.push_back({ ":groupId", QString(member->groupId()) });
+        bindValues.push_back({ ":memberId", QString(member->memberId()) });
+        bindValues.push_back({ ":memberAffiliation", GroupAffiliationToString(member->memberAffiliation()) });
+
+        auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("insertGroupMember"), bindValues);
+        if (!query) {
+            qCCritical(lcDatabase) << "GroupMembersTable::onAdd error";
+        }
+    }
+}
+
+void Self::onFetch(const GroupId &groupId)
+{
+    qCDebug(lcDatabase) << "Start fetching group members by for group:" << groupId;
+
+    ScopedConnection connection(*database());
+
+    const DatabaseUtils::BindValues bindValues { { ":groupId", QString(groupId) } };
+
+    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectGroupMembers"), bindValues);
+    if (!query) {
+        qCCritical(lcDatabase) << "GroupMembersTable::onFetchFailed error";
+        emit errorOccurred(tr("Failed to fetch group members"));
+    } else {
+        GroupMembers groupMembers;
+        while (query->next()) {
+            if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
+                groupMembers.push_back(std::move(maybyGroupMember));
+            }
+        }
+        emit fetched(groupId, groupMembers);
+    }
+}
+
 void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
 {
     std::list<DatabaseUtils::BindValues> bindValuesCollection;
     QLatin1String queryId;
 
-    if (auto update = std::get_if<AddGroupOwnersUpdate>(&groupUpdate)) {
-        queryId = QLatin1String("insertGroupMember");
-
-        for (const auto &member : update->owners) {
-            DatabaseUtils::BindValues bindValues;
-            bindValues.push_back({ ":groupId", QString(update->groupId) });
-            bindValues.push_back({ ":memberId", QString(member->id()) });
-            bindValues.push_back({ ":memberAffiliation", "owner" });
-
-            bindValuesCollection.push_back(std::move(bindValues));
-        }
-
-    } else if (auto update = std::get_if<AddGroupMembersUpdate>(&groupUpdate)) {
-        queryId = QLatin1String("insertGroupMember");
-
-        for (const auto &member : update->members) {
-            DatabaseUtils::BindValues bindValues;
-            bindValues.push_back({ ":groupId", QString(update->groupId) });
-            bindValues.push_back({ ":memberId", QString(member->id()) });
-            bindValues.push_back({ ":memberAffiliation", "member" });
-
-            bindValuesCollection.push_back(std::move(bindValues));
-        }
-
-    } else if (auto update = std::get_if<GroupMemberAffiliationUpdate>(&groupUpdate)) {
+    if (auto update = std::get_if<GroupMemberAffiliationUpdate>(&groupUpdate)) {
         queryId = QLatin1String("updateGroupMemberAffiliation");
 
         DatabaseUtils::BindValues bindValues;
@@ -120,52 +140,6 @@ void Self::onUpdateGroup(const GroupUpdate &groupUpdate)
     }
 }
 
-void Self::onFetchByMemberId(const UserId &memberId)
-{
-    qCDebug(lcDatabase) << "Start fetching group members by member id:" << memberId;
-
-    ScopedConnection connection(*database());
-
-    const DatabaseUtils::BindValues bindValues { { ":memberId", QString(memberId) } };
-
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectGroupMembersByMemberId"), bindValues);
-    if (!query) {
-        qCCritical(lcDatabase) << "GroupMembersTable::onFetchFailed error";
-        emit errorOccurred(tr("Failed to fetch group members"));
-    } else {
-        GroupMembers groupMembers;
-        while (query->next()) {
-            if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
-                groupMembers.push_back(std::move(maybyGroupMember));
-            }
-        }
-        emit fetchedByMemberId(memberId, groupMembers);
-    }
-}
-
-void Self::onFetchByGroupId(const GroupId &groupId)
-{
-    qCDebug(lcDatabase) << "Start fetching group members by for group:" << groupId;
-
-    ScopedConnection connection(*database());
-
-    const DatabaseUtils::BindValues bindValues { { ":groupId", QString(groupId) } };
-
-    auto query = DatabaseUtils::readExecQuery(database(), QLatin1String("selectGroupMembersByGroupId"), bindValues);
-    if (!query) {
-        qCCritical(lcDatabase) << "GroupMembersTable::onFetchFailed error";
-        emit errorOccurred(tr("Failed to fetch group members"));
-    } else {
-        GroupMembers groupMembers;
-        while (query->next()) {
-            if (auto maybyGroupMember = readGroupMember(*query); maybyGroupMember) {
-                groupMembers.push_back(std::move(maybyGroupMember));
-            }
-        }
-        emit fetchedByGroupId(groupId, groupMembers);
-    }
-}
-
 void Self::onDeleteGroupMembers(const GroupId &groupId)
 {
     const DatabaseUtils::BindValues values { { ":id", QString(groupId) } };
@@ -182,15 +156,7 @@ GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
 {
 
     auto groupId = query.value("groupId").toString();
-    auto groupOwnerId = query.value("groupOwnerId").toString();
     auto memberId = query.value("memberId").toString();
-    auto memberNickname = query.value("memberNickname").toString();
-    if (memberNickname.isEmpty()) {
-        const auto username = query.value("username").toString();
-        const auto email = query.value("email").toString();
-        const auto phone = query.value("phone").toString();
-        memberNickname = Utils::contactDisplayName(memberNickname, username, email, phone);
-    }
     auto memberAffiliation = query.value("memberAffiliation").toString();
 
     if (groupId.isEmpty() || memberId.isEmpty() || memberAffiliation.isEmpty()) {
@@ -200,7 +166,12 @@ GroupMemberHandler Self::readGroupMember(const QSqlQuery &query)
         return GroupMemberHandler();
     }
 
-    return std::make_shared<GroupMember>(GroupId(std::move(groupId)), UserId(std::move(groupOwnerId)),
-                                         UserId(std::move(memberId)), std::move(memberNickname),
+    auto contact = std::make_unique<Contact>();
+    contact->setUserId(UserId(std::move(memberId)));
+    contact->setUsername(query.value("username").toString());
+    contact->setEmail(query.value("email").toString());
+    contact->setPhone(query.value("phone").toString());
+
+    return std::make_shared<GroupMember>(GroupId(std::move(groupId)), std::move(contact),
                                          GroupAffiliationFromString(memberAffiliation));
 }

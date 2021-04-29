@@ -81,8 +81,10 @@ Self::Messenger(Settings *settings, Validator *validator)
     //
     connect(m_coreMessenger, &CoreMessenger::lastActivityTextChanged, this, &Self::lastActivityTextChanged);
     connect(m_coreMessenger, &CoreMessenger::updateMessage, this, &Self::updateMessage);
-    connect(m_coreMessenger, &CoreMessenger::groupChatCreated, this, &Self::groupChatCreated);
     connect(m_coreMessenger, &CoreMessenger::userWasFound, this, &Self::userWasFound);
+    connect(m_coreMessenger, &CoreMessenger::updateContact, this, &Self::updateContact);
+
+    connect(this, &Self::sendMessageStatusDisplayed, m_coreMessenger, &CoreMessenger::sendMessageStatusDisplayed);
 
     //
     //  Handle connection states.
@@ -109,6 +111,7 @@ Self::Messenger(Settings *settings, Validator *validator)
     connect(m_coreMessenger, &CoreMessenger::groupChatCreateFailed, [this](const auto &groupId, const auto &status) {
         emit groupChatCreateFailed(groupId, "Chat was not created on the services");
     });
+    connect(m_coreMessenger, &CoreMessenger::newGroupChatLoaded, this, &Self::newGroupChatLoaded);
 
     //
     // Push notifications
@@ -119,7 +122,12 @@ Self::Messenger(Settings *settings, Validator *validator)
 #endif // VS_PUSHNOTIFICATIONS
 }
 
-bool Messenger::isOnline() const noexcept
+bool Self::isNetworkOnline() const noexcept
+{
+    return m_coreMessenger->isNetworkOnline();
+}
+
+bool Self::isOnline() const noexcept
 {
     return m_coreMessenger->isOnline();
 }
@@ -127,9 +135,10 @@ bool Messenger::isOnline() const noexcept
 void Self::signIn(const QString &username)
 {
     FutureWorker::run(m_coreMessenger->signIn(username), [this, username = username](auto result) {
+        m_settings->setLastSignedInUser((result == CoreMessengerStatus::Success) ? username : QString());
+
         switch (result) {
         case CoreMessengerStatus::Success:
-            m_settings->setLastSignedInUser(username);
             emit signedIn(username);
             break;
 
@@ -143,6 +152,10 @@ void Self::signIn(const QString &username)
 
         case CoreMessengerStatus::Error_Signin:
             emit signInErrorOccured(tr("Cannot sign-in user"));
+            break;
+
+        case CoreMessengerStatus::Error_Offline:
+            emit signInErrorOccured(tr("No internet"));
             break;
 
         default:
@@ -325,21 +338,26 @@ void Self::suspend()
     m_coreMessenger->suspend();
 }
 
+void Self::setShouldDisconnectWhenSuspended(bool disconnectWhenSuspended)
+{
+    m_coreMessenger->setShouldDisconnectWhenSuspended(disconnectWhenSuspended);
+}
+
 void Self::setCurrentRecipient(const UserId &recipientId)
 {
     m_coreMessenger->setCurrentRecipient(recipientId);
 }
 
-void Self::createGroupChat(const GroupHandler &group)
+void Self::createGroupChat(const QString &groupName, const Contacts &contacts)
 {
 
-    m_coreMessenger->createGroupChat(group);
+    m_coreMessenger->createGroupChat(groupName, contacts);
 }
 
-void Self::joinGroupChats(const GroupMembers &groupsWithMe)
+void Self::loadGroupChats(const Groups &groups)
 {
 
-    m_coreMessenger->joinGroupChats(groupsWithMe);
+    m_coreMessenger->loadGroupChats(groups);
 }
 
 void Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
@@ -348,10 +366,15 @@ void Self::acceptGroupInvitation(const GroupId &groupId, const UserId &groupOwne
     m_coreMessenger->acceptGroupInvitation(groupId, groupOwnerId);
 }
 
-void Messenger::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
+void Self::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwnerId)
 {
 
     m_coreMessenger->rejectGroupInvitation(groupId, groupOwnerId);
+}
+
+void Self::setGroupInfo(const GroupId &groupId, const QString &name)
+{
+    m_coreMessenger->renameGroupChat(groupId, name);
 }
 
 void Self::onPushNotificationTokenUpdate()

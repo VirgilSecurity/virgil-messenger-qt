@@ -41,6 +41,8 @@
 #include "Messenger.h"
 #include "Settings.h"
 #include "Utils.h"
+#include "FileUtils.h"
+#include "android/VSQAndroid.h"
 
 Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs")
 
@@ -66,6 +68,20 @@ void CloudFileSystem::signOut()
 {
     qCDebug(lcCloudFileSystem) << "Sign-out cloud-fs";
     m_coreFs = {};
+}
+
+bool CloudFileSystem::checkPermissions()
+{
+#if VS_ANDROID
+    return VSQAndroid::checkWriteExternalStoragePermission();
+#else
+    return true;
+#endif
+}
+
+bool CloudFileSystem::createDownloadsDir()
+{
+    return FileUtils::forceCreateDir(m_downloadsDir.absolutePath(), false);
 }
 
 CloudFileRequestId CloudFileSystem::fetchList(const CloudFileHandler &parentFolder)
@@ -210,8 +226,8 @@ CloudFileRequestId CloudFileSystem::fetchMembers(const CloudFileHandler &file)
             return;
         }
 
-        const auto members = std::get_if<CloudFileMembers>(&result);
-        emit membersFetched(requestId, file, *members);
+        auto members = std::get_if<CloudFileMembers>(&result);
+        emit membersFetched(requestId, file, std::move(*members));
     });
     return requestId;
 }

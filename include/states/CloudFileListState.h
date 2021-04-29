@@ -52,14 +52,9 @@ class CloudFileListState : public QState
 public:
     CloudFileListState(Messenger *messenger, CloudFilesController *controller, QState *parent);
 
-signals:
-    void requestNewFolder(const QString &name);
-    void requestNewSharedFolder(const QString &name);
-    void requestSharingInfo();
+    Q_INVOKABLE void switchToRootFolder();
 
 private:
-    void onEntry(QEvent *);
-
     QPointer<Messenger> m_messenger;
     QPointer<CloudFilesController> m_controller;
     UserHandler m_lastUser;

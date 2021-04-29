@@ -38,23 +38,20 @@
 #include "OperationState.h"
 
 namespace vm {
+class Messenger;
 class Validator;
-class UsersController;
 
 class SignUpState : public OperationState
 {
     Q_OBJECT
 
 public:
-    SignUpState(UsersController *usersController, Validator *validator, QState *parent);
+    SignUpState(Messenger *messenger, Validator *validator, QState *parent);
 
-signals:
-    void signUp(const QString &username);
+    Q_INVOKABLE void signUp(const QString &username);
 
 private:
-    void processSignUp(const QString &username);
-
-    UsersController *m_usersController;
+    Messenger *m_messenger;
     Validator *m_validator;
 };
 } // namespace vm

@@ -61,6 +61,9 @@ public:
     void signIn();
     void signOut();
 
+    bool checkPermissions();
+    bool createDownloadsDir();
+
     CloudFileRequestId fetchList(const CloudFileHandler &parentFolder);
     CloudFileRequestId createFile(const QString &filePath, const CloudFileHandler &parentFolder);
     CloudFileRequestId createFolder(const QString &name, const CloudFileHandler &parentFolder,
@@ -96,7 +99,7 @@ signals:
     void membersSet(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
     void setMembersErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
-    void membersFetched(CloudFileRequestId requestId, const CloudFileHandler &file, const CloudFileMembers &members);
+    void membersFetched(CloudFileRequestId requestId, const CloudFileHandler &file, CloudFileMembers members);
     void fetchMembersErrorOccurred(CloudFileRequestId requestId, const QString &errorText);
 
 private:

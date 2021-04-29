@@ -40,6 +40,17 @@ else()
         set(VS_ANDROID_PACKAGE_NAME "com.virgilsecurity.android.virgil")
 
     # ----------
+    # Windows
+    # ----------
+    # ***********************************************************************************
+    elseif(VS_PLATFORM STREQUAL "windows")
+        # Windows sparkle feed URL
+        set(WIN_SU_URL "https://virgilsecurity.bintray.com/messenger/windows/nightly")
+        set(WIN_SU_FILE "${PROJECT_NAME}-installer-${VS_TARGET_VERSION}.exe")
+        set(WIN_SU_FILE_URL "${WIN_SU_URL}/${WIN_SU_FILE}")
+        set(WIN_SU_FEED_URL "${WIN_SU_URL}/appcast.xml")
+
+    # ----------
     # MacOS
     # ----------
     # ***********************************************************************************
