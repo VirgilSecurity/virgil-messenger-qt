@@ -32,19 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if (VS_ANDROID)
+#include <QtCore>
+#include <QtAndroid>
 
-#    include <QtCore>
-#    include <QtAndroid>
+#include "android/VSQAndroid.h"
+#include "CustomerEnv.h"
+#include "Utils.h"
 
-#    include "android/VSQAndroid.h"
-#    include "CustomerEnv.h"
-#    include "Utils.h"
-
-#    include <android/log.h>
-#    include <pthread.h>
-#    include <unistd.h>
-#    include <cstdio>
+#include <android/log.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <cstdio>
 
 using namespace vm;
 
@@ -151,28 +149,6 @@ int VSQAndroid::runLoggingThread()
 }
 
 /******************************************************************************/
-
-QString VSQAndroid::getDisplayName(const QUrl &url)
-{
-    const QString urlString = url.toString();
-    const auto javaUrl = QAndroidJniObject::fromString(urlString);
-    const auto javaDisplayName =
-            QAndroidJniObject::callStaticObjectMethod("org/virgil/utils/Utils", "getDisplayName",
-                                                      "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
-                                                      QtAndroid::androidContext().object(), javaUrl.object<jstring>());
-    return javaDisplayName.toString();
-}
-
-quint64 VSQAndroid::getFileSize(const QUrl &url)
-{
-    const QString urlString = url.toString();
-    const auto javaUrl = QAndroidJniObject::fromString(urlString);
-    const auto javaFileSize = QAndroidJniObject::callStaticMethod<jint>(
-            "org/virgil/utils/Utils", "getFileSize", "(Landroid/content/Context;Ljava/lang/String;)I",
-            QtAndroid::androidContext().object(), javaUrl.object<jstring>());
-    return static_cast<quint64>(javaFileSize);
-}
-
 Contacts VSQAndroid::getContacts()
 {
     const auto javaStr = QAndroidJniObject::callStaticObjectMethod("org/virgil/utils/ContactUtils", "getContacts",
@@ -210,5 +186,3 @@ QUrl VSQAndroid::getContactAvatarUrl(const ContactHandler contact)
             javaIdString.object<jstring>());
     return FileUtils::localFileToUrl(javaFilePath.toString());
 }
-
-#endif // VS_ANDROID

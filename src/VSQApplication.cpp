@@ -44,8 +44,8 @@
 #include "VSQUiHelper.h"
 
 #if VS_ANDROID
-#    include <android/VSQAndroid.h>
-#    include "FirebaseListener.h"
+#    include "android/VSQAndroid.h"
+#    include "android/FirebaseListener.h"
 #endif // VS_ANDROID
 
 #if VS_WINDOWS

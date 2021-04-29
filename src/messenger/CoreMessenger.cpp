@@ -2518,7 +2518,7 @@ QByteArray Self::packXmppMessageBody(const QByteArray &messageCiphertext, PushTy
         break;
 
     case PushType::Alert:
-        messageBodyJson["pushType"] = "alert";
+        messageBodyJson["pushType"] = "alertBare";
         break;
 
     case PushType::Voip:

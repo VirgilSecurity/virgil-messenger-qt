@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,53 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILE_UTILS_H
-#define VM_FILE_UTILS_H
+#ifndef VM_PLATFORM_PLATFORM_FS_DEFAULT
+#define VM_PLATFORM_PLATFORM_FS_DEFAULT
 
-#include <QString>
-#include <QUrl>
-#include <QFileInfo>
-
-#include <optional>
+#include "PlatformFsBase.h"
 
 namespace vm {
-class FileUtils
-{
-public:
-    static QString calculateFingerprint(const QString &path);
+namespace platform {
 
-    static QString findUniqueFileName(const QString &fileName);
-
-    static bool forceCreateDir(const QString &absolutePath, bool isFatal);
-
-    static std::optional<QString> readTextFile(const QString &filePath);
-
-    static bool fileExists(const QUrl &fileUrl);
-
-    static bool fileExists(const QString &filePath);
-
-    static quint64 fileSize(const QUrl &fileUrl);
-
-    static quint64 fileSize(const QString &filePath);
-
-    static void removeFile(const QString &filePath);
-
-    static void removeDir(const QString &dirPath);
-
-    static QString fileName(const QString &filePath);
-
-    static QString fileExt(const QString &filePath);
-
-    static QString attachmentFileName(const QUrl &url, bool isPicture);
-
-    static QString fileMimeType(const QString &filePath);
-
-    static bool isValidUrl(const QUrl &url);
-
-    static QString urlToLocalFile(const QUrl &url);
-
-    static QUrl localFileToUrl(const QString &filePath);
+//
+//  Provides base implementation.
+//  Note, method instance() is implemented here.
+//
+class PlatformFsDefault: public PlatformFsBase {
 };
-}; // namespace vm
 
-#endif // VM_FILE_UTILS_H
+} // platform
+} // vm
+
+#endif // VM_PLATFORM_PLATFORM_FS_DEFAULT

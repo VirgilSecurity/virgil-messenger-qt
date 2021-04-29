@@ -49,18 +49,8 @@ using namespace notifications;
 using namespace notifications::xmpp;
 #endif // VS_PUSHNOTIFICATIONS
 
-#include <qxmpp/QXmppMessage.h>
-#include <qxmpp/QXmppUtils.h>
-#include <qxmpp/QXmppPushEnableIq.h>
-#include <qxmpp/QXmppMessageReceiptManager.h>
-#include <qxmpp/QXmppCarbonManager.h>
-
 #include <QtConcurrent>
 #include <QStandardPaths>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QSslSocket>
-#include <QUuid>
 
 Q_LOGGING_CATEGORY(lcMessenger, "messenger")
 

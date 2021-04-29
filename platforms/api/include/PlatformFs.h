@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,53 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILE_UTILS_H
-#define VM_FILE_UTILS_H
+#ifndef VM_PLATFORM_PLATFORM_FS
+#define VM_PLATFORM_PLATFORM_FS
 
 #include <QString>
 #include <QUrl>
-#include <QFileInfo>
-
-#include <optional>
 
 namespace vm {
-class FileUtils
-{
+namespace platform {
+
+//
+//  Provides API for a platform dependent File System communication.
+//
+class PlatformFs {
 public:
-    static QString calculateFingerprint(const QString &path);
+    virtual QString urlToLocalFile(const QUrl &url) const = 0;
 
-    static QString findUniqueFileName(const QString &fileName);
+    virtual QString fileDisplayName(const QUrl &url, bool isPicture) const = 0;
 
-    static bool forceCreateDir(const QString &absolutePath, bool isFatal);
+    virtual ~PlatformFs() = default;
 
-    static std::optional<QString> readTextFile(const QString &filePath);
-
-    static bool fileExists(const QUrl &fileUrl);
-
-    static bool fileExists(const QString &filePath);
-
-    static quint64 fileSize(const QUrl &fileUrl);
-
-    static quint64 fileSize(const QString &filePath);
-
-    static void removeFile(const QString &filePath);
-
-    static void removeDir(const QString &dirPath);
-
-    static QString fileName(const QString &filePath);
-
-    static QString fileExt(const QString &filePath);
-
-    static QString attachmentFileName(const QUrl &url, bool isPicture);
-
-    static QString fileMimeType(const QString &filePath);
-
-    static bool isValidUrl(const QUrl &url);
-
-    static QString urlToLocalFile(const QUrl &url);
-
-    static QUrl localFileToUrl(const QString &filePath);
+    //
+    //  This method should be implemented within derived class.
+    //
+    static PlatformFs& instance();
 };
-}; // namespace vm
 
-#endif // VM_FILE_UTILS_H
+} // platform
+} // vm
+
+#endif // VM_PLATFORM_PLATFORM_FS

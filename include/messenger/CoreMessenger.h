@@ -49,7 +49,7 @@
 #include "GroupUpdate.h"
 #include "Contact.h"
 #include "ContactUpdate.h"
-#include "XmppMucSubIq.h"
+#include "xmpp/XmppMucSubIq.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppHttpUploadIq.h>

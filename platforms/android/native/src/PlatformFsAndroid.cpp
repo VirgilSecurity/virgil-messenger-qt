@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,53 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_FILE_UTILS_H
-#define VM_FILE_UTILS_H
+#include "PlatformFsAndroid.h"
 
-#include <QString>
-#include <QUrl>
-#include <QFileInfo>
+#include <QtCore>
+#include <QtAndroid>
+#include <QLoggingCategory>
 
-#include <optional>
+Q_LOGGING_CATEGORY(lcPlatformFsAndroid, "platform-fs-android");
 
-namespace vm {
-class FileUtils
+using namespace vm;
+using namespace platform;
+
+using Self = PlatformFsAndroid;
+
+PlatformFs &PlatformFs::instance()
 {
-public:
-    static QString calculateFingerprint(const QString &path);
+    static Self impl;
+    return impl;
+}
 
-    static QString findUniqueFileName(const QString &fileName);
+QString Self::urlToLocalFile(const QUrl &url) const
+{
+    qCDebug(lcPlatformFsAndroid) << "File URL (before urlToLocalFile):" << url.toString();
+    const auto options = url.isLocalFile() ? QUrl::FormattingOptions(QUrl::RemoveScheme) : QUrl::PrettyDecoded;
+    const auto res = QUrl::fromPercentEncoding(url.toString(options).toUtf8());
+    qCDebug(lcPlatformFsAndroid) << "File URL path (after urlToLocalFile):" << res;
+    return res;
+}
 
-    static bool forceCreateDir(const QString &absolutePath, bool isFatal);
-
-    static std::optional<QString> readTextFile(const QString &filePath);
-
-    static bool fileExists(const QUrl &fileUrl);
-
-    static bool fileExists(const QString &filePath);
-
-    static quint64 fileSize(const QUrl &fileUrl);
-
-    static quint64 fileSize(const QString &filePath);
-
-    static void removeFile(const QString &filePath);
-
-    static void removeDir(const QString &dirPath);
-
-    static QString fileName(const QString &filePath);
-
-    static QString fileExt(const QString &filePath);
-
-    static QString attachmentFileName(const QUrl &url, bool isPicture);
-
-    static QString fileMimeType(const QString &filePath);
-
-    static bool isValidUrl(const QUrl &url);
-
-    static QString urlToLocalFile(const QUrl &url);
-
-    static QUrl localFileToUrl(const QString &filePath);
-};
-}; // namespace vm
-
-#endif // VM_FILE_UTILS_H
+QString Self::fileDisplayName(const QUrl &url, bool /* isPicture */) const
+{
+    const QString urlString = url.toString();
+    const auto javaUrl = QAndroidJniObject::fromString(urlString);
+    const auto javaDisplayName =
+            QAndroidJniObject::callStaticObjectMethod("org/virgil/utils/Utils", "getDisplayName",
+                                                      "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
+                                                      QtAndroid::androidContext().object(), javaUrl.object<jstring>());
+    return javaDisplayName.toString();
+}

@@ -35,11 +35,9 @@
 #ifndef VSQANDROID_H
 #define VSQANDROID_H
 
-#if (VS_ANDROID)
-
-#    include <QObject>
-#    include <Contact.h>
-#    include <FileUtils.h>
+#include <QObject>
+#include <Contact.h>
+#include <FileUtils.h>
 
 using namespace vm;
 
@@ -56,10 +54,6 @@ public:
 
     static void hideSplashScreen();
 
-    static QString getDisplayName(const QUrl &url);
-
-    static quint64 getFileSize(const QUrl &url);
-
     static Contacts getContacts();
 
     static QUrl getContactAvatarUrl(const ContactHandler contact);
@@ -67,7 +61,5 @@ public:
 private:
     static int runLoggingThread();
 };
-
-#endif // VS_ANDROID
 
 #endif // VSQANDROID_H

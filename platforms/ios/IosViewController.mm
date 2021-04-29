@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "ios/IosViewController.h"
+#include "IosViewController.h"
 
 @interface IosViewController ()
 @end
