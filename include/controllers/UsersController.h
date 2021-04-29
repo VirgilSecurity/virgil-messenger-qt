@@ -38,6 +38,7 @@
 #include "UserId.h"
 #include "Chat.h"
 #include "Messenger.h"
+#include "android/VSQAndroid.h"
 
 #include <QObject>
 #include <QPointer>
@@ -74,6 +75,7 @@ private:
 
     void updateCurrentUser();
     void writeContactToDatabase(const UserHandler &user);
+    void hideSplashScreen();
 
     void onMessengerSignedOut();
     void onUserDatabaseOpened();
@@ -83,6 +85,9 @@ private:
 private:
     QPointer<Messenger> m_messenger;
     QPointer<UserDatabase> m_userDatabase;
+#if VS_ANDROID
+    bool m_splashScreenVisible = true;
+#endif
 };
 } // namespace vm
 

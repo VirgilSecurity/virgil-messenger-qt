@@ -48,7 +48,7 @@
 
 using namespace vm;
 
-// TODO(fpohtmeh): Remove it
+// TODO(fpohtmeh): refactor
 static int pfd[2];
 static pthread_t loggingThread;
 

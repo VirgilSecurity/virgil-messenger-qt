@@ -648,6 +648,10 @@ void Self::onActivate()
         m_impl->xmpp->setClientPresence(presenceOnline);
 
     } else {
+        //
+        //  When application was suspended lets give some time, to finish disconnect.
+        //
+        m_impl->startDisconnectAt = QDateTime::currentDateTime();
         reconnectXmppServerIfNeeded();
     }
 }
@@ -671,6 +675,7 @@ void Self::onSuspend()
         //
         //  Setting QXmppPresence::Unavailable also call the disconnectFromServer() function underneath.
         //
+        qCDebug(lcCoreMessenger) << "Start disconnect due to suspended";
         QXmppPresence presenceAway(QXmppPresence::Unavailable);
         presenceAway.setAvailableStatusType(QXmppPresence::XA);
         m_impl->xmpp->setClientPresence(presenceAway);
@@ -2233,9 +2238,18 @@ void Self::xmppOnStateChanged(QXmppClient::State state)
 void Self::xmppOnError(QXmppClient::Error error)
 {
     qCWarning(lcCoreMessenger) << "XMPP error:" << error;
-    emit connectionStateChanged(Self::ConnectionState::Error);
 
-    disconnectXmppServer();
+    switch (m_impl->connectionState) {
+    case Self::ConnectionState::Connecting:
+    case Self::ConnectionState::Connected:
+        disconnectXmppServer();
+        break;
+
+    case Self::ConnectionState::Disconnected:
+    case Self::ConnectionState::Error:
+        break;
+    }
+    emit connectionStateChanged(Self::ConnectionState::Error);
 
     // Wait 10 second and try to reconnect.
     qCDebug(lcCoreMessenger) << "Emit reconnect in 10s from: xmppOnError()";
@@ -2314,6 +2328,9 @@ void Self::onProcessNetworkState(bool isOnline)
 {
     if (isOnline) {
         qCDebug(lcCoreMessenger) << "Network go online.";
+        qCDebug(lcCoreMessenger) << "Emit reconnect when network changed";
+
+        emit disconnectXmppServer();
         emit reconnectXmppServerIfNeeded();
     } else {
         qCDebug(lcCoreMessenger) << "Network go offline.";

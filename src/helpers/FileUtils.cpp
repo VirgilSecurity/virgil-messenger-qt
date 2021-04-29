@@ -85,18 +85,16 @@ QString Self::findUniqueFileName(const QString &fileName)
 
 bool Self::isValidUrl(const QUrl &url)
 {
-    bool isValid = url.isValid();
-#if !defined(Q_OS_ANDROID)
-    isValid = isValid && url.isLocalFile();
-#endif
-    return isValid;
+    // TODO(fpohtmeh): review previous implementation
+    return url.isValid();
 }
 
 QString Self::urlToLocalFile(const QUrl &url)
 {
 #if VS_ANDROID
     qCDebug(lcFileUtils) << "Android file url (before urlToLocalFile):" << url.toString();
-    auto res = QUrl::fromPercentEncoding(url.toString(QUrl::RemoveScheme).toUtf8());
+    const auto options = url.isLocalFile() ? QUrl::FormattingOptions(QUrl::RemoveScheme) : QUrl::PrettyDecoded;
+    const auto res = QUrl::fromPercentEncoding(url.toString(options).toUtf8());
     qCDebug(lcFileUtils) << "Android file url path:" << res;
     return res;
 #else

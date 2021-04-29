@@ -220,23 +220,21 @@ QVariant Self::data(const QModelIndex &index, int role) const
         if (!attachment || message->status() == MessageStatus::Broken) {
             return false;
         }
-        if (message->isOutgoing() && (attachment->uploadStage() != MessageContentUploadStage::Uploaded)) {
-            return true; // uploading
+        if (attachment->uploadStage() == MessageContentUploadStage::Initial
+            && attachment->downloadStage() == MessageContentDownloadStage::Initial) {
+            return false;
         }
-        const bool isDownloading = attachment->downloadStage() == MessageContentDownloadStage::Preloading
-                || attachment->downloadStage() == MessageContentDownloadStage::Downloading
-                || attachment->downloadStage() == MessageContentDownloadStage::Downloaded;
-        return isDownloading;
+        return attachment->uploadStage() != MessageContentUploadStage::Uploaded
+                && attachment->downloadStage() != MessageContentDownloadStage::Preloaded
+                && attachment->downloadStage() != MessageContentDownloadStage::Decrypted;
     }
 
     case AttachmentIsLoadedRole: {
         if (!attachment || message->status() == MessageStatus::Broken) {
             return false;
         }
-        if (message->isOutgoing() && (attachment->uploadStage() == MessageContentUploadStage::Uploaded)) {
-            return true; // uploaded
-        }
-        return attachment->downloadStage() == MessageContentDownloadStage::Decrypted;
+        return attachment->uploadStage() == MessageContentUploadStage::Uploaded
+                || attachment->downloadStage() == MessageContentDownloadStage::Decrypted;
     }
 
     case AttachmentIconPathRole: {
