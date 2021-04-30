@@ -37,15 +37,18 @@
 #include <QAndroidJniObject>
 #include <QtAndroid>
 
+#include "FileUtils.h"
+
 using namespace vm;
 using Self = AndroidDocumentInteractionController;
 
-Self::AndroidDocumentInteractionController(QObject *parent) : DocumentInteractionController(parent) { }
-
 void Self::openUrl(const QUrl &url)
 {
-    const auto urlString = QAndroidJniObject::fromString(url.toString());
-    QAndroidJniObject::callStaticMethod<void>(
-            "org/virgil/utils/DocumentInteraction", "viewFile", "(Landroid/content/Context;Ljava/lang/String;)V",
-            QtAndroid::androidActivity().object<jobject>(), urlString.object<jstring>());
+    const auto filePath = QAndroidJniObject::fromString(FileUtils::urlToLocalFile(url));
+    const auto javaResult = QAndroidJniObject::callStaticMethod<jboolean>(
+            "org/virgil/utils/DocumentInteraction", "viewFile", "(Landroid/content/Context;Ljava/lang/String;)Z",
+            QtAndroid::androidActivity().object<jobject>(), filePath.object<jstring>());
+    if (!static_cast<bool>(javaResult)) {
+        emit notificationCreated(tr("File preview is not avaialable"), false);
+    }
 }

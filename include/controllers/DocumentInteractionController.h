@@ -47,6 +47,9 @@ public:
     using QObject::QObject;
 
     Q_INVOKABLE virtual void openUrl(const QUrl &url);
+
+signals:
+    void notificationCreated(const QString &notification, const bool error);
 };
 } // namespace vm
 

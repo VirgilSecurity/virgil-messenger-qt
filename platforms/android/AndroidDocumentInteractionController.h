@@ -43,7 +43,7 @@ class AndroidDocumentInteractionController : public DocumentInteractionControlle
     Q_OBJECT
 
 public:
-    explicit AndroidDocumentInteractionController(QObject *parent);
+    using DocumentInteractionController::DocumentInteractionController;
 
     void openUrl(const QUrl &url) override;
 };

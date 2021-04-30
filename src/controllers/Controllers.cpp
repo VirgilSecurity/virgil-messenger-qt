@@ -69,6 +69,8 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_users, &UsersController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_documentInteraction, &DocumentInteractionController::notificationCreated, this,
+            &Controllers::notificationCreated);
 
     connect(m_attachments, &AttachmentsController::openUrlRequested, m_documentInteraction,
             &DocumentInteractionController::openUrl);

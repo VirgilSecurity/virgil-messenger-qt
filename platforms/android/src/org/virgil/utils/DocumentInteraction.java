@@ -13,15 +13,32 @@ public class DocumentInteraction
 {
     private static final String TAG = "DocumentInteraction";
 
-    public static void viewFile(Context context, String filePath) {
-        File file = new File(filePath);
+    public static boolean viewFile(Context context, String filePath) {
         try {
-            Uri uri = FileProvider.getUriForFile(context, "com.virgilsecurity.android.virgil.provider", file);
+            Log.i(TAG, "File opening. filePath: " + filePath);
+            Uri uri;
+            if (filePath.startsWith("content://")) {
+                uri = Uri.parse(filePath);
+            } else {
+                File file = new File(filePath);
+                uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+            }
+            Log.i(TAG, "uri: " + uri);
+
             Intent viewIntent = new Intent(Intent.ACTION_VIEW, uri);
-            QtNative.activity().startActivity(viewIntent);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "The selected file can't be opened: " + file.toString());
+            viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (viewIntent.resolveActivity(context.getPackageManager()) != null) {
+                QtNative.activity().startActivity(viewIntent);
+                Log.i(TAG, "File was opened. Uri: " + uri);
+                return true;
+            }
+            else {
+                Log.w(TAG, "Failed to resolve activity. Uri: " + uri);
+                return false;
+            }
+        } catch (Exception e) {
             Log.e(TAG, "Error: " + e.toString());
+            return false;
         }
     }
 }
