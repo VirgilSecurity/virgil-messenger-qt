@@ -38,4 +38,4 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 #   Library: platform-deps
 #
 add_library(platform-deps INTERFACE)
-target_link_libraries(platform-deps PUBLIC curl)
+target_link_libraries(platform-deps INTERFACE curl)
