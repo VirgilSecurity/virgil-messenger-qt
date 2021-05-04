@@ -996,6 +996,9 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/operations>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
 
+        # TODO: Remove it when VSQAndroid will be hidden under platform API.
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/include>
+
         $<BUILD_INTERFACE:${VS_CUSTOMER_INCLUDE_DIR}>
         )
 

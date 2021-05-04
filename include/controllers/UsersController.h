@@ -38,7 +38,6 @@
 #include "UserId.h"
 #include "Chat.h"
 #include "Messenger.h"
-#include "VSQAndroid.h"
 
 #include <QObject>
 #include <QPointer>
