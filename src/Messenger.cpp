@@ -39,7 +39,6 @@
 #include "Messenger.h"
 #include "Utils.h"
 #include "Settings.h"
-#include "VSQAndroid.h"
 #include "helpers/FutureWorker.h"
 
 #include <QtConcurrent>
