@@ -42,7 +42,7 @@
 #include "models/MessagesModel.h"
 
 #if VS_ANDROID
-#include "VSQAndroid.h"
+#    include "VSQAndroid.h"
 #endif
 
 #include <utility>

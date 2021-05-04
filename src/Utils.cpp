@@ -46,7 +46,9 @@
 #include <QUuid>
 #include <QLoggingCategory>
 
-#include "VSQAndroid.h"
+#if VS_ANDROID
+#    include "VSQAndroid.h"
+#endif
 
 Q_LOGGING_CATEGORY(lcUtils, "utils")
 

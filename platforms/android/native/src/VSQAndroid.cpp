@@ -38,7 +38,6 @@
 #include "VSQAndroid.h"
 #include "Platform.h"
 
-
 using namespace vm;
 using namespace vm::platform;
 
