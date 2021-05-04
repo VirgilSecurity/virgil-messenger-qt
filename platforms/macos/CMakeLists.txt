@@ -33,3 +33,47 @@
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+
+#
+#   Library: platform.
+#
+add_library(platform STATIC)
+
+target_sources(platform
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformMacos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformMacos.mm"
+        )
+
+target_include_directories(platform
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform
+        PUBLIC
+        platform-base
+        customer-config
+        )
+
+#
+#   Library: platform-updates.
+#
+add_library(platform-updates STATIC)
+
+target_sources(platform-updates
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformUpdatesMacos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformUpdatesMacos.mm"
+        )
+
+target_include_directories(platform-updates
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>"
+        )
+
+target_link_libraries(platform-updates
+        PUBLIC
+        platform-updates-api
+        )

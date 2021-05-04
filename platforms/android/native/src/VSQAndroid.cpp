@@ -35,120 +35,18 @@
 #include <QtCore>
 #include <QtAndroid>
 
-#include "android/VSQAndroid.h"
-#include "CustomerEnv.h"
-#include "Utils.h"
+#include "VSQAndroid.h"
+#include "Platform.h"
 
-#include <android/log.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <cstdio>
 
 using namespace vm;
+using namespace vm::platform;
 
-// TODO(fpohtmeh): refactor
-static int pfd[2];
-static pthread_t loggingThread;
-
-/******************************************************************************/
-QString VSQAndroid::caBundlePath()
-{
-    return CustomerEnv::appDataLocation().filePath("cert.pem");
-}
-
-/******************************************************************************/
-static bool _checkPermission(const QString &permission)
-{
-    auto result = QtAndroid::checkPermission(permission);
-    if (result == QtAndroid::PermissionResult::Denied) {
-        auto resultHash = QtAndroid::requestPermissionsSync(QStringList({ permission }));
-        if (resultHash[permission] == QtAndroid::PermissionResult::Denied) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/******************************************************************************/
-static bool _checkPermissions()
-{
-    const QStringList permissions({ "android.permission.WRITE_EXTERNAL_STORAGE",
-                                    "android.permission.READ_EXTERNAL_STORAGE", "android.permission.READ_CONTACTS" });
-    for (const QString &permission : permissions) {
-        if (!_checkPermission(permission)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/******************************************************************************/
-bool VSQAndroid::prepare()
-{
-    _checkPermissions();
-
-    runLoggingThread();
-
-    auto destCertFile = caBundlePath();
-    QFile::remove(destCertFile);
-    return QFile::copy(":qml/resources/cert.pem", destCertFile);
-}
-
-/******************************************************************************/
-bool VSQAndroid::checkWriteExternalStoragePermission()
-{
-    return _checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-}
-
-/******************************************************************************/
 void VSQAndroid::hideSplashScreen()
 {
     QtAndroid::hideSplashScreen();
 }
 
-/******************************************************************************/
-static void *loggingFunction(void *)
-{
-    ssize_t readSize;
-    char buf[4096];
-
-    while ((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
-        if (buf[readSize - 1] == '\n') {
-            --readSize;
-        }
-
-        buf[readSize] = 0; // add null-terminator
-
-        __android_log_write(ANDROID_LOG_DEBUG, "", buf); // Set any log level you want
-    }
-
-    return nullptr;
-}
-
-/******************************************************************************/
-int VSQAndroid::runLoggingThread()
-{
-    // run this function to redirect your output to android log
-    setvbuf(stdout, nullptr, _IOLBF, 0); // make stdout line-buffered
-    setvbuf(stderr, nullptr, _IONBF, 0); // make stderr unbuffered
-
-    /* create the pipe and redirect stdout and stderr */
-    pipe(pfd);
-    dup2(pfd[1], 1);
-    dup2(pfd[1], 2);
-
-    /* spawn the logging thread */
-    if (pthread_create(&loggingThread, nullptr, loggingFunction, nullptr) == -1) {
-        return -1;
-    }
-
-    pthread_detach(loggingThread);
-
-    return 0;
-}
-
-/******************************************************************************/
 Contacts VSQAndroid::getContacts()
 {
     const auto javaStr = QAndroidJniObject::callStaticObjectMethod("org/virgil/utils/ContactUtils", "getContacts",

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,63 +32,42 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_USERSCONTROLLER_H
-#define VM_USERSCONTROLLER_H
+#ifndef VM_PLATFORM_PLATFORM_DEFAULT
+#define VM_PLATFORM_PLATFORM_DEFAULT
 
-#include "UserId.h"
-#include "Chat.h"
-#include "Messenger.h"
-#include "VSQAndroid.h"
-
-#include <QObject>
-#include <QPointer>
-
-class Messenger;
+#include "PlatformBase.h"
 
 namespace vm {
-class Models;
-class UserDatabase;
+namespace platform {
 
-class UsersController : public QObject
+//
+//  Default implementation of the Platform API.
+//
+class PlatformDefault : public PlatformBase
 {
-    Q_OBJECT
-    Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
-    Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
-
 public:
-    UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    //
+    //  Do nothing.
+    //
+    bool prepare() const override;
 
-    Q_INVOKABLE void initialSignIn();
+    //
+    //  Return an invalid or an empty string.
+    //
+    QString caBundlePath() const override;
 
-signals:
-    void userLoaded();
-    void userNotLoaded();
+    //
+    //  Return false.
+    //
+    bool isPushAvailable() const override;
 
-    void currentUserIdChanged(const QString &userId);
-    void currentUsernameChanged(const QString &username);
-
-    void notificationCreated(const QString &notification, const bool error) const;
-
-private:
-    QString currentUserId() const;
-    QString currentUsername() const;
-
-    void updateCurrentUser();
-    void writeContactToDatabase(const UserHandler &user);
-    void hideSplashScreen();
-
-    void onMessengerSignedOut();
-    void onUserDatabaseOpened();
-    void onUserDatabaseErrorOccurred();
-    void onChatAdded(const ChatHandler &chat);
-
-private:
-    QPointer<Messenger> m_messenger;
-    QPointer<UserDatabase> m_userDatabase;
-#if VS_ANDROID
-    bool m_splashScreenVisible = true;
-#endif
+    //
+    //  Return an invalid or an empty string.
+    //
+    QString pushToken() const override;
 };
+
+} // namespace platform
 } // namespace vm
 
-#endif // VM_USERSCONTROLLER_H
+#endif // VM_PLATFORM_PLATFORM_DEFAULT

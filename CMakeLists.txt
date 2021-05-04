@@ -255,6 +255,21 @@ target_link_libraries(qt-common
         )
 
 #
+#   Customers.
+#
+add_library(customer-config INTERFACE)
+
+target_sources(customer-config
+        INTERFACE
+        "${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h"
+        )
+
+target_include_directories(customer-config
+        INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+#
 #   CommKit
 #
 add_library(comm-kit INTERFACE)
@@ -280,12 +295,21 @@ target_link_libraries(comm-kit
         json-c
         )
 
+target_link_directories(comm-kit
+        INTERFACE
+        "$<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>"
+        )
+
 #
 #   Platform specific
 #
 add_library(platform-definitions INTERFACE)
 target_compile_definitions(platform-definitions
         INTERFACE
+        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
+
         $<BUILD_INTERFACE:VS_ANDROID=$<STREQUAL:"${VS_PLATFORM}","android">>
         $<BUILD_INTERFACE:VS_IOS=$<STREQUAL:"${VS_PLATFORM}","ios">>
         $<BUILD_INTERFACE:VS_IOS_SIMULATOR=$<BOOL:${VS_IOS_SIMULATOR}>>
@@ -309,7 +333,6 @@ target_sources(helpers
         #
         ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FileUtils.h
         ${CMAKE_CURRENT_LIST_DIR}/include/helpers/UidUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
         ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
 
         #
@@ -452,6 +475,7 @@ target_include_directories(core-messenger
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
 
         PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
         )
 
@@ -792,24 +816,11 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
-        # Generated
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
-        # Windows
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.h>
-        # MacOS
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
-        # IOS
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosViewController.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
+        # Push Notifications
+        ${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h
         # Android
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/android/VSQAndroid.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
-
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/include/windows/VSQWindows.h>
+        # TODO: Hide this under platform API.
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/include/VSQAndroid.h>
 
         #
         #  Sources
@@ -945,43 +956,16 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadCloudFileOperation.cpp
+        # Push Notifications
+        ${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp
         # QT QRC
         ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
         ${VS_CUSTOMER_DIR}/src/customer.qrc
-        # Linux
-        $<$<STREQUAL:"${VS_PLATFORM}","linux">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
-        # Windows
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/windows/VSQWindows.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/winsparkle.qrc>
-        # MACOS
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
-        # IOS
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosViewController.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
-        # Android
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/android/VSQAndroid.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/android/FirebaseListener.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
-
         # Customer sources
         ${VS_CUSTOMER_SOURCES}
-        )
-
-target_link_directories(${VS_TARGET_NAME}
-        PRIVATE
-        $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${VS_ANDROID_SSL_DIR}>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/x64/Release>>
+        # Android
+        # TODO: Hide this under platform API.
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/src/VSQAndroid.cpp>
         )
 
 target_link_libraries(${VS_TARGET_NAME}
@@ -989,8 +973,11 @@ target_link_libraries(${VS_TARGET_NAME}
         qt-common
         comm-kit
         core-messenger
+        platform
         platform-definitions
         platform-deps
+        platform-fs
+        platform-updates
         )
 
 #
@@ -999,7 +986,6 @@ target_link_libraries(${VS_TARGET_NAME}
 target_include_directories(${VS_TARGET_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/database>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/models>
@@ -1008,27 +994,19 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/controllers>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/states>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/operations>
-
-        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
 
         $<BUILD_INTERFACE:${VS_CUSTOMER_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/include>>
         )
 
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
         $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
 
-        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
 #        $<BUILD_INTERFACE:VS_WINSPARKLE=$<STREQUAL:"${VS_PLATFORM}","windows">>
 
         $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
         $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
-        $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
@@ -1039,6 +1017,8 @@ target_compile_definitions(${VS_TARGET_NAME}
 
         $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG>>
         $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
+        $<BUILD_INTERFACE:$<$<CONFIG:Debug>:QT_QML_DEBUG>>
+        $<BUILD_INTERFACE:$<$<CONFIG:RelWithDebInfo>:QT_QML_DEBUG>>
         )
 
 target_compile_options(${VS_TARGET_NAME}
@@ -1054,13 +1034,6 @@ if (CMAKE_GENERATOR STREQUAL "Xcode")
   set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=MinSizeRel] "YES")
   set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=Release] "YES")
 endif()
-
-# ---------------------------------------------------------------------------
-#   Additional debug parameters
-# ---------------------------------------------------------------------------
-target_compile_definitions(${VS_TARGET_NAME}
-        PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
-        )
 
 if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
     add_clangformat(${VS_TARGET_NAME})

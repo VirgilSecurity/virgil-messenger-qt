@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,63 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_USERSCONTROLLER_H
-#define VM_USERSCONTROLLER_H
+#ifndef VM_PLATFORM_PLATFORM_MACOS
+#define VM_PLATFORM_PLATFORM_MACOS
 
-#include "UserId.h"
-#include "Chat.h"
-#include "Messenger.h"
-#include "VSQAndroid.h"
+#include "PlatformUpdates.h"
 
-#include <QObject>
-#include <QPointer>
-
-class Messenger;
+#include <QTimer>
 
 namespace vm {
-class Models;
-class UserDatabase;
+namespace platform {
 
-class UsersController : public QObject
+//
+//  Provides General Platform Initialization.
+//
+class PlatformUpdatesWindows : public PlatformUpdates
 {
-    Q_OBJECT
-    Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
-    Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
+private:
+    static const int kUpdateCheckMinutes = 5;
 
 public:
-    UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+    //
+    //  Init timers.
+    //
+    PlatformUpdatesWindows();
 
-    Q_INVOKABLE void initialSignIn();
+    //
+    //  Cleanup Windows sources.
+    //
+    ~PlatformUpdatesWindows() noexcept;
 
-signals:
-    void userLoaded();
-    void userNotLoaded();
+    //
+    //  Return false.
+    //
+    bool isSupported() const noexcept override;
 
-    void currentUserIdChanged(const QString &userId);
-    void currentUsernameChanged(const QString &username);
+    //
+    //  Do nothing.
+    //
+    void startChecking() override;
 
-    void notificationCreated(const QString &notification, const bool error) const;
+    //
+    //  Do nothing.
+    //
+    void checkNow() const override;
 
 private:
-    QString currentUserId() const;
-    QString currentUsername() const;
-
-    void updateCurrentUser();
-    void writeContactToDatabase(const UserHandler &user);
-    void hideSplashScreen();
-
-    void onMessengerSignedOut();
-    void onUserDatabaseOpened();
-    void onUserDatabaseErrorOccurred();
-    void onChatAdded(const ChatHandler &chat);
-
-private:
-    QPointer<Messenger> m_messenger;
-    QPointer<UserDatabase> m_userDatabase;
-#if VS_ANDROID
-    bool m_splashScreenVisible = true;
-#endif
+    QTimer m_updateTimer;
 };
-} // namespace vm
 
-#endif // VM_USERSCONTROLLER_H
+} // platform
+} // vm
+
+#endif // VM_PLATFORM_PLATFORM_MACOS

@@ -41,6 +41,7 @@
 #include "OutgoingMessage.h"
 #include "UserImpl.h"
 #include "Utils.h"
+#include "Platform.h"
 
 #include "VSQNetworkAnalyzer.h"
 #include "VSQDiscoveryManager.h"
@@ -48,12 +49,7 @@
 #include "VSQLastActivityManager.h"
 #include "XmppRoomParticipantsManager.h"
 #include "XmppMucSubManager.h"
-
-#if VS_PUSHNOTIFICATIONS
-#    include "XmppPushNotifications.h"
-using namespace notifications;
-using namespace notifications::xmpp;
-#endif // VS_PUSHNOTIFICATIONS
+#include "XmppPushNotifications.h"
 
 #include <virgil/crypto/foundation/vscf_ctr_drbg.h>
 
@@ -86,6 +82,9 @@ using namespace notifications::xmpp;
 #include <optional>
 
 using namespace vm;
+using namespace platform;
+using namespace notifications::xmpp;
+
 using Self = vm::CoreMessenger;
 
 Q_LOGGING_CATEGORY(lcCoreMessenger, "core-messenger");
@@ -383,6 +382,7 @@ Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_im
 
     connect(this, &Self::syncPrivateChatsHistory, this, &Self::onSyncPrivateChatsHistory, Qt::QueuedConnection);
     connect(this, &Self::syncGroupChatHistory, this, &Self::onSyncGroupChatHistory, Qt::QueuedConnection);
+
     //
     //  Configure Network Analyzer.
     //
@@ -391,6 +391,11 @@ Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_im
     m_impl->lastActivityManager = new VSQLastActivityManager(settings);
 
     connect(m_impl->networkAnalyzer, &VSQNetworkAnalyzer::connectedChanged, this, &Self::onProcessNetworkState);
+
+    //
+    //  Configure Push Notifications
+    //
+    connect(&Platform::instance(), &Platform::pushTokenUpdated, this, &Self::onRegisterPushNotifications);
 }
 
 Self::~CoreMessenger() noexcept = default;
@@ -416,7 +421,7 @@ Self::Result Self::resetCommKitConfiguration()
                                                                      vsc_str_from(contactDiscoveryServiceUrlStd),
                                                                      vsc_str_from(xmppServiceUrlStd));
 
-    auto caBundlePath = CustomerEnv::caBundlePath().toStdString();
+    auto caBundlePath = Platform::instance().caBundlePath().toStdString();
     if (!caBundlePath.empty()) {
         vssq_messenger_config_set_ca_bundle(config, vsc_str_from(caBundlePath));
     }
@@ -952,7 +957,10 @@ UserId Self::groupUserIdFromJid(const QString &jid) const
 
 void Self::onRegisterPushNotifications()
 {
-#if VS_PUSHNOTIFICATIONS
+    if (!Platform::instance().isPushAvailable()) {
+        return;
+    }
+
     if (!isOnline()) {
         qCWarning(lcCoreMessenger) << "Can not subscribe for push notifications, no connection. Will try it later.";
         return;
@@ -969,13 +977,14 @@ void Self::onRegisterPushNotifications()
     const bool sentStatus = m_impl->xmpp->sendPacket(xmppPush);
 
     qCInfo(lcCoreMessenger) << "Register for push notifications on XMPP server status:" << sentStatus;
-
-#endif // VS_PUSHNOTIFICATIONS
 }
 
 void Self::onDeregisterPushNotifications()
 {
-#if VS_PUSHNOTIFICATIONS
+    if (!Platform::instance().isPushAvailable()) {
+        return;
+    }
+
     if (!isOnline()) {
         qCWarning(lcCoreMessenger) << "Can not unsubscribe from the push notifications, no connection.";
     }
@@ -989,7 +998,6 @@ void Self::onDeregisterPushNotifications()
     const bool sentStatus = m_impl->xmpp->sendPacket(xmppPush);
 
     qCDebug(lcCoreMessenger) << "Unsubscribe from push notifications status:" << (sentStatus ? "success" : "failed");
-#endif // VS_PUSHNOTIFICATIONS
 }
 
 bool Self::subscribeToUser(const User &user)

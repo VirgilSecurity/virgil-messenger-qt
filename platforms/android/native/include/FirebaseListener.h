@@ -32,17 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_IOS_H_INCLUDED
-#define VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_IOS_H_INCLUDED
+#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#define VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
 
-#include "PushNotifications.h"
+#include <firebase/messaging.h>
+#include <firebase/app.h>
+#include <firebase/util.h>
 
+#include <QtCore>
+
+class QAndroidJniEnvironment;
+
+namespace vm {
 namespace notifications {
 
-class PushNotificationsIOS : public PushNotifications {
-    Q_OBJECT
+class FirebaseListener : public firebase::messaging::Listener
+{
+public:
+    static FirebaseListener &instance();
+
+    void init();
+
+    void OnTokenReceived(const char *token) override;
+
+    void OnMessage(const firebase::messaging::Message &message) override;
+
+private:
+    FirebaseListener();
+
+    void showNotification(QString title, QString message);
+
+private:
+    QAndroidJniEnvironment *m_jniEnv;
+    firebase::App *m_app;
+    firebase::ModuleInitializer m_initializer;
 };
 
-} // namespace notifications
+} // notifications
+} // vm
 
-#endif // VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_IOS_H_INCLUDED
+#endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED

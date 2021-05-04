@@ -34,13 +34,14 @@
 
 #include "XmppPushNotifications.h"
 
-#include "PushNotifications.h"
+#include "VSQCustomer.h"
+#include "Platform.h"
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppPushEnableIq.h>
 #include <qxmpp/QXmppDataForm.h>
-#include "VSQCustomer.h"
 
+using namespace vm::platform;
 using namespace notifications;
 using namespace notifications::xmpp;
 using namespace Customer;
@@ -55,10 +56,10 @@ static const QString kPushNotificationsService = "service";
 
 #if VS_ANDROID
 static const QString kPushNotificationsServiceVal = "fcm";
-#endif
-
-#if VS_IOS
+#elif VS_IOS
 static const QString kPushNotificationsServiceVal = "apns";
+#else
+static const QString kPushNotificationsServiceVal = "<undefined>";
 #endif
 
 #ifdef QT_DEBUG
@@ -99,7 +100,7 @@ QXmppPushEnableIq Self::buildEnableIq() const
     { // Subscribe device
         QXmppDataForm::Field field;
         field.setKey(kPushNotificationsDeviceID);
-        field.setValue(PushNotifications::instance().token());
+        field.setValue(Platform::instance().pushToken());
         fields << field;
     }
 #if VS_IOS

@@ -34,7 +34,7 @@
 
 #include "FirebaseListener.h"
 
-#include "PushNotifications.h"
+#include "PlatformAndroid.h"
 
 #include <QtAndroid>
 #include <QAndroidJniEnvironment>
@@ -45,7 +45,9 @@
 Q_DECLARE_LOGGING_CATEGORY(lcFirebaseListener);
 Q_LOGGING_CATEGORY(lcFirebaseListener, "firebase");
 
-using namespace notifications::android;
+using namespace vm::platform;
+using namespace vm::notifications;
+
 using Self = FirebaseListener;
 
 static firebase::InitResult _InitializeMessaging(firebase::App *app, void *context)
@@ -100,7 +102,7 @@ void Self::OnTokenReceived(const char *token)
 {
     qCDebug(lcFirebaseListener) << "Token received: [" << token << "]";
     auto deviceToken = QString::fromUtf8(token);
-    PushNotifications::instance().registerToken(deviceToken);
+    PlatformAndroid::instance().updatePushToken(deviceToken);
 }
 
 void Self::OnMessage(const firebase::messaging::Message &message)

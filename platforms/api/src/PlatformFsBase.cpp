@@ -48,8 +48,16 @@ QString Self::urlToLocalFile(const QUrl &url) const
 {
     qCDebug(lcPlatformFsBase) << "File URL (before urlToLocalFile):" << url.toString();
     const auto res = url.toLocalFile();
-    qCDebug(lcPlatformFsBase) << "File URL path (after urlToLocalFile):" << res;
+    qCDebug(lcPlatformFsBase) << "File path (after urlToLocalFile):" << res;
     return res;
+}
+
+QUrl Self::localFileToUrl(const QString &path) const
+{
+    qCDebug(lcPlatformFsBase) << "File URL (before urlToLocalFile):" << path;
+    const auto url = QUrl::fromLocalFile(path);
+    qCDebug(lcPlatformFsBase) << "File path (after urlToLocalFile):" << url.toString();
+    return url;
 }
 
 QString Self::fileDisplayName(const QUrl &url, bool /* isPicture */) const
@@ -57,4 +65,9 @@ QString Self::fileDisplayName(const QUrl &url, bool /* isPicture */) const
     const auto filePath = urlToLocalFile(url);
     const auto res = QFileInfo(filePath).fileName();
     return res;
+}
+
+bool Self::requestExternalStorageWritePermission() const
+{
+    return true;
 }

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,66 +32,58 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#if VS_MACOS
-
-#include <QtCore>
+#include "PlatformUpdatesMacos.h"
 
 #include <SUUpdater.h>
 #include <Sparkle.h>
 
-#include "macos/VSQMacos.h"
+using namespace vm;
+using namespace platform;
 
-/******************************************************************************/
-VSQMacos::~VSQMacos() { _deleteTimer(); }
+using Self = PlatformUpdatesMacos;
 
-/******************************************************************************/
-void VSQMacos::_setURL() const
+PlatformUpdates& PlatformUpdates::instance()
 {
-    NSString* urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
-    NSURL* appcastURL = [NSURL URLWithString:urlStr];
-    [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
+    static Self impl;
+    return impl;
 }
 
-/******************************************************************************/
-void VSQMacos::checkUpdates() const
+static void checkUpdatesBackground()
 {
-    if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
-        _setURL();
-        [[SUUpdater sharedUpdater] checkForUpdates:nil];
-    }
-}
-
-/******************************************************************************/
-void VSQMacos::checkUpdatesBackground() const
-{
-    if (FALSE == [SUUpdater sharedUpdater].updateInProgress) {
-        _setURL();
+    if (NO == [SUUpdater sharedUpdater].updateInProgress) {
         [[SUUpdater sharedUpdater] checkForUpdatesInBackground];
     }
 }
 
-/******************************************************************************/
-void VSQMacos::_deleteTimer()
+Self::PlatformUpdatesMacos()
 {
-    if (m_updateTimer) {
-        m_updateTimer->stop();
-        delete m_updateTimer;
-        m_updateTimer = nullptr;
-    }
+    //
+    //  Configure updates feed URL.
+    //
+    NSString* urlStr = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"SUFeedURL"];
+    NSURL* appcastURL = [NSURL URLWithString:urlStr];
+    [[SUUpdater sharedUpdater] setFeedURL:appcastURL];
+
+    //
+    //  Configure updates timer.
+    //
+    m_updateTimer.setSingleShot(false);
+    m_updateTimer.setInterval(Self::kUpdateCheckMinutes * 60 * 1000);
+    QObject::connect(&m_updateTimer, &QTimer::timeout, checkUpdatesBackground);
 }
 
-/******************************************************************************/
-void VSQMacos::startUpdatesTimer()
+bool Self::isSupported() const noexcept { return true; }
+
+void Self::startChecking()
 {
-    _deleteTimer();
-    m_updateTimer = new QTimer();
-    m_updateTimer->setSingleShot(false);
-    m_updateTimer->setInterval(kUpdateCheckMinutes * 60 * 1000);
-    connect(m_updateTimer, &QTimer::timeout, this, &VSQMacos::checkUpdatesBackground);
-    m_updateTimer->start();
+    m_updateTimer.start();
+
     checkUpdatesBackground();
 }
 
-/******************************************************************************/
-
-#endif // VS_MACOS
+void Self::checkNow() const
+{
+    if (NO == [SUUpdater sharedUpdater].updateInProgress) {
+        [[SUUpdater sharedUpdater] checkForUpdates:nil];
+    }
+}

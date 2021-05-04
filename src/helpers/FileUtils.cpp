@@ -96,6 +96,11 @@ QString Self::urlToLocalFile(const QUrl &url)
     return PlatformFs::instance().urlToLocalFile(url);
 }
 
+QUrl Self::localFileToUrl(const QString &filePath)
+{
+    return PlatformFs::instance().localFileToUrl(filePath);
+}
+
 bool Self::forceCreateDir(const QString &absolutePath, bool isFatal)
 {
     const QFileInfo info(absolutePath);
@@ -115,19 +120,6 @@ bool Self::forceCreateDir(const QString &absolutePath, bool isFatal)
         qWarning(lcFileUtils()) << "Failed to create directory:" << absolutePath;
     }
     return false;
-}
-
-QUrl Self::localFileToUrl(const QString &filePath)
-{
-#if VS_ANDROID
-    QUrl url(filePath);
-    if (url.scheme().isEmpty()) {
-        return QUrl::fromLocalFile(filePath);
-    }
-    return url;
-#else
-    return QUrl::fromLocalFile(filePath);
-#endif
 }
 
 std::optional<QString> Self::readTextFile(const QString &filePath)

@@ -44,10 +44,16 @@ namespace platform {
 //  Provides base implementation.
 //  Note, method instance() is implemented here.
 //
-class PlatformFsDefault: public PlatformFsBase {
+class PlatformFsDefault : public PlatformFsBase
+{
+public:
+    //
+    //  Return true.
+    //
+    bool requestExternalStorageWritePermission() const override;
 };
 
-} // platform
-} // vm
+} // namespace platform
+} // namespace vm
 
 #endif // VM_PLATFORM_PLATFORM_FS_DEFAULT

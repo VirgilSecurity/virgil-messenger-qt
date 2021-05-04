@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,23 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_WINDOWS_PLATFORM_H
-#define VM_WINDOWS_PLATFORM_H
+#ifndef VM_PLATFORM_PLATFORM_DEFAULT
+#define VM_PLATFORM_PLATFORM_DEFAULT
 
-#include <QString>
+#include "PlatformUpdates.h"
 
 namespace vm {
+namespace platform {
 
-class WindowsPlatform
+//
+//  Provides General Platform Initialization.
+//
+class PlatformUpdatesDefault : public PlatformUpdates
 {
 public:
-    WindowsPlatform() = delete;
+    //
+    //  Do nothing.
+    //
+    void startChecking() override;
 
-    static QString caBundlePath();
+    //
+    //  Do nothing.
+    //
+    void checkNow() const override;
 
-    static bool prepare();
+    //
+    //  Return false.
+    //
+    bool isSupported() const noexcept override;
 };
 
+} // namespace platform
 } // namespace vm
 
-#endif // VM_WINDOWS_PLATFORM_H
+#endif // VM_PLATFORM_PLATFORM_DEFAULT

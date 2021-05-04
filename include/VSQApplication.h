@@ -43,11 +43,6 @@
 #include "Validator.h"
 #include "Messenger.h"
 #include "Settings.h"
-#if VS_MACOS
-#    include <macos/VSQMacos.h>
-#elif VS_WINDOWS
-#    include <windows/VSQWindows.h>
-#endif // VS_MACOS
 #include "Controllers.h"
 #include "UserDatabase.h"
 #include "Models.h"
@@ -76,6 +71,9 @@ public:
 
     Q_INVOKABLE
     void reloadQml();
+
+    Q_INVOKABLE
+    bool isUpdatesSupported();
 
     Q_INVOKABLE
     void checkUpdates();

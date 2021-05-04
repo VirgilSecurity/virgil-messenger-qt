@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,35 +32,43 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_H_INCLUDED
-#define VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_H_INCLUDED
+#ifndef VM_PLATFORM_PLATFORM_UPDATES
+#define VM_PLATFORM_PLATFORM_UPDATES
 
 #include <QObject>
 
-namespace notifications {
+namespace vm {
+namespace platform {
 
-class PushNotifications : public QObject
-{
-    Q_OBJECT
-
-signals:
-    void tokenUpdated();
-
+//
+//  Provides API for in-place application updates.
+//
+class PlatformUpdates {
 public:
-    static PushNotifications &instance();
+    //
+    //  Start periodic checking for updates.
+    //
+    virtual void startChecking() = 0;
 
-    void registerToken(QString token);
+    //
+    //  Run checking of a new version in background.
+    //
+    virtual void checkNow() const = 0;
 
-    const QString &token() const noexcept;
+    //
+    //  Return true if current platform supports in-place updates.
+    //
+    virtual bool isSupported() const noexcept = 0;
 
-protected:
-    PushNotifications() = default;
-    virtual ~PushNotifications() noexcept = default;
+    virtual ~PlatformUpdates() noexcept = default;
 
-private:
-    QString m_token;
+    //
+    //  This method should be implemented within derived class.
+    //
+    static PlatformUpdates& instance();
 };
 
-} // namespace notifications
+} // platform
+} // vm
 
-#endif // VIRGIL_MESSENGER_NOTIFICATIONS_PUSH_NOTIFICATIONS_H_INCLUDED
+#endif // VM_PLATFORM_PLATFORM_UPDATES

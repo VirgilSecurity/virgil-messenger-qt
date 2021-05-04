@@ -77,13 +77,39 @@ target_link_libraries(platform-deps
 
 target_include_directories(platform-deps
         SYSTEM INTERFACE
-        ${PREBUILT_DIR}/firebase_cpp_sdk/include
+        "${PREBUILT_DIR}/firebase_cpp_sdk/include"
         )
 
 target_link_directories(platform-deps
         INTERFACE
-        ${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++
-        ${VS_ANDROID_SSL_DIR}
+        "${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++"
+        "${VS_ANDROID_SSL_DIR}"
+        )
+
+#
+#   Library: platform.
+#
+add_library(platform STATIC)
+
+target_sources(platform
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformAndroid.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/FirebaseListener.h"
+
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformAndroid.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/FirebaseListener.cpp"
+        )
+
+target_include_directories(platform
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+        )
+
+target_link_libraries(platform
+        PUBLIC
+        platform-deps
+        platform-base
+        customer-config
         )
 
 #
@@ -93,9 +119,8 @@ add_library(platform-fs STATIC)
 
 target_sources(platform-fs
         PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformFsAndroid.h
-
-        ${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformFsAndroid.cpp
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformFsAndroid.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformFsAndroid.cpp"
         )
 
 target_include_directories(platform-fs

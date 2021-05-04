@@ -45,6 +45,29 @@ if (NOT TARGET platform-deps)
 endif()
 
 #
+#   Library: platform.
+#
+if (NOT TARGET platform)
+    add_library(platform STATIC)
+
+    target_sources(platform
+            PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/include/PlatformDefault.h"
+            "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDefault.cpp"
+            )
+
+    target_include_directories(platform
+            PRIVATE
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+            )
+
+    target_link_libraries(platform
+            PUBLIC
+            platform-base
+            )
+endif()
+
+#
 #   Library: platform-fs.
 #
 if (NOT TARGET platform-fs)
@@ -52,8 +75,8 @@ if (NOT TARGET platform-fs)
 
     target_sources(platform-fs
             PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/include/PlatformFsDefault.h
-            ${CMAKE_CURRENT_LIST_DIR}/src/PlatformFsDefault.cpp
+            "${CMAKE_CURRENT_LIST_DIR}/include/PlatformFsDefault.h"
+            "${CMAKE_CURRENT_LIST_DIR}/src/PlatformFsDefault.cpp"
             )
 
     target_include_directories(platform-fs
@@ -64,5 +87,28 @@ if (NOT TARGET platform-fs)
     target_link_libraries(platform-fs
             PUBLIC
             platform-fs-base
+            )
+endif()
+
+#
+#   Library: platform-updates.
+#
+if (NOT TARGET platform-updates)
+    add_library(platform-updates STATIC)
+
+    target_sources(platform-updates
+            PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/include/PlatformUpdatesDefault.h"
+            "${CMAKE_CURRENT_LIST_DIR}/src/PlatformUpdatesDefault.cpp"
+            )
+
+    target_include_directories(platform-updates
+            PRIVATE
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+            )
+
+    target_link_libraries(platform-updates
+            PUBLIC
+            platform-updates-api
             )
 endif()

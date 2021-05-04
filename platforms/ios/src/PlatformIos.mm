@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,36 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQMACOS_H
-#define VSQMACOS_H
+#include "PlatformIos.h"
 
-#if VS_MACOS
+#include "VSQCustomer.h"
 
-#    include <QObject>
-#    include <QTimer>
-#    include "helpers/VSQSingleton.h"
+#include <Foundation/Foundation.h>
+#include <QUrl>
 
-class VSQMacos : public QObject, public VSQSingleton<VSQMacos>
+using namespace vm;
+using namespace platform;
+
+using Self = PlatformIos;
+
+Platform& Platform::instance() { return Self::instance(); }
+
+Self& Self::instance()
 {
-    Q_OBJECT
-public:
-    virtual ~VSQMacos();
+    static Self impl;
+    return impl;
+}
 
-public slots:
-    void checkUpdatesBackground() const;
+static NSString* getEnvSuffix()
+{
+#if VS_MSGR_ENV_DEV
+    return @".dev";
+#elif VS_MSGR_ENV_STG
+    return @".stg";
+#else
+    return @"";
+#endif
+}
 
-    void checkUpdates() const;
+QDir Self::appDataLocation() const
+{
+    NSString* appGroup =
+        [NSString stringWithFormat:@"%@%@", Customer::kSecurityApplicationGroupIdentifier.toNSString(), getEnvSuffix()];
 
-    void startUpdatesTimer();
+    NSURL* appDataLocationNative =
+        [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroup];
 
-private:
-    QTimer *m_updateTimer = nullptr;
-    const int kUpdateCheckMinutes = 5;
+    QUrl appDataLocation = QUrl::fromNSURL(appDataLocationNative);
 
-    void _setURL() const;
-    void _deleteTimer();
-};
+    return QDir(appDataLocation.toLocalFile());
+}
 
-#endif // VS_MACOS
+bool Self::isPushAvailable() const { return !m_pushToken.isEmpty(); }
 
-#endif // VSQMACOS_H
+void Self::updatePushToken(QString pushToken)
+{
+    m_pushToken = std::move(pushToken);
+    emit pushTokenUpdated(m_pushToken);
+}
+
+QString Self::pushToken() const { return m_pushToken; }

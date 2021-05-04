@@ -35,15 +35,19 @@
 #
 #   Build platform dependent implementations as libraries.
 #
-#   Depends on targets:
+#   May depends on targets:
 #       * qt-common
 #       * platform-definitions
+#       * customer-config
 #
-#   Create libraries:
+#   Create targets:
 #       * platform-deps    - interface library that refers mandatory platform libraries, i.e curl.
+#       * platform-api     - interface library that declares API for generic platform operations.
+#       * platform-base    - base implementation of platform-api.
+#       * platform         - platform specific implementation of platform-api.
 #       * platform-fs-api  - interface library that declares API for specific File System operations.
 #       * platform-fs-base - base implementation of platform-fs-api.
-#       * platform-fs      - library that implements specific File System operations.
+#       * platform-fs      - platform specific implementation of platform-fs-api.
 #
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
@@ -63,7 +67,10 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${VS_PLATFORM}")
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/default")
 
 if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(platform-base)
+    add_clangformat(platform)
     add_clangformat(platform-fs-base)
     add_clangformat(platform-fs)
+    add_clangformat(platform-updates)
 endif()
 

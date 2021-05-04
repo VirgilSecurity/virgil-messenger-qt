@@ -42,11 +42,12 @@
 #include "Settings.h"
 #include "Utils.h"
 #include "FileUtils.h"
-#include "android/VSQAndroid.h"
-
-Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs")
+#include "PlatformFs.h"
 
 using namespace vm;
+using namespace platform;
+
+Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs");
 
 CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, Messenger *messenger)
     : QObject(messenger), m_coreMessenger(coreMessenger), m_messenger(messenger)
@@ -72,11 +73,7 @@ void CloudFileSystem::signOut()
 
 bool CloudFileSystem::checkPermissions()
 {
-#if VS_ANDROID
-    return VSQAndroid::checkWriteExternalStoragePermission();
-#else
-    return true;
-#endif
+    return PlatformFs::instance().requestExternalStorageWritePermission();
 }
 
 bool CloudFileSystem::createDownloadsDir()

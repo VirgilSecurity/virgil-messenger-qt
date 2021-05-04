@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
-#define VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#include "PlatformMacos.h"
 
-#include <firebase/messaging.h>
-#include <firebase/app.h>
-#include <firebase/util.h>
+#include "VSQCustomer.h"
 
-#include <QtCore>
+#include <Foundation/Foundation.h>
+#include <QUrl>
 
-class QAndroidJniEnvironment;
+using namespace vm;
+using namespace platform;
 
-namespace notifications {
-namespace android {
+using Self = PlatformMacos;
 
-class FirebaseListener : public firebase::messaging::Listener
+Platform& Platform::instance()
 {
-public:
-    static FirebaseListener &instance();
+    static Self impl;
+    return impl;
+}
 
-    void init();
+static NSString* getEnvSuffix()
+{
+#if VS_MSGR_ENV_DEV
+    return @".dev";
+#elif VS_MSGR_ENV_STG
+    return @".stg";
+#else
+    return @"";
+#endif
+}
 
-    virtual void OnTokenReceived(const char *token);
+QDir Self::appDataLocation() const
+{
+    NSString* appGroup =
+        [NSString stringWithFormat:@"%@%@", Customer::kSecurityApplicationGroupIdentifier.toNSString(), getEnvSuffix()];
 
-    virtual void OnMessage(const firebase::messaging::Message &message);
+    NSURL* appDataLocationNative =
+        [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroup];
 
-private:
-    FirebaseListener();
+    QUrl appDataLocation = QUrl::fromNSURL(appDataLocationNative);
 
-    void showNotification(QString title, QString message);
-
-private:
-    QAndroidJniEnvironment *m_jniEnv;
-    firebase::App *m_app;
-    firebase::ModuleInitializer m_initializer;
-};
-
-} // namespace android
-} // namespace notifications
-
-#endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+    return QDir(appDataLocation.toLocalFile());
+}

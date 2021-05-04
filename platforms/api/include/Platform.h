@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,63 +32,61 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_USERSCONTROLLER_H
-#define VM_USERSCONTROLLER_H
-
-#include "UserId.h"
-#include "Chat.h"
-#include "Messenger.h"
-#include "VSQAndroid.h"
+#ifndef VM_PLATFORM_PLATFORM
+#define VM_PLATFORM_PLATFORM
 
 #include <QObject>
-#include <QPointer>
-
-class Messenger;
+#include <QString>
+#include <QDir>
 
 namespace vm {
-class Models;
-class UserDatabase;
+namespace platform {
 
-class UsersController : public QObject
-{
+//
+//  Provides General Platform Initialization.
+//
+class Platform : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
-    Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
-
-public:
-    UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
-
-    Q_INVOKABLE void initialSignIn();
 
 signals:
-    void userLoaded();
-    void userNotLoaded();
+    void pushTokenUpdated(const QString& pushToken);
 
-    void currentUserIdChanged(const QString &userId);
-    void currentUsernameChanged(const QString &username);
+public:
+    //
+    //  Initialize system resources.
+    //  Note, Qt Resources should be available at this point.
+    //
+    virtual bool prepare() const = 0;
 
-    void notificationCreated(const QString &notification, const bool error) const;
+    //
+    //  Return writable location for the application.
+    //
+    virtual QDir appDataLocation() const = 0;
 
-private:
-    QString currentUserId() const;
-    QString currentUsername() const;
+    //
+    //  Return path to a file with custom CA certificates, or empty string.
+    //
+    virtual QString caBundlePath() const = 0;
 
-    void updateCurrentUser();
-    void writeContactToDatabase(const UserHandler &user);
-    void hideSplashScreen();
+    //
+    //  Return true if Push Notifications are supported and push token is available.
+    //
+    virtual bool isPushAvailable() const = 0;
 
-    void onMessengerSignedOut();
-    void onUserDatabaseOpened();
-    void onUserDatabaseErrorOccurred();
-    void onChatAdded(const ChatHandler &chat);
+    //
+    //  Return valid push token if Push Notifications are supported and it is available.
+    //
+    virtual QString pushToken() const = 0;
 
-private:
-    QPointer<Messenger> m_messenger;
-    QPointer<UserDatabase> m_userDatabase;
-#if VS_ANDROID
-    bool m_splashScreenVisible = true;
-#endif
+    virtual ~Platform() noexcept = default;
+
+    //
+    //  This method should be implemented within derived class.
+    //
+    static Platform& instance();
 };
-} // namespace vm
 
-#endif // VM_USERSCONTROLLER_H
+} // platform
+} // vm
+
+#endif // VM_PLATFORM_PLATFORM

@@ -38,31 +38,56 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 #
-#   Library: platform-deps.
+#   Library: platform.
 #
-if (NOT TARGET platform-deps)
-    add_library(platform-deps INTERFACE)
-endif()
+add_library(platform STATIC)
+
+target_sources(platform
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformIos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformIos.mm"
+
+        # TODO: Move to the include/src.
+        # TODO: Hide implementation under platform API.
+        "${CMAKE_CURRENT_LIST_DIR}/AppDelegate.mm"
+        "${CMAKE_CURRENT_LIST_DIR}/IosDocumentInteractionController.h"
+        "${CMAKE_CURRENT_LIST_DIR}/IosDocumentInteractionController.mm"
+        "${CMAKE_CURRENT_LIST_DIR}/IosViewController.h"
+        "${CMAKE_CURRENT_LIST_DIR}/IosViewController.mm"
+        )
+
+target_include_directories(platform
+        PUBLIC
+        # TODO: When implementation will be hidden under platform API, then remove it.
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../include/controllers>"
+
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform
+        PUBLIC
+        platform-base
+        customer-config
+        )
 
 #
 #   Library: platform-fs.
 #
-if (NOT TARGET platform-fs)
-    add_library(platform-fs STATIC)
+add_library(platform-fs STATIC)
 
-    target_sources(platform-fs
-            PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/include/PlatformFsIos.h
-            ${CMAKE_CURRENT_LIST_DIR}/src/PlatformFsIos.cpp
-            )
+target_sources(platform-fs
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformFsIos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformFsIos.cpp"
+        )
 
-    target_include_directories(platform-fs
-            PRIVATE
-            "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-            )
+target_include_directories(platform-fs
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
 
-    target_link_libraries(platform-fs
-            PUBLIC
-            platform-fs-base
-            )
-endif()
+target_link_libraries(platform-fs
+        PUBLIC
+        platform-fs-base
+        )

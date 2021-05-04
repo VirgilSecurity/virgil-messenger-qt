@@ -32,38 +32,44 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CustomerEnv.h"
+#include "PlatformBase.h"
 
-#include "VSQCustomer.h"
-
-#include <QUrl>
-
-#import <Foundation/Foundation.h>
+#include <QStandardPaths>
 
 using namespace vm;
-using Self = vm::CustomerEnv;
+using namespace platform;
 
-static NSString* getEnvSuffix()
+using Self = PlatformBase;
+
+bool Self::prepare() const
 {
+    return true;
+}
+
+QDir Self::appDataLocation() const
+{
+    auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
 #if VS_MSGR_ENV_DEV
-    return @".dev";
+    return appDataLocation + "-dev";
 #elif VS_MSGR_ENV_STG
-    return @".stg";
+    return appDataLocation + "-stg";
 #else
-    return @"";
+    return appDataLocation;
 #endif
 }
 
-QDir Self::appDataLocation()
+QString Self::caBundlePath() const
 {
+    return {};
+}
 
-    NSString* appGroup =
-        [NSString stringWithFormat:@"%@%@", Customer::kSecurityApplicationGroupIdentifier.toNSString(), getEnvSuffix()];
+bool Self::isPushAvailable() const
+{
+    return false;
+}
 
-    NSURL* appDataLocationNative =
-        [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroup];
-
-    QUrl appDataLocation = QUrl::fromNSURL(appDataLocationNative);
-
-    return QDir(appDataLocation.toLocalFile());
+QString Self::pushToken() const
+{
+    return {};
 }

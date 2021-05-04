@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,63 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_USERSCONTROLLER_H
-#define VM_USERSCONTROLLER_H
+#include "PlatformDefault.h"
 
-#include "UserId.h"
-#include "Chat.h"
-#include "Messenger.h"
-#include "VSQAndroid.h"
+using namespace vm;
+using namespace platform;
 
-#include <QObject>
-#include <QPointer>
+using Self = PlatformDefault;
 
-class Messenger;
-
-namespace vm {
-class Models;
-class UserDatabase;
-
-class UsersController : public QObject
+Platform &Platform::instance()
 {
-    Q_OBJECT
-    Q_PROPERTY(QString currentUserId READ currentUserId NOTIFY currentUserIdChanged)
-    Q_PROPERTY(QString currentUsername READ currentUsername NOTIFY currentUsernameChanged)
+    static Self impl;
+    return impl;
+}
 
-public:
-    UsersController(Messenger *messenger, Models *models, UserDatabase *userDatabase, QObject *parent);
+bool Self::prepare() const
+{
+    return true;
+}
 
-    Q_INVOKABLE void initialSignIn();
+QString Self::caBundlePath() const
+{
+    return {};
+}
 
-signals:
-    void userLoaded();
-    void userNotLoaded();
+bool Self::isPushAvailable() const
+{
+    return false;
+}
 
-    void currentUserIdChanged(const QString &userId);
-    void currentUsernameChanged(const QString &username);
-
-    void notificationCreated(const QString &notification, const bool error) const;
-
-private:
-    QString currentUserId() const;
-    QString currentUsername() const;
-
-    void updateCurrentUser();
-    void writeContactToDatabase(const UserHandler &user);
-    void hideSplashScreen();
-
-    void onMessengerSignedOut();
-    void onUserDatabaseOpened();
-    void onUserDatabaseErrorOccurred();
-    void onChatAdded(const ChatHandler &chat);
-
-private:
-    QPointer<Messenger> m_messenger;
-    QPointer<UserDatabase> m_userDatabase;
-#if VS_ANDROID
-    bool m_splashScreenVisible = true;
-#endif
-};
-} // namespace vm
-
-#endif // VM_USERSCONTROLLER_H
+QString Self::pushToken() const
+{
+    return {};
+}

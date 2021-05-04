@@ -48,9 +48,13 @@ class PlatformFs {
 public:
     virtual QString urlToLocalFile(const QUrl &url) const = 0;
 
+    virtual QUrl localFileToUrl(const QString &path) const = 0;
+
     virtual QString fileDisplayName(const QUrl &url, bool isPicture) const = 0;
 
-    virtual ~PlatformFs() = default;
+    virtual bool requestExternalStorageWritePermission() const = 0;
+
+    virtual ~PlatformFs() noexcept = default;
 
     //
     //  This method should be implemented within derived class.

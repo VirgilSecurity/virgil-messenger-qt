@@ -38,6 +38,7 @@
 #include "VSQCustomer.h"
 #include "Utils.h"
 #include "FileUtils.h"
+#include "Platform.h"
 
 #include <QStandardPaths>
 #include <QLoggingCategory>
@@ -57,6 +58,7 @@ static const QString kSessionId = "SessionId";
 static const QString kSignedInUsername = "SignedInUsername";
 
 using namespace vm;
+using namespace platform;
 
 QDir Settings::m_logsDir = QDir();
 bool Settings::m_logsDirInitialized = false;
@@ -74,7 +76,7 @@ Settings::Settings(QObject *parent)
         removeGroup(kCredenitalsGroup);
     }
 
-    m_databaseDir.setPath(CustomerEnv::appDataLocation().filePath(QLatin1String("database")));
+    m_databaseDir.setPath(Platform::instance().appDataLocation().filePath(QLatin1String("database")));
     const QDir cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     m_attachmentCacheDir.setPath(cacheDir.filePath(QLatin1String("attachments")));
     m_thumbnaisDir.setPath(cacheDir.filePath(QLatin1String("thumbnails")));
@@ -151,7 +153,7 @@ QString Settings::settingsFileName()
 #elif VS_LINUX || VS_WINDOWS
     ext = QLatin1String(".ini");
 #endif
-    return CustomerEnv::appDataLocation().filePath(QLatin1String("settings") + ext);
+    return Platform::instance().appDataLocation().filePath(QLatin1String("settings") + ext);
 }
 
 QSettings::Format Settings::settingsFormat()
@@ -210,7 +212,7 @@ void Settings::setRunFlag(bool run)
 QDir Settings::logsDir()
 {
     if (!m_logsDirInitialized) {
-        m_logsDir.setPath(CustomerEnv::appDataLocation().filePath(QLatin1String("logs")));
+        m_logsDir.setPath(Platform::instance().appDataLocation().filePath(QLatin1String("logs")));
         m_logsDirInitialized = true;
     }
     if (!m_logsDir.exists()) {

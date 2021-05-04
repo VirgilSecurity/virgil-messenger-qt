@@ -46,20 +46,11 @@ class VSQAndroid
 public:
     VSQAndroid() = delete;
 
-    static QString caBundlePath();
-
-    static bool prepare();
-
-    static bool checkWriteExternalStoragePermission();
-
     static void hideSplashScreen();
 
     static Contacts getContacts();
 
     static QUrl getContactAvatarUrl(const ContactHandler contact);
-
-private:
-    static int runLoggingThread();
 };
 
 #endif // VSQANDROID_H

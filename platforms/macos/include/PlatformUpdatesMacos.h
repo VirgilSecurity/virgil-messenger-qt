@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,23 +32,50 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "WindowsPlatform.h"
+#ifndef VM_PLATFORM_PLATFORM_MACOS
+#define VM_PLATFORM_PLATFORM_MACOS
 
-#include "CustomerEnv.h"
+#include "PlatformUpdates.h"
 
-#include <QFile>
+#include <QTimer>
 
-using namespace vm;
-using Self = WindowsPlatform;
+namespace vm {
+namespace platform {
 
-QString Self::caBundlePath()
+//
+//  Provides General Platform Initialization.
+//
+class PlatformUpdatesMacos : public PlatformUpdates
 {
-    return CustomerEnv::appDataLocation().filePath("cert.pem");
-}
+private:
+    static const int kUpdateCheckMinutes = 5;
 
-bool Self::prepare()
-{
-    const auto destCertFile = caBundlePath();
-    QFile::remove(destCertFile);
-    return QFile::copy(":qml/resources/cert.pem", destCertFile);
-}
+public:
+    //
+    //  Init timers.
+    //
+    PlatformUpdatesMacos();
+
+    //
+    //  Return false.
+    //
+    bool isSupported() const noexcept override;
+
+    //
+    //  Do nothing.
+    //
+    void startChecking() override;
+
+    //
+    //  Do nothing.
+    //
+    void checkNow() const override;
+
+private:
+    QTimer m_updateTimer;
+};
+
+} // namespace platform
+} // namespace vm
+
+#endif // VM_PLATFORM_PLATFORM_MACOS

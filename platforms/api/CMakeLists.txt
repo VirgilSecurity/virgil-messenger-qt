@@ -35,6 +35,48 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 #
+#   Library: platform-api
+#
+add_library(platform-api INTERFACE)
+
+target_sources(platform-api
+        INTERFACE
+        "${CMAKE_CURRENT_LIST_DIR}/include/Platform.h"
+        )
+
+
+target_include_directories(platform-api
+        INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform-api
+        INTERFACE
+        qt-common
+        )
+
+#
+#   Library: platform-base
+#
+add_library(platform-base STATIC)
+
+target_include_directories(platform-base
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_sources(platform-base
+        PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformBase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformBase.cpp"
+        )
+
+target_link_libraries(platform-base
+        PUBLIC
+        platform-api
+        )
+
+#
 #   Library: platform-fs-api
 #
 add_library(platform-fs-api INTERFACE)
@@ -74,4 +116,25 @@ target_sources(platform-fs-base
 target_link_libraries(platform-fs-base
         PUBLIC
         platform-fs-api
+        )
+
+#
+#   Library: platform-updates-api
+#
+add_library(platform-updates-api INTERFACE)
+
+target_sources(platform-updates-api
+        INTERFACE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformUpdates.h"
+        )
+
+
+target_include_directories(platform-updates-api
+        INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform-updates-api
+        INTERFACE
+        qt-common
         )

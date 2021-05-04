@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,15 +32,66 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "PushNotificationsIOS.h"
+#include "PlatformUpdatesWindows.h"
 
-using namespace notifications;
+#include "VSQCustomer.h"
+#include "CustomerEnv.h"
 
-using Parent = PushNotifications;
-using Self = PushNotificationsIOS;
+#include <winsparkle.h>
 
-Parent &
-Parent::instance() {
-    static Self instance;
-    return instance;
+using namespace vm;
+using namespace platform;
+
+using Self = PlatformUpdatesWindows;
+
+PlatformUpdates& PlatformUpdates::instance()
+{
+    static Self impl;
+    return impl;
+}
+
+static void checkUpdatesBackground() {
+    win_sparkle_check_update_without_ui();
+}
+
+Self::PlatformUpdatesWindows()
+{
+    //
+    //  Configure updates feed URL.
+    //
+    win_sparkle_set_appcast_url(Customer::kWinSparklURL.toUtf8().constData());
+    win_sparkle_set_dsa_pub_pem(
+            reinterpret_cast<const char *>(QResource(":qml/resources/windows/dsa_pub.pem").data()));
+    win_sparkle_set_app_details(Customer::ApplicationName.toStdWString().c_str(),
+                                Customer::OrganizationDisplayName.toStdWString().c_str(),
+                                vm::CustomerEnv::version().toStdWString().c_str());
+
+    //
+    //  Configure updates timer.
+    //
+    m_updateTimer.setSingleShot(false);
+    m_updateTimer.setInterval(Self::kUpdateCheckMinutes * 60 * 1000);
+    QObject::connect(&m_updateTimer, &QTimer::timeout, checkUpdatesBackground);
+}
+
+Self::~PlatformUpdatesWindows() noexcept
+{
+    win_sparkle_cleanup();
+}
+
+bool Self::isSupported() const noexcept
+{
+    return true;
+}
+
+void Self::startChecking()
+{
+    m_updateTimer.start();
+
+    checkUpdatesBackground();
+}
+
+void Self::checkNow() const
+{
+    win_sparkle_check_update_with_ui();
 }

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,25 +32,51 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "PushNotifications.h"
+#ifndef VM_PLATFORM_PLATFORM_IOS
+#define VM_PLATFORM_PLATFORM_IOS
 
-using namespace notifications;
+#include "PlatformBase.h"
 
-using Self = PushNotifications;
+namespace vm {
+namespace platform {
 
-Self &Self::instance()
+//
+//  iOS implementation of the Platform API.
+//
+class PlatformIos : public PlatformBase
 {
-    static Self instance;
-    return instance;
-}
+public:
+    //
+    //  Return writable location for the application.
+    //
+    QDir appDataLocation() const override;
 
-void Self::registerToken(QString token)
-{
-    m_token = token;
-    emit tokenUpdated();
-}
+    //
+    //  Return true if push token is defined.
+    //
+    bool isPushAvailable() const override;
 
-const QString &Self::token() const noexcept
-{
-    return m_token;
-}
+    //
+    //  Return a push token if defined.
+    //
+    QString pushToken() const override;
+
+    //
+    //  Update push token.
+    //  Emit a correspond signal from the API class.
+    //
+    void updatePushToken(QString pushToken);
+
+    //
+    //  Defined it's own singleton access method to give access to specific methods.
+    //
+    static PlatformIos &instance();
+
+private:
+    QString m_pushToken;
+};
+
+} // namespace platform
+} // namespace vm
+
+#endif // VM_PLATFORM_PLATFORM_IOS

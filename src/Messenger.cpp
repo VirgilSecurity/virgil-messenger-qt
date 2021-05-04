@@ -39,23 +39,16 @@
 #include "Messenger.h"
 #include "Utils.h"
 #include "Settings.h"
-#include "android/VSQAndroid.h"
+#include "VSQAndroid.h"
 #include "helpers/FutureWorker.h"
-
-#if VS_PUSHNOTIFICATIONS
-#    include "PushNotifications.h"
-#    include "XmppPushNotifications.h"
-using namespace notifications;
-using namespace notifications::xmpp;
-#endif // VS_PUSHNOTIFICATIONS
 
 #include <QtConcurrent>
 #include <QStandardPaths>
 
-Q_LOGGING_CATEGORY(lcMessenger, "messenger")
-
 using namespace vm;
 using Self = Messenger;
+
+Q_LOGGING_CATEGORY(lcMessenger, "messenger");
 
 Self::Messenger(Settings *settings, Validator *validator)
     : MessageSender(),
@@ -102,14 +95,6 @@ Self::Messenger(Settings *settings, Validator *validator)
         emit groupChatCreateFailed(groupId, "Chat was not created on the services");
     });
     connect(m_coreMessenger, &CoreMessenger::newGroupChatLoaded, this, &Self::newGroupChatLoaded);
-
-    //
-    // Push notifications
-    //
-#if VS_PUSHNOTIFICATIONS
-    auto &pushNotifications = PushNotifications::instance();
-    connect(&pushNotifications, &PushNotifications::tokenUpdated, this, &Self::onPushNotificationTokenUpdate);
-#endif // VS_PUSHNOTIFICATIONS
 }
 
 bool Self::isNetworkOnline() const noexcept
@@ -365,11 +350,6 @@ void Self::rejectGroupInvitation(const GroupId &groupId, const UserId &groupOwne
 void Self::setGroupInfo(const GroupId &groupId, const QString &name)
 {
     m_coreMessenger->renameGroupChat(groupId, name);
-}
-
-void Self::onPushNotificationTokenUpdate()
-{
-    m_coreMessenger->registerPushNotifications();
 }
 
 void Self::onConnectionStateChanged(CoreMessenger::ConnectionState state)

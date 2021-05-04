@@ -49,9 +49,16 @@ class PlatformFsBase : public PlatformFs
 public:
     QString urlToLocalFile(const QUrl &url) const override;
 
+    QUrl localFileToUrl(const QString &path) const override;
+
     QString fileDisplayName(const QUrl &url, bool isPicture) const override;
 
-    virtual ~PlatformFsBase() = default;
+    //
+    //  Return true.
+    //
+    bool requestExternalStorageWritePermission() const override;
+
+    virtual ~PlatformFsBase() noexcept = default;
 
 protected:
     PlatformFsBase() = default;

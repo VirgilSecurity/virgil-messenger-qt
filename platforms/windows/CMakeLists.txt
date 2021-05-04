@@ -39,3 +39,26 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 #
 add_library(platform-deps INTERFACE)
 target_link_libraries(platform-deps PUBLIC curl)
+
+#
+#   Library: platform-updates.
+#
+add_library(platform-updates STATIC)
+
+target_sources(platform-updates
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformUpdatesWindows.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformUpdatesWindows.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/winsparkle.qrc"
+         )
+
+target_include_directories(platform-updates
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/include>"
+        )
+
+target_link_libraries(platform-updates
+        PUBLIC
+        platform-updates-api
+        )

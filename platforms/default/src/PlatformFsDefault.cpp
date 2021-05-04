@@ -37,8 +37,15 @@
 using namespace vm;
 using namespace platform;
 
+using Self = PlatformFsDefault;
+
 PlatformFs &PlatformFs::instance()
 {
     static PlatformFsDefault impl;
     return impl;
+}
+
+bool Self::requestExternalStorageWritePermission() const
+{
+    return true;
 }

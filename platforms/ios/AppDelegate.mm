@@ -3,11 +3,11 @@
 #import <Intents/Intents.h>
 #import <UserNotifications/UserNotifications.h>
 
-#include "PushNotifications.h"
+#include "PlatformIos.h"
 
 #include <QDebug>
 
-using namespace notifications;
+using namespace vm::platform;
 
 @interface NSData (HexString)
 - (NSString*)hexEncodedString;
@@ -85,11 +85,7 @@ using namespace notifications;
 
     qDebug() << "Received device push token: " << tokenStr;
 
-    auto& pushNotifications = PushNotifications::instance();
-
-    pushNotifications.registerToken(tokenStr);
-
-    // TODO: do re-register if connected.
+    PlatformIos::instance().updatePushToken(tokenStr);
 }
 
 - (void)application:(UIApplication*)application
@@ -97,11 +93,7 @@ using namespace notifications;
 {
     qWarning() << "Failed to get device token";
 
-    auto& pushNotifications = PushNotifications::instance();
-
-    pushNotifications.registerToken(QByteArray());
-
-    // TODO: do de-register if connected.
+    PlatformIos::instance().updatePushToken({});
 }
 
 @end

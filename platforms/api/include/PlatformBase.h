@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,62 +32,47 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-/*! \file VSQSingleton.h
- * \brief Singleton implementation
- *
- * #VSQSingleton is the singleton implementation. Its minimum usage is simple:
- * \code
+#ifndef VM_PLATFORM_PLATFORM_BASE
+#define VM_PLATFORM_PLATFORM_BASE
 
-class YourClass :
-    public VSQSingleton<YourClass> {    // public inheritance
-    friend VSQSingleton<YourClass>;     // Singleton has to be friend to call constructor
+#include "Platform.h"
 
-    void member();                      // Some class member
-private:
-    YourClass();                        // Private constructor that has to be called by VSQSingleton<YourClass> only
-};
+namespace vm {
+namespace platform {
 
-YourClass::instance().member();         // Class usage
- * \endcode
- *
- * #VSQIoTKitFacade, #VSQSnapInfoClient, #VSQSnapInfoClientQml use #VSQSingleton.
- *
- */
-
-#ifndef VIRGIL_IOTKIT_QT_SINGLETON_H
-#define VIRGIL_IOTKIT_QT_SINGLETON_H
-
-#include <type_traits>
-
-/** Singleton implementation
- *
- * You can use \a D parameter as derived from \a T
- * \tparam T Base class for \a D
- * \tparam D Class to be singleton
- */
-template<typename T, typename D = T>
-class VSQSingleton
+//
+//  Base implementation of the Platform API.
+//
+class PlatformBase : public Platform
 {
-    friend D;
-    static_assert(std::is_base_of<T, D>::value, "T should be a base type for D");
-
 public:
-    /** Get static instance
-     *
-     * Creates once \a D class instance and returns its base class \a T
-     * \return
-     */
-    static T &instance()
-    {
-        static D inst;
-        return inst;
-    }
+    //
+    //  Do nothing, return true.
+    //
+    bool prepare() const override;
 
-private:
-    VSQSingleton() = default;
-    ~VSQSingleton() = default;
-    VSQSingleton(const VSQSingleton &) = delete;
-    VSQSingleton &operator=(const VSQSingleton &) = delete;
+    //
+    //  Return writable location for the application.
+    //
+    QDir appDataLocation() const override;
+
+    //
+    //  Return nothing.
+    //
+    QString caBundlePath() const override;
+
+    //
+    //  Return false.
+    //
+    bool isPushAvailable() const override;
+
+    //
+    //  Return nothing.
+    //
+    QString pushToken() const override;
 };
 
-#endif // VIRGIL_IOTKIT_QT_SINGLETON_H
+} // namespace platform
+} // namespace vm
+
+#endif // VM_PLATFORM_PLATFORM_BASE

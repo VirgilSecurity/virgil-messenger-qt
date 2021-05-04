@@ -36,14 +36,6 @@
 
 #include "VSQCustomer.h"
 
-#if VS_ANDROID
-#    include "android/VSQAndroid.h"
-#endif
-
-#if VS_WINDOWS
-#    include "windows/WindowsPlatform.h"
-#endif
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -97,17 +89,6 @@ QString Self::contactDiscoveryServiceUrl()
     return Customer::ContactDiscoveryUrlTemplate.arg(QLatin1String("-stg"));
 #else
     return Customer::ContactDiscoveryUrlTemplate.arg(QString());
-#endif
-}
-
-QString Self::caBundlePath()
-{
-#if VS_ANDROID
-    return VSQAndroid::caBundlePath();
-#elif VS_WINDOWS
-    return WindowsPlatform::caBundlePath();
-#else
-    return qgetenv("VS_CURL_CA_BUNDLE");
 #endif
 }
 

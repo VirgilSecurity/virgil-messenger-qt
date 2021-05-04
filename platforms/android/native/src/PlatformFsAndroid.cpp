@@ -56,8 +56,19 @@ QString Self::urlToLocalFile(const QUrl &url) const
     qCDebug(lcPlatformFsAndroid) << "File URL (before urlToLocalFile):" << url.toString();
     const auto options = url.isLocalFile() ? QUrl::FormattingOptions(QUrl::RemoveScheme) : QUrl::PrettyDecoded;
     const auto res = QUrl::fromPercentEncoding(url.toString(options).toUtf8());
-    qCDebug(lcPlatformFsAndroid) << "File URL path (after urlToLocalFile):" << res;
+    qCDebug(lcPlatformFsAndroid) << "File path (after urlToLocalFile):" << res;
     return res;
+}
+
+QUrl Self::localFileToUrl(const QString &path) const
+{
+    qCDebug(lcPlatformFsAndroid) << "File path (before localFileToUrl):" << path;
+    QUrl url(path);
+    if (url.scheme().isEmpty()) {
+        return QUrl::fromLocalFile(path);
+    }
+    qCDebug(lcPlatformFsAndroid) << "File URK (after localFileToUrl):" << url.toString();
+    return url;
 }
 
 QString Self::fileDisplayName(const QUrl &url, bool /* isPicture */) const
@@ -69,4 +80,17 @@ QString Self::fileDisplayName(const QUrl &url, bool /* isPicture */) const
                                                       "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;",
                                                       QtAndroid::androidContext().object(), javaUrl.object<jstring>());
     return javaDisplayName.toString();
+}
+
+bool Self::requestExternalStorageWritePermission() const
+{
+    const QString permission("android.permission.WRITE_EXTERNAL_STORAGE");
+    auto result = QtAndroid::checkPermission(permission);
+    if (result == QtAndroid::PermissionResult::Denied) {
+        auto resultHash = QtAndroid::requestPermissionsSync(QStringList({ permission }));
+        if (resultHash[permission] == QtAndroid::PermissionResult::Denied) {
+            return false;
+        }
+    }
+    return true;
 }

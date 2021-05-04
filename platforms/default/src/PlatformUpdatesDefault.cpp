@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,34 +32,24 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQWINDOWS_H
-#define VSQWINDOWS_H
+#include "PlatformUpdatesDefault.h"
 
-#if VS_WINDOWS
+using namespace vm;
+using namespace platform;
 
-#    include <QObject>
-#    include <QTimer>
-#    include "helpers/VSQSingleton.h"
-#    include <winsparkle.h>
+using Self = PlatformUpdatesDefault;
 
-class VSQWindows : public QObject, public VSQSingleton<VSQWindows>
+PlatformUpdates &PlatformUpdates::instance()
 {
-    Q_OBJECT
-public:
-    virtual ~VSQWindows();
+    static Self impl;
+    return impl;
+}
 
-public slots:
-    void checkUpdatesBackground() const;
-    void checkUpdates() const;
-    void startUpdatesTimer();
+void Self::startChecking() { }
 
-private:
-    QTimer *m_updateTimer = nullptr;
-    const int kUpdateCheckMinutes = 5;
-    void _WinSparkle_init() const;
-    void _deleteTimer();
-};
+void Self::checkNow() const { }
 
-#endif // VS_WINDOWS
-
-#endif // VSQWINDOWS_H
+bool Self::isSupported() const noexcept
+{
+    return false;
+}

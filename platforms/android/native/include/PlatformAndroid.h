@@ -32,22 +32,55 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "CustomerEnv.h"
+#ifndef VM_PLATFORM_PLATFORM_ANDROID
+#define VM_PLATFORM_PLATFORM_ANDROID
 
-#include <QStandardPaths>
+#include "PlatformBase.h"
 
-using namespace vm;
-using Self = vm::CustomerEnv;
+namespace vm {
+namespace platform {
 
-QDir Self::appDataLocation()
-{
-    auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+//
+//  Android implementation of the Platform API.
+//
+class PlatformAndroid : public PlatformBase {
+public:
+    //
+    //  Prepare Android Services: firebase, etc.
+    //
+    bool prepare() const override;
 
-#if VS_MSGR_ENV_DEV
-    return appDataLocation + "-dev";
-#elif VS_MSGR_ENV_STG
-    return appDataLocation + "-stg";
-#else
-    return appDataLocation;
-#endif
-}
+    //
+    //  Return path to the custom CA bundle file (cert.pem).
+    //
+    QString caBundlePath() const override;
+
+    //
+    //  Return true if push token is defined.
+    //
+    bool isPushAvailable() const override;
+
+    //
+    //  Return a push token if defined.
+    //
+    QString pushToken() const override;
+
+    //
+    //  Update push token.
+    //  Emit a correspond signal from the API class.
+    //
+    void updatePushToken(QString pushToken);
+
+    //
+    //  Defined it's own singleton access method to give access to specific methods.
+    //
+    static PlatformAndroid& instance();
+
+private:
+    QString m_pushToken;
+};
+
+} // platform
+} // vm
+
+#endif // VM_PLATFORM_PLATFORM_ANDROID
