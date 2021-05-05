@@ -37,6 +37,26 @@
 #
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
+
+#
+#   System introspection.
+#
+if (NOT XCODE_VERSION)
+        message(FATAL_ERROR "Xcode only")
+endif ()
+
+find_package(Qt5 COMPONENTS QmlImportScanner Gui REQUIRED)
+
+#
+#   Library: platform-deps.
+#
+add_library(platform-deps INTERFACE)
+target_link_libraries(platform-deps
+        INTERFACE
+        Qt5::Gui
+        Qt5::QIosOptionalPlugin_NSPhotoLibrary
+        )
+
 #
 #   Library: platform.
 #

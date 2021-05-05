@@ -246,12 +246,6 @@ target_link_libraries(qt-common
         Qt5::Concurrent
         Qt5::Qml
         Qt5::Xml
-        $<$<STREQUAL:"${VS_PLATFORM}","linux">:Qt5::Widgets>
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:Qt5::Widgets>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:WinSparkle>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         )
 
 #

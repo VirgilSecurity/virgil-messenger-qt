@@ -35,7 +35,16 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 #
+#   System introspection.
+#
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
+#
 #   Library: platform-deps
 #
 add_library(platform-deps INTERFACE)
-target_link_libraries(platform-deps INTERFACE curl)
+target_link_libraries(platform-deps
+        INTERFACE
+        Qt5::Widgets
+        curl
+        )
