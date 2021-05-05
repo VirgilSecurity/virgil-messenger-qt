@@ -40,12 +40,12 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Get from another device")
-            enabled: false
+            visible: false
         }
 
         FormSecondaryButton {
             text: qsTr("Use local file")
-            enabled: false
+            visible: false
         }
     }
 
