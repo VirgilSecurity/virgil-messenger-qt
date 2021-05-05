@@ -66,7 +66,7 @@ add_custom_target(deploy
         COMMAND ${DEPLOY_QT} deploySystem
             -bin "$<TARGET_FILE:${VS_TARGET_NAME}>"
             -qmlDir "${PROJECT_SOURCE_DIR}/src/qml"
-            -targetDir "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist"
+            -targetDir "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dist"
             -qmake "${QT_QMAKE_EXECUTABLE}" clear
         COMMAND tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" "${PROJECT_NAME}.dist"
         VERBATIM
