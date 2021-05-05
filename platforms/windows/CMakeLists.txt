@@ -72,3 +72,33 @@ target_link_libraries(platform-updates
         PUBLIC
         platform-updates-api
         )
+
+# ---------------------------------------------------------------------------
+#   Deploy
+# ---------------------------------------------------------------------------
+find_program(DEPLOY_QT cqtdeployer)
+
+add_custom_target(deploy
+        COMMAND ${DEPLOY_QT}
+        -bin ${PROJECT_NAME}.exe
+        -qmlDir ${PROJECT_SOURCE_DIR}/src/qml
+        -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist
+        -qmake ${QT_QMAKE_EXECUTABLE} clear
+        COMMAND cp -f "${VS_CUSTOMER_DIR}/platforms/windows/Logo.ico" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libcrypto-1_1-x64.dll                    "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libcurl-4.dll                            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libidn2-0.dll                            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libssh2-1.dll                            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libssl-1_1-x64.dll                       "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libssp-0.dll                             "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f /usr/x86_64-w64-mingw32/sys-root/mingw/bin/zlib1.dll                                "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND cp -f "${PROJECT_SOURCE_DIR}/ext/prebuilt/windows/winsparkle/x64/Release/WinSparkle.dll"  "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/"
+        COMMAND sed -i "s!Prefix= ./../!Prefix= ./!g" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/bin/qt.conf"
+        COMMAND bash -c "cp -rf ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/bin/* ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/"
+        COMMAND bash -c "cp -rf ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib/* ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/"
+        COMMAND rm -f "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/*.bat"
+        COMMAND rm -rf "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/bin"
+        COMMAND rm -rf "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist/lib"
+        COMMAND makensis messenger.nsi
+        COMMAND ${PROJECT_SOURCE_DIR}/platforms/windows/tools/signing_win.sh "${CMAKE_BINARY_DIR}/${WIN_SU_FILE}" "${VS_WINSPARKE_KEY}"
+        VERBATIM)

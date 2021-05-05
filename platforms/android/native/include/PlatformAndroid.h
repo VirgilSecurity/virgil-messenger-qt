@@ -43,7 +43,8 @@ namespace platform {
 //
 //  Android implementation of the Platform API.
 //
-class PlatformAndroid : public PlatformBase {
+class PlatformAndroid : public PlatformBase
+{
 public:
     //
     //  Prepare Android Services: firebase, etc.
@@ -74,13 +75,13 @@ public:
     //
     //  Defined it's own singleton access method to give access to specific methods.
     //
-    static PlatformAndroid& instance();
+    static PlatformAndroid &instance();
 
 private:
     QString m_pushToken;
 };
 
-} // platform
-} // vm
+} // namespace platform
+} // namespace vm
 
 #endif // VM_PLATFORM_PLATFORM_ANDROID

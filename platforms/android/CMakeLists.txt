@@ -34,10 +34,10 @@
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-#
+# ---------------------------------------------------------------------------
 #   System introspection.
-#
-find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
+# ---------------------------------------------------------------------------
+include("${ANDROID_SDK}/android_openssl/CMakeLists.txt")
 
 message(STATUS "Prepare sources for Android ...")
 message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")
@@ -58,6 +58,19 @@ endif ()
 
 message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
+get_firebase("${PROJECT_SOURCE_DIR}/ext")
+
+set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${VS_TARGET_VERSION}")
+message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
+message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
+
+set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
+
+# ---------------------------------------------------------------------------
+#   Libraries
+# ---------------------------------------------------------------------------
 #
 #   Library: platform-deps.
 #
@@ -136,3 +149,52 @@ target_link_libraries(platform-fs
         platform-definitions
         platform-fs-api
         )
+
+# ---------------------------------------------------------------------------
+#   Deploy
+# ---------------------------------------------------------------------------
+find_program(DEPLOY_QT androiddeployqt)
+
+if (DEFINED ENV{JAVA_HOME})
+    set(JAVA_HOME $ENV{JAVA_HOME} CACHE INTERNAL "Saved JAVA_HOME variable")
+elseif (EXISTS "/etc/alternatives/java_sdk")
+    set(JAVA_HOME "/etc/alternatives/java_sdk" CACHE INTERNAL "Saved JAVA_HOME variable")
+endif ()
+
+if (JAVA_HOME)
+    set(android_deploy_qt_jdk "--jdk ${JAVA_HOME}")
+    message(STATUS "Java home: [${android_deploy_qt_jdk}]")
+endif ()
+
+if (ANDROID_SDK_PLATFORM)
+    set(android_deploy_qt_platform "--android-platform ${ANDROID_SDK_PLATFORM}")
+    message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
+endif ()
+
+add_custom_target(apk_release
+        COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
+        --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
+        --output "${CMAKE_BINARY_DIR}/android-build"
+        --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
+        ${android_deploy_qt_platform}
+        ${android_deploy_qt_jdk}
+        --gradle
+        --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
+        --storepass "${VS_KEYCHAIN_PASSWORD}"
+        --keypass "${VS_KEY_PASSWORD}"
+        --no-gdbserver
+        VERBATIM)
+
+add_custom_target(aab_release
+        COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
+        --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
+        --output "${CMAKE_BINARY_DIR}/android-build"
+        --aab
+        ${android_deploy_qt_platform}
+        ${android_deploy_qt_jdk}
+        --gradle
+        --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
+        --storepass "${VS_KEYCHAIN_PASSWORD}"
+        --keypass "${VS_KEY_PASSWORD}"
+        --no-gdbserver
+        VERBATIM)

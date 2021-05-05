@@ -52,13 +52,12 @@ using Self = PlatformAndroid;
 static int pfd[2];
 static pthread_t loggingThread;
 
-
-Platform& Platform::instance()
+Platform &Platform::instance()
 {
     return Self::instance();
 }
 
-Self& Self::instance()
+Self &Self::instance()
 {
     static Self impl;
     return impl;

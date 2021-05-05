@@ -34,35 +34,46 @@
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-# ---------------------------------------------------------------------------
-#   System introspection.
-# ---------------------------------------------------------------------------
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+function(PAD_STRING OUT_VARIABLE DESIRED_LENGTH FILL_CHAR VALUE)
+    string(LENGTH "${VALUE}" VALUE_LENGTH)
+    math(EXPR REQUIRED_PADS "${DESIRED_LENGTH} - ${VALUE_LENGTH}")
+    set(PAD ${VALUE})
+    if (REQUIRED_PADS GREATER 0)
+        math(EXPR REQUIRED_MINUS_ONE "${REQUIRED_PADS} - 1")
+        foreach (FOO RANGE ${REQUIRED_MINUS_ONE})
+            SET(PAD "${FILL_CHAR}${PAD}")
+        endforeach()
+    endif()
+    set(${OUT_VARIABLE} "${PAD}" PARENT_SCOPE)
+endfunction()
 
-# ---------------------------------------------------------------------------
-#   Libraries.
-# ---------------------------------------------------------------------------
-#
-#   Library: platform-deps
-#
-add_library(platform-deps INTERFACE)
-target_link_libraries(platform-deps
-        INTERFACE
-        Qt5::Widgets
-        curl
-        )
 
-# ---------------------------------------------------------------------------
-#   Deploy
-# ---------------------------------------------------------------------------
-find_program(DEPLOY_QT cqtdeployer)
+function(SET_ANDROID_VERSION ANDROID_VERSION_NAME ANDROID_VERSION_CODE TARGET_VERSION)
+    # Set Android version name
+    set(${ANDROID_VERSION_NAME} "${TARGET_VERSION}" PARENT_SCOPE)
 
-add_custom_target(deploy
-        COMMAND ${DEPLOY_QT}
-        deploySystem
-        -bin ${PROJECT_NAME}
-        -qmlDir ${PROJECT_SOURCE_DIR}/src/qml
-        -targetDir ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.dist
-        -qmake ${QT_QMAKE_EXECUTABLE} clear
-        COMMAND tar czf ${PROJECT_NAME}-${PROJECT_VERSION}.tgz ${PROJECT_NAME}.dist
-        VERBATIM)
+    # Fill Android version code
+    string(REPLACE "." ";" VS_VERSION_LIST ${VS_TARGET_VERSION})
+
+    list(GET VS_VERSION_LIST 0 TMP_VERS)
+    pad_string(CODE 3 "0" "1${TMP_VERS}")
+
+    list(GET VS_VERSION_LIST 1 TMP_VERS)
+    pad_string(TMP_VERS 2 "0" "${TMP_VERS}")
+    string(APPEND CODE "${TMP_VERS}")
+
+    list(GET VS_VERSION_LIST 2 TMP_VERS)
+    pad_string(TMP_VERS 2 "0" "${TMP_VERS}")
+    string(APPEND CODE "${TMP_VERS}")
+
+    # Get build number (or zero)
+    if (DEFINED ENV{BUILD_NUMBER})
+        set(VS_BUILD_NUMBER "$ENV{BUILD_NUMBER}")
+    else ()
+        set(VS_BUILD_NUMBER "0")
+    endif ()
+    pad_string(TMP_VERS 3 "0" "${VS_BUILD_NUMBER}")
+    string(APPEND CODE "${TMP_VERS}")
+
+    set(${ANDROID_VERSION_CODE} "${CODE}" PARENT_SCOPE)
+endfunction()

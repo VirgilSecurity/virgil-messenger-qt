@@ -37,8 +37,8 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 #
 #   Fetch prebuilt core libraries
 #
-function(get_prebuild)
-    set(PREBUILT_CORE_ARCHIVE "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/prebuilt-${VS_CORE_VERSION}.tgz")
+function(get_prebuild EXT_DEST_DIR)
+    set(PREBUILT_CORE_ARCHIVE "${EXT_DEST_DIR}/downloads/prebuilt-${VS_CORE_VERSION}.tgz")
     message(STATUS "Get prebuild libraries [https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz]...")
     if (NOT EXISTS "${PREBUILT_CORE_ARCHIVE}")
         file(DOWNLOAD
@@ -48,9 +48,9 @@ function(get_prebuild)
                 )
         message(STATUS "Unpacking ...")
         execute_process(
-                COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/ext/prebuild
+                COMMAND ${CMAKE_COMMAND} -E remove_directory "${EXT_DEST_DIR}/prebuild"
                 COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_CORE_ARCHIVE}"
-                WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext"
+                WORKING_DIRECTORY "${EXT_DEST_DIR}"
         )
     endif ()
 endfunction()
@@ -58,10 +58,10 @@ endfunction()
 #
 #   Fetch prebuilt firebase library
 #
-function(get_firebase)
+function(get_firebase EXT_DEST_DIR)
     set(PREBUILT_FIREBASE_SDK_VERSION "6.11.0")
     set(PREBUILT_FIREBASE_SDK_ARCHIVE
-            "${CMAKE_CURRENT_LIST_DIR}/ext/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
+            "${EXT_DEST_DIR}/downloads/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip"
             )
     message(STATUS "Get prebuild firebase [https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_${PREBUILT_FIREBASE_SDK_VERSION}.zip]...")
     if (NOT EXISTS "${PREBUILT_FIREBASE_SDK_ARCHIVE}")
@@ -72,7 +72,7 @@ function(get_firebase)
                 )
         execute_process(
                 COMMAND ${CMAKE_COMMAND} -E tar xzf "${PREBUILT_FIREBASE_SDK_ARCHIVE}"
-                WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt"
+                WORKING_DIRECTORY "${EXT_DEST_DIR}/prebuilt"
         )
     endif ()
 endfunction()

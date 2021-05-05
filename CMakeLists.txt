@@ -40,7 +40,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(vsplatforms)
 include(clangformat)
-include(varpadding)
+include(android_version)
 include(getprebuild)
 include(customers)
 
@@ -111,7 +111,7 @@ endif ()
 # ---------------------------------------------------------------------------
 # Get prebuild core libraries
 # ---------------------------------------------------------------------------
-get_prebuild()
+get_prebuild("${CMAKE_CURRENT_LIST_DIR}/ext")
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
@@ -151,71 +151,8 @@ include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
 vs_customer_prepare()
 
 # ---------------------------------------------------------------------------
-# Prepare platform depends
+# Define generic build options.
 # ---------------------------------------------------------------------------
-set(VS_QT_EXTRA "")
-
-# IOS, IOS_SIM
-if (VS_PLATFORM STREQUAL "ios")
-    if (NOT XCODE_VERSION)
-        message(FATAL_ERROR "Xcode only")
-    endif ()
-
-    # QT Extra packages
-    list(APPEND VS_QT_EXTRA QmlImportScanner Gui)
-
-# Android
-elseif (VS_PLATFORM STREQUAL "android")
-    # Get firebase
-    get_firebase()
-
-    # Set Android version name
-    set(ANDROID_VERSION_NAME "${VS_TARGET_VERSION}")
-    # Fill Android version code
-    string(REPLACE "." ";" VS_VERSION_LIST ${VS_TARGET_VERSION})
-
-    list(GET VS_VERSION_LIST 0 TMP_VERS)
-    PAD_STRING(ANDROID_VERSION_CODE 3 "0" "1${TMP_VERS}")
-
-    list(GET VS_VERSION_LIST 1 TMP_VERS)
-    PAD_STRING(TMP_VERS 2 "0" "${TMP_VERS}")
-    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
-
-    list(GET VS_VERSION_LIST 2 TMP_VERS)
-    PAD_STRING(TMP_VERS 2 "0" "${TMP_VERS}")
-    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
-
-    # Get build number ( or zero)
-    if (DEFINED ENV{BUILD_NUMBER})
-        set(VS_BUILD_NUMBER "$ENV{BUILD_NUMBER}")
-    else ()
-        set(VS_BUILD_NUMBER "0")
-    endif ()
-    PAD_STRING(TMP_VERS 3 "0" "${VS_BUILD_NUMBER}")
-    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
-    message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
-    message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
-
-    # Android QT Extra
-    string(APPEND VS_QT_EXTRA "AndroidExtras")
-    # Android gradle path
-    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")
-
-    include("${ANDROID_SDK}/android_openssl/CMakeLists.txt")
-# Linux
-elseif (VS_PLATFORM STREQUAL "linux")
-    string(APPEND VS_QT_EXTRA "Widgets")
-
-# MacOS
-elseif (VS_PLATFORM STREQUAL "macos")
-    string(APPEND VS_QT_EXTRA "Widgets")
-
-# Windows
-elseif (VS_PLATFORM STREQUAL "windows")
-    string(APPEND VS_QT_EXTRA "Widgets")
-
-endif ()
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -227,7 +164,7 @@ set(CMAKE_AUTORCC ON)
 include(GNUInstallDirs)
 include(FetchContent)
 
-find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml ${VS_QT_EXTRA} REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml REQUIRED)
 
 # ---------------------------------------------------------------------------
 #   Common libraries that is used by different targets.
@@ -478,10 +415,6 @@ target_link_libraries(core-messenger PUBLIC qxmpp qt-common comm-kit helpers)
 # ---------------------------------------------------------------------------
 #   Prepare for build target
 # ---------------------------------------------------------------------------
-# Add deployers targets
-include(deployers)
-
-
 # Android
 if (VS_PLATFORM STREQUAL "android")
     add_library(${VS_TARGET_NAME} SHARED)

@@ -68,7 +68,7 @@ private:
     firebase::ModuleInitializer m_initializer;
 };
 
-} // notifications
-} // vm
+} // namespace notifications
+} // namespace vm
 
 #endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
