@@ -93,8 +93,8 @@ QString Self::urlToLocalFile(const QUrl &url)
 {
 #if VS_ANDROID
     qCDebug(lcFileUtils) << "Android file url (before urlToLocalFile):" << url.toString();
-    const auto options = url.isLocalFile() ? QUrl::FormattingOptions(QUrl::RemoveScheme) : QUrl::PrettyDecoded;
-    const auto res = QUrl::fromPercentEncoding(url.toString(options).toUtf8());
+    const auto resUrl = url.isLocalFile() ? url.adjusted(QUrl::RemoveScheme) : url;
+    const auto res = resUrl.toEncoded();
     qCDebug(lcFileUtils) << "Android file url path:" << res;
     return res;
 #else
@@ -164,7 +164,7 @@ void Self::removeFile(const QString &filePath)
     }
 }
 
-void FileUtils::removeDir(const QString &dirPath)
+void Self::removeDir(const QString &dirPath)
 {
     if (fileExists(dirPath)) {
         if (QDir(dirPath).removeRecursively()) {
@@ -173,12 +173,12 @@ void FileUtils::removeDir(const QString &dirPath)
     }
 }
 
-QString FileUtils::fileName(const QString &filePath)
+QString Self::fileName(const QString &filePath)
 {
     return QFileInfo(filePath).fileName();
 }
 
-QString FileUtils::fileExt(const QString &filePath)
+QString Self::fileExt(const QString &filePath)
 {
     return QFileInfo(filePath).completeSuffix();
 }
@@ -204,12 +204,12 @@ QString Self::attachmentFileName(const QUrl &url, bool isPicture)
     Q_UNUSED(isPicture)
 #endif
     if (fileName.isEmpty()) {
-        fileName = FileUtils::fileName(urlToLocalFile(url));
+        fileName = Self::fileName(urlToLocalFile(url));
     }
     return fileName;
 }
 
-QString FileUtils::fileMimeType(const QString &filePath)
+QString Self::fileMimeType(const QString &filePath)
 {
     static QMimeDatabase db;
     return db.mimeTypeForFile(filePath).name();

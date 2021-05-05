@@ -32,25 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOCUMENT_INTERACTION_CONTROLLER_H
-#define VM_DOCUMENT_INTERACTION_CONTROLLER_H
+#include "AndroidDocumentInteractionController.h"
 
-#include <QObject>
-#include <QUrl>
+#include <QAndroidJniObject>
+#include <QtAndroid>
 
-namespace vm {
-class DocumentInteractionController : public QObject
+#include "FileUtils.h"
+
+using namespace vm;
+using Self = AndroidDocumentInteractionController;
+
+void Self::openUrl(const QUrl &url)
 {
-    Q_OBJECT
-
-public:
-    using QObject::QObject;
-
-    Q_INVOKABLE virtual void openUrl(const QUrl &url);
-
-signals:
-    void notificationCreated(const QString &notification, const bool error);
-};
-} // namespace vm
-
-#endif // VM_DOCUMENT_INTERACTION_CONTROLLER_H
+    const auto filePath = QAndroidJniObject::fromString(FileUtils::urlToLocalFile(url));
+    const auto javaResult = QAndroidJniObject::callStaticMethod<jboolean>(
+            "org/virgil/utils/DocumentInteraction", "viewFile", "(Landroid/content/Context;Ljava/lang/String;)Z",
+            QtAndroid::androidActivity().object<jobject>(), filePath.object<jstring>());
+    if (!static_cast<bool>(javaResult)) {
+        emit notificationCreated(tr("File preview is not avaialable"), false);
+    }
+}

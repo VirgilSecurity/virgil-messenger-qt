@@ -136,7 +136,9 @@ void Self::downloadAttachment(const ModifiableMessageHandler &message, const Mes
         function();
     } else {
         localPath = FileUtils::findUniqueFileName(m_settings->downloadsDir().filePath(attachment->fileName()));
-
+#if VS_ANDROID
+        localPath = QUrl(localPath).adjusted(QUrl::RemoveScheme).toEncoded();
+#endif
         m_models->messagesQueue()->pushMessageDownload(message, localPath, function);
     }
 }

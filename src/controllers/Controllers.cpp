@@ -48,6 +48,8 @@
 
 #if VS_IOS
 #    include "ios/IosDocumentInteractionController.h"
+#elif VS_ANDROID
+#    include "android/AndroidDocumentInteractionController.h"
 #endif
 
 using namespace vm;
@@ -67,6 +69,8 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_users, &UsersController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_documentInteraction, &DocumentInteractionController::notificationCreated, this,
+            &Controllers::notificationCreated);
 
     connect(m_attachments, &AttachmentsController::openUrlRequested, m_documentInteraction,
             &DocumentInteractionController::openUrl);
@@ -152,6 +156,8 @@ DocumentInteractionController *Controllers::createDocumentInteraction()
 {
 #if VS_IOS
     return new IosDocumentInteractionController(this);
+#elif VS_ANDROID
+    return new AndroidDocumentInteractionController(this);
 #else
     return new DocumentInteractionController(this);
 #endif

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2021 Virgil Security, Inc.
+﻿//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,25 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DOCUMENT_INTERACTION_CONTROLLER_H
-#define VM_DOCUMENT_INTERACTION_CONTROLLER_H
+#ifndef VM_ANDROID_DOCUMENT_INTERACTION_CONTROLLER_H
+#define VM_ANDROID_DOCUMENT_INTERACTION_CONTROLLER_H
 
-#include <QObject>
-#include <QUrl>
+#include "DocumentInteractionController.h"
 
 namespace vm {
-class DocumentInteractionController : public QObject
+class AndroidDocumentInteractionController : public DocumentInteractionController
 {
     Q_OBJECT
 
 public:
-    using QObject::QObject;
+    using DocumentInteractionController::DocumentInteractionController;
 
-    Q_INVOKABLE virtual void openUrl(const QUrl &url);
-
-signals:
-    void notificationCreated(const QString &notification, const bool error);
+    void openUrl(const QUrl &url) override;
 };
 } // namespace vm
 
-#endif // VM_DOCUMENT_INTERACTION_CONTROLLER_H
+#endif // VM_ANDROID_DOCUMENT_INTERACTION_CONTROLLER_H
