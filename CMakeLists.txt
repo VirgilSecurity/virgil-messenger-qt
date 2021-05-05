@@ -139,9 +139,9 @@ set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
 
 message(STATUS "Setting prebuild QT directory:      [${PREBUILT_QT_DIR}]")
-message(STATUS "Setting prebuild directory:	        [${PREBUILT_BASE_DIR}]")
-message(STATUS "Setting prebuild include directory:	[${PREBUILT_INCLUDE_DIR}]")
-message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
+message(STATUS "Setting prebuild directory:         [${PREBUILT_BASE_DIR}]")
+message(STATUS "Setting prebuild include directory: [${PREBUILT_INCLUDE_DIR}]")
+message(STATUS "Setting prebuild library directory: [${PREBUILT_LIB_DIR}]")
 
 # ---------------------------------------------------------------------------
 # Include customer file and prepare data
