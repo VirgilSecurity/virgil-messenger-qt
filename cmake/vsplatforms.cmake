@@ -108,9 +108,8 @@ if (VS_PLATFORM)
     # -- Linux
     if (VS_PLATFORM STREQUAL "linux")
         set(QT_PREFIX_PATH "gcc_64")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
-        # -- Android
+    # -- Android
     elseif (VS_PLATFORM STREQUAL "android")
         set(QT_PREFIX_PATH "android")
         #   Android NDK ABIs
@@ -125,7 +124,6 @@ if (VS_PLATFORM)
         message(STATUS "ANDROID_BUILD_ABI_armeabi-v7a: ${ANDROID_BUILD_ABI_armeabi-v7a}")
         message(STATUS "ANDROID_BUILD_ABI_x86: ${ANDROID_BUILD_ABI_x86}")
         message(STATUS "ANDROID_BUILD_ABI_x86_64: ${ANDROID_BUILD_ABI_x86_64}")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
         #  Android NDK
         if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -152,18 +150,16 @@ if (VS_PLATFORM)
         message(STATUS "Android SDK build tool version: [${ANDROID_SDK_BUILD_TOOLS_REVISION}]")
         set(QT_ANDROID_DEPLOYMENT_DEPENDENCIES "\"sdkBuildToolsRevision\": \"${ANDROID_SDK_BUILD_TOOLS_REVISION}\",")
 
-        # -- MacOS
+    # -- MacOS
     elseif (VS_PLATFORM STREQUAL "macos")
         set(QT_PREFIX_PATH "clang_64")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
-        # -- IOS
+    # -- IOS
     elseif (VS_PLATFORM STREQUAL "ios" AND NOT VS_IOS_SIMULATOR)
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 
-        # -- IOS-SIM
+    # -- IOS-SIM
     elseif (VS_PLATFORM STREQUAL "ios" AND VS_IOS_SIMULATOR)
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
@@ -176,12 +172,11 @@ if (VS_PLATFORM)
             message(FATAL_ERROR "Invalid CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT} does not exist.")
         endif ()
 
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
-
-        # -- Windows
+    # -- Windows
     elseif (VS_PLATFORM STREQUAL "windows")
         set(QT_PREFIX_PATH "mingw81_64")
-        prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
     endif ()
+
+    prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 endif ()
 

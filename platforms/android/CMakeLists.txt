@@ -35,7 +35,7 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 # ---------------------------------------------------------------------------
-#   System introspection.
+#   System introspection
 # ---------------------------------------------------------------------------
 include("${ANDROID_SDK}/android_openssl/CMakeLists.txt")
 
@@ -149,6 +149,16 @@ target_link_libraries(platform-fs
         platform-definitions
         platform-fs-api
         )
+
+# ---------------------------------------------------------------------------
+#   Main target
+# ---------------------------------------------------------------------------
+add_library(${VS_TARGET_NAME} SHARED)
+
+add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+      COMMAND touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
+      COMMENT "Touch CMakeCache.txt"
+)
 
 # ---------------------------------------------------------------------------
 #   Deploy

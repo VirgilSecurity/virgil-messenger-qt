@@ -34,11 +34,14 @@
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-#
-#   System introspection.
-#
+# ---------------------------------------------------------------------------
+#   System introspection
+# ---------------------------------------------------------------------------
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
+# ---------------------------------------------------------------------------
+#   Libraries
+# ---------------------------------------------------------------------------
 #
 #   Library: platform-deps
 #
@@ -91,6 +94,37 @@ target_include_directories(platform-updates
 target_link_libraries(platform-updates
         PUBLIC
         platform-updates-api
+        )
+
+# ---------------------------------------------------------------------------
+#   Main target
+# ---------------------------------------------------------------------------
+set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}")
+set_source_files_properties(${App_ICON}
+        PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE ${App_ICON})
+
+set_target_properties(${VS_TARGET_NAME}
+        PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/Info.plist.in"
+        )
+
+add_custom_command(TARGET ${VS_TARGET_NAME}
+        POST_BUILD COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
+        $<TARGET_FILE:${VS_TARGET_NAME}>)
+
+set_target_properties(${VS_TARGET_NAME}
+        PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
+        )
+
+add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
+        COMMAND mkdir ARGS -p
+            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks"
+
+        COMMAND cp ARGS -Rf
+            "${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework"
+            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks/Sparkle.framework"
         )
 
 # ---------------------------------------------------------------------------
