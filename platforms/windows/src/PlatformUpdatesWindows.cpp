@@ -38,6 +38,8 @@
 
 #include <winsparkle.h>
 
+#include <QResource>
+
 using namespace vm;
 using namespace platform;
 
@@ -72,7 +74,7 @@ Self::PlatformUpdatesWindows()
             reinterpret_cast<const char *>(QResource(":qml/resources/windows/dsa_pub.pem").data()));
     win_sparkle_set_app_details(Customer::ApplicationName.toStdWString().c_str(),
                                 Customer::OrganizationDisplayName.toStdWString().c_str(),
-                                kVersion);
+                                QString(kVersion).toStdWString().c_str());
 
     //
     //  Configure updates timer.
