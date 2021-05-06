@@ -90,13 +90,13 @@ target_link_libraries(platform-deps
 
 target_include_directories(platform-deps
         SYSTEM INTERFACE
-        "${PREBUILT_DIR}/firebase_cpp_sdk/include"
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/include>"
         )
 
 target_link_directories(platform-deps
         INTERFACE
-        "${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++"
-        "${VS_ANDROID_SSL_DIR}"
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>"
+        "$<BUILD_INTERFACE:${VS_ANDROID_SSL_DIR}>"
         )
 
 #

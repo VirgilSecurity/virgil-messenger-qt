@@ -46,11 +46,17 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 #   Library: platform-deps
 #
 add_library(platform-deps INTERFACE)
+
 target_link_libraries(platform-deps
         INTERFACE
         Qt5::Widgets
         WinSparkle
         curl
+        )
+
+target_link_directories(platform-deps
+        INTERFACE
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/windows/winsparkle/x64/Release>"
         )
 
 #
