@@ -83,7 +83,8 @@ target_include_directories(platform
         # TODO: When implementation will be hidden under platform API, then remove it.
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../include/controllers>"
 
-        PRIVATE
+        PUBLIC
+        # TODO: When implementation will be hidden under platform API, make it PRIVATE.
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         )
 
@@ -211,8 +212,8 @@ set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
 
 target_sources(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
+    "${CMAKE_CURRENT_SOURCE_DIR}/NotificationService.mm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/NotificationService.h"
     )
 
 set_target_properties(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
@@ -246,3 +247,41 @@ add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
         "$<TARGET_FILE_DIR:${VS_TARGET_NAME}>/PlugIns/${VS_TARGET_NOTIFICATION_EXTENSION_NAME}.appex"
     MAIN_DEPENDENCY ${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
     )
+
+# ---------------------------------------------------------------------------
+#   Deploy
+# ---------------------------------------------------------------------------
+add_custom_target(xcarchive
+        COMMENT "Building xcarchive..."
+
+        COMMAND xcodebuild
+            -project "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.xcodeproj"
+            -scheme ${PROJECT_NAME}
+            -sdk iphoneos
+            -destination generic/platform=iOS
+            -configuration Release
+            archive
+            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+
+        COMMAND "${CMAKE_COMMAND}" -E
+            tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" -- "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+        )
+
+add_custom_target(upload
+        COMMENT "Upload xcarchive..."
+        COMMAND xcodebuild
+            -exportArchive
+            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            -exportOptionsPlist "${CMAKE_CURRENT_LIST_DIR}/exportOptions.plist"
+            -allowProvisioningUpdates
+        )
+
+add_custom_target(ipa
+        COMMENT "Build IPA..."
+        COMMAND xcodebuild
+        -exportArchive
+        -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+        -exportOptionsPlist "${CMAKE_CURRENT_LIST_DIR}/exportOptions-ipa.plist"
+        -allowProvisioningUpdates
+        -exportPath "${CMAKE_BINARY_DIR}"
+        )

@@ -47,7 +47,7 @@
 #include "models/Models.h"
 
 #if VS_IOS
-#    include "platforms/ios/IosDocumentInteractionController.h"
+#    include "IosDocumentInteractionController.h"
 #endif
 
 using namespace vm;
