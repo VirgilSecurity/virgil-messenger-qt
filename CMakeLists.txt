@@ -237,6 +237,8 @@ target_link_directories(comm-kit
 add_library(platform-definitions INTERFACE)
 target_compile_definitions(platform-definitions
         INTERFACE
+        $<BUILD_INTERFACE:VERSION=${VS_TARGET_VERSION}>
+
         $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
         $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
         $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
@@ -751,8 +753,6 @@ target_include_directories(${VS_TARGET_NAME}
 
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
-        $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
-
         $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
         $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 

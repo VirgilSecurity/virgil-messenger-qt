@@ -40,9 +40,9 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 #if defined(VERSION)
-static const QString kVersion = QString(TOSTRING(VERSION)) + "-alpha";
+static constexpr const auto kVersion = TOSTRING(VERSION) "-alpha";
 #else
-static const QString kVersion = "unknown";
+static constexpr const auto kVersion = "unknown";
 #endif
 
 using namespace vm;

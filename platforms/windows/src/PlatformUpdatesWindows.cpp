@@ -34,14 +34,21 @@
 
 #include "PlatformUpdatesWindows.h"
 
-#include "CustomerEnv.h"
-
 #include <winsparkle.h>
 
 using namespace vm;
 using namespace platform;
 
 using Self = PlatformUpdatesWindows;
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#if defined(VERSION)
+static constexpr const auto kVersion = TOSTRING(VERSION) "-alpha";
+#else
+static constexpr const auto kVersion = "unknown";
+#endif
 
 PlatformUpdates& PlatformUpdates::instance()
 {
@@ -63,7 +70,7 @@ Self::PlatformUpdatesWindows()
             reinterpret_cast<const char *>(QResource(":qml/resources/windows/dsa_pub.pem").data()));
     win_sparkle_set_app_details(Customer::ApplicationName.toStdWString().c_str(),
                                 Customer::OrganizationDisplayName.toStdWString().c_str(),
-                                vm::CustomerEnv::version().toStdWString().c_str());
+                                kVersion);
 
     //
     //  Configure updates timer.
