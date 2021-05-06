@@ -110,6 +110,7 @@ find_program(DEPLOY_QT cqtdeployer)
 
 set(DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dist")
 add_custom_target(deploy
+        COMMENT "Running QT deployer for Windows..."
         COMMAND ${DEPLOY_QT}
             -bin "$<TARGET_FILE:${VS_TARGET_NAME}>"
             -qmlDir "${PROJECT_SOURCE_DIR}/src/qml"
@@ -133,7 +134,7 @@ add_custom_target(deploy
         COMMAND rm -rf "${DEPLOY_DIR}/bin"
         COMMAND rm -rf "${DEPLOY_DIR}/lib"
         COMMAND makensis messenger.nsi
-        COMMAND ${PROJECT_SOURCE_DIR}/platforms/windows/tools/signing_win.sh
+        COMMAND "${CMAKE_CURRENT_LIST_DIR}/tools/signing_win.sh"
             "${PROJECT_BINARY_DIR}/${WIN_SU_FILE}"
             "${VS_WINSPARKE_KEY}"
-        VERBATIM)
+        )

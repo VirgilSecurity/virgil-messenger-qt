@@ -171,40 +171,30 @@ elseif (EXISTS "/etc/alternatives/java_sdk")
     set(JAVA_HOME "/etc/alternatives/java_sdk" CACHE INTERNAL "Saved JAVA_HOME variable")
 endif ()
 
-if (JAVA_HOME)
-    set(android_deploy_qt_jdk "--jdk ${JAVA_HOME}")
-    message(STATUS "Java home: [${android_deploy_qt_jdk}]")
-endif ()
-
-if (ANDROID_SDK_PLATFORM)
-    set(android_deploy_qt_platform "--android-platform ${ANDROID_SDK_PLATFORM}")
-    message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
-endif ()
-
 add_custom_target(apk_release
-        COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
+        COMMAND "${CMAKE_COMMAND}" -E env JAVA_HOME="${JAVA_HOME}" "${DEPLOY_QT}"
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
         --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
-        ${android_deploy_qt_platform}
-        ${android_deploy_qt_jdk}
+        $<$<BOOL:${ANDROID_SDK_PLATFORM}>:--android-platform ${ANDROID_SDK_PLATFORM}>
+        $<$<BOOL:${JAVA_HOME}>:--jdk ${JAVA_HOME}>
         --gradle
         --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
-        VERBATIM)
+        )
 
 add_custom_target(aab_release
-        COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
+        COMMAND "${CMAKE_COMMAND}" -E env JAVA_HOME="${JAVA_HOME}" "${DEPLOY_QT}"
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
         --aab
-        ${android_deploy_qt_platform}
-        ${android_deploy_qt_jdk}
+        $<$<BOOL:${ANDROID_SDK_PLATFORM}>:--android-platform ${ANDROID_SDK_PLATFORM}>
+        $<$<BOOL:${JAVA_HOME}>:--jdk ${JAVA_HOME}>
         --gradle
         --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
-        VERBATIM)
+        )
