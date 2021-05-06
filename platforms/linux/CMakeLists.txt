@@ -71,7 +71,7 @@ add_custom_target(deploy
             -targetDir "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dist"
             -qmake "${QT_QMAKE_EXECUTABLE}" clear
 
-        COMMAND "${CMAKE_COMMAND}"
+        COMMAND "${CMAKE_COMMAND}" -E
             tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" -- "${PROJECT_NAME}.dist"
 
         DEPENDS ${VS_TARGET_NAME}
