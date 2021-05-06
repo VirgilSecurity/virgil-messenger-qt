@@ -34,7 +34,6 @@
 
 #include "PlatformUpdatesWindows.h"
 
-#include "VSQCustomer.h"
 #include "CustomerEnv.h"
 
 #include <winsparkle.h>
