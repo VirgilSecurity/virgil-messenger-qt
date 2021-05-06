@@ -194,14 +194,14 @@ add_custom_target(sign_bundle
             --options runtime
             -s "${VS_MACOS_IDENT}"
             "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
-        DEPENDS deploy
+        DEPENDS deploy sign_sparkle
         )
 
 add_custom_target(create_dmg
         COMMENT "Creating DMG..."
 
         COMMAND "${CMAKE_COMMAND}" -E
-            rm "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
 
         COMMAND "${MAC_APPDMG}"
             "${CMAKE_CURRENT_BINARY_DIR}/dmg.json"
@@ -214,7 +214,6 @@ add_custom_target(create_dmg
 
         DEPENDS
             deploy
-            sign_sparkle
             sign_bundle
             "${CMAKE_CURRENT_BINARY_DIR}/dmg.json"
         )
@@ -254,7 +253,7 @@ add_custom_target(dmg_debug
         COMMENT "Create debug MacOS DMG (without signing)..."
 
         COMMAND "${CMAKE_COMMAND}" -E
-            rm "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
 
         COMMAND "${MAC_DEPLOY_QT}"
             "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
