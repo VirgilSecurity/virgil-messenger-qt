@@ -128,7 +128,7 @@ add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
         )
 
 # ---------------------------------------------------------------------------
-#   Configure template files.
+#   Configure template files
 # ---------------------------------------------------------------------------
 configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/release-notes.html.in"

@@ -89,6 +89,21 @@ target_link_libraries(platform-updates
 add_executable(${VS_TARGET_NAME})
 
 # ---------------------------------------------------------------------------
+#   Configure deployment files.
+# ---------------------------------------------------------------------------
+configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/messenger.nsi.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/messenger.nsi"
+        @ONLY
+        )
+
+configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/appcast.xml.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/appcast.xml"
+        @ONLY
+        )
+
+# ---------------------------------------------------------------------------
 #   Deploy
 # ---------------------------------------------------------------------------
 find_program(DEPLOY_QT cqtdeployer)
