@@ -74,6 +74,7 @@ target_include_directories(platform-updates
 target_link_libraries(platform-updates
         PUBLIC
         platform-updates-api
+        customer-config
         )
 
 # ---------------------------------------------------------------------------
