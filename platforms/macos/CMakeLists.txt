@@ -149,23 +149,27 @@ find_program(MAC_DEPLOY_QT macdeployqt)
 find_program(MAC_CODESIGN codesign)
 find_program(MAC_APPDMG appdmg)
 
-add_custom_target(dmg_release
-        COMMAND echo "Deploy MacOS bundle data..."
-        COMMAND ${MAC_DEPLOY_QT}
-            $<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>
-            -qmldir=${PROJECT_SOURCE_DIR}/src/qml
+add_custom_target(deploy
+        COMMENT "Deploy MacOS bundle data..."
+        COMMAND "${MAC_DEPLOY_QT}"
+            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
+            -qmldir="${PROJECT_SOURCE_DIR}/src/qml"
             -verbose=1
-        COMMAND echo "Signing sparkle [Autoupdate]"
-        COMMAND ${MAC_CODESIGN}
-             --display
-             --verbose=4
+        DEPENDS ${VS_TARGET_NAME}
+        )
+
+add_custom_target(sign_sparkle
+        COMMENT "Signing sparkle..."
+        COMMAND "${MAC_CODESIGN}"
+            --display
+            --verbose=4
             --force
             --deep
             --timestamp
             --options runtime
-             -s "${VS_MACOS_IDENT}"
-             "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app/Contents/MacOS/Autoupdate"
-       COMMAND echo "Signing sparkle [fileop]"
+            -s "${VS_MACOS_IDENT}"
+            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app/Contents/MacOS/Autoupdate"
+
        COMMAND "${MAC_CODESIGN}"
            --display
            --verbose=4
@@ -175,7 +179,12 @@ add_custom_target(dmg_release
            --options runtime
            -s "${VS_MACOS_IDENT}"
            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks/Sparkle.framework/Resources/Autoupdate.app/Contents/MacOS/fileop"
-        COMMAND echo "Signing bundle..."
+
+        DEPENDS deploy
+        )
+
+add_custom_target(sign_bundle
+        COMMENT "Signing bundle..."
         COMMAND "${MAC_CODESIGN}"
             --display
             --verbose=4
@@ -185,45 +194,76 @@ add_custom_target(dmg_release
             --options runtime
             -s "${VS_MACOS_IDENT}"
             "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
-        COMMAND echo "Create DMG..."
+        DEPENDS deploy
+        )
+
+add_custom_target(create_dmg
+        COMMENT "Creating DMG..."
+
+        COMMAND "${CMAKE_COMMAND}" -E
+            rm "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+
         COMMAND "${MAC_APPDMG}"
             "${CMAKE_CURRENT_BINARY_DIR}/dmg.json"
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
             -v
-        COMMAND echo "Set DMG icon..."
+
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/seticon"
             "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}"
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
-        VERBATIM
+
+        DEPENDS
+            deploy
+            sign_sparkle
+            sign_bundle
+            "${CMAKE_CURRENT_BINARY_DIR}/dmg.json"
         )
 
-add_custom_target(dmg_debug
-        COMMAND echo "Deploy MacOS bundle data (without signing)..."
-        COMMAND "${MAC_DEPLOY_QT}"
-            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
-            -qmldir=${PROJECT_SOURCE_DIR}/src/qml
-            -verbose=1
-            -dmg
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/seticon"
-            "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
-        VERBATIM
-        )
+add_custom_target(notarize_dmg
+        COMMENT "Notarizing DMG..."
 
-add_custom_target(dmg_notarization
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/dmg-notarization.sh"
             -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
             -u ${NOTARIZATION_LOGIN}
             -p ${NOTARIZATION_PASSWORD}
             -i "${MACOSX_BUNDLE_GUI_IDENTIFIER}"
-        VERBATIM
+
+        DEPENDS create_dmg
         )
 
+
 add_custom_target(dmg_update
-        COMMAND echo "Creating sparkle update files..."
-        COMMAND cp -f
+        COMMENT "Creating Sparkle update files..."
+
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
             "${CMAKE_CURRENT_BINARY_DIR}/update/${PROJECT_NAME}-${PROJECT_VERSION}.dmg"
+
         COMMAND "${PREBUILT_DIR}/macos/sparkle/bin/generate_appcast" "${CMAKE_CURRENT_BINARY_DIR}/update"
-        VERBATIM
+
+        DEPENDS notarize_dmg
+        )
+
+add_custom_target(dmg_release
+        COMMENT "Create production ready MacOS DMG..."
+        DEPENDS dmg_update
+        )
+
+
+add_custom_target(dmg_debug
+        COMMENT "Create debug MacOS DMG (without signing)..."
+
+        COMMAND "${CMAKE_COMMAND}" -E
+            rm "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+
+        COMMAND "${MAC_DEPLOY_QT}"
+            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
+            -qmldir="${PROJECT_SOURCE_DIR}/src/qml"
+            -verbose=1
+            -dmg
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/seticon"
+            "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}"
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+
+        DEPENDS ${VS_TARGET_NAME}
         )
