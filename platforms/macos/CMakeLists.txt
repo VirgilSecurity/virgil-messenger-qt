@@ -151,9 +151,9 @@ find_program(MAC_APPDMG appdmg)
 
 add_custom_target(dmg_release
         COMMAND echo "Deploy MacOS bundle data..."
-        COMMAND "${MAC_DEPLOY_QT}"
-            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
-            -qmldir="${PROJECT_SOURCE_DIR}/src/qml"
+        COMMAND ${MAC_DEPLOY_QT}
+            $<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>
+            -qmldir=${PROJECT_SOURCE_DIR}/src/qml
             -verbose=1
         COMMAND echo "Signing sparkle [Autoupdate]"
         COMMAND ${MAC_CODESIGN}
@@ -204,14 +204,14 @@ add_custom_target(dmg_debug
             -qmldir=${PROJECT_SOURCE_DIR}/src/qml
             -verbose=1
             -dmg
-        COMMAND "${PROJECT_SOURCE_DIR}/platforms/macos/tools/seticon"
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/seticon"
             "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}"
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
         VERBATIM
         )
 
 add_custom_target(dmg_notarization
-        COMMAND "${PROJECT_SOURCE_DIR}/platforms/macos/tools/dmg-notarization.sh"
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/dmg-notarization.sh"
             -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
             -u ${NOTARIZATION_LOGIN}
             -p ${NOTARIZATION_PASSWORD}
