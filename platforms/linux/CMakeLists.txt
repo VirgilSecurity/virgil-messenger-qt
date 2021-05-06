@@ -63,10 +63,16 @@ add_executable(${VS_TARGET_NAME})
 find_program(DEPLOY_QT cqtdeployer)
 
 add_custom_target(deploy
+        COMMENT "Running QT deployer for Linux..."
+
         COMMAND "${DEPLOY_QT}" deploySystem
             -bin "$<TARGET_FILE:${VS_TARGET_NAME}>"
             -qmlDir "${PROJECT_SOURCE_DIR}/src/qml"
             -targetDir "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dist"
             -qmake "${QT_QMAKE_EXECUTABLE}" clear
-        COMMAND tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" "${PROJECT_NAME}.dist"
+
+        COMMAND "${CMAKE_COMMAND}"
+            tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" -- "${PROJECT_NAME}.dist"
+
+        DEPENDS ${VS_TARGET_NAME}
         )
