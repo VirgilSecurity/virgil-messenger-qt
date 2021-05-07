@@ -43,18 +43,18 @@ message(STATUS "Prepare sources for Android ...")
 message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")
 message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
 
-if (ANDROID_ABI STREQUAL "armeabi-v7a")
+if(ANDROID_ABI STREQUAL "armeabi-v7a")
     set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm")
 
-elseif (ANDROID_ABI STREQUAL "arm64-v8a")
+elseif(ANDROID_ABI STREQUAL "arm64-v8a")
     set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm64")
 
-elseif (ANDROID_ABI STREQUAL "x86")
+elseif(ANDROID_ABI STREQUAL "x86")
     set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/x86")
 
-elseif (ANDROID_ABI STREQUAL "x86_64")
+elseif(ANDROID_ABI STREQUAL "x86_64")
     set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/x86_64")
-endif ()
+endif()
 
 message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
@@ -165,36 +165,52 @@ add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
 # ---------------------------------------------------------------------------
 find_program(DEPLOY_QT androiddeployqt)
 
-if (DEFINED ENV{JAVA_HOME})
+if(DEFINED ENV{JAVA_HOME})
     set(JAVA_HOME $ENV{JAVA_HOME} CACHE INTERNAL "Saved JAVA_HOME variable")
-elseif (EXISTS "/etc/alternatives/java_sdk")
+elseif(EXISTS "/etc/alternatives/java_sdk")
     set(JAVA_HOME "/etc/alternatives/java_sdk" CACHE INTERNAL "Saved JAVA_HOME variable")
-endif ()
+endif()
+
+if(JAVA_HOME)
+    set(android_deploy_qt_jdk_option "--jdk")
+    set(android_deploy_qt_jdk_arg "${JAVA_HOME}")
+    message(STATUS "Java home: [${JAVA_HOME}]")
+endif()
+
+if(ANDROID_SDK_PLATFORM)
+    set(android_deploy_qt_platform_option "--android-platform")
+    set(android_deploy_qt_platform_arg "${ANDROID_SDK_PLATFORM}")
+    message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
+endif()
 
 add_custom_target(apk_release
+        COMMENT "Making APK release..."
         COMMAND "${CMAKE_COMMAND}" -E env JAVA_HOME="${JAVA_HOME}" "${DEPLOY_QT}"
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
         --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
-        $<$<BOOL:${ANDROID_SDK_PLATFORM}>:--android-platform ${ANDROID_SDK_PLATFORM}>
-        $<$<BOOL:${JAVA_HOME}>:--jdk ${JAVA_HOME}>
+        ${android_deploy_qt_jdk_option} "${android_deploy_qt_jdk_arg}"
+        ${android_deploy_qt_platform_option} "${android_deploy_qt_platform_arg}"
         --gradle
         --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
+        DEPENDS ${VS_TARGET_NAME}
         )
 
 add_custom_target(aab_release
+        COMMENT "Making AAB release..."
         COMMAND "${CMAKE_COMMAND}" -E env JAVA_HOME="${JAVA_HOME}" "${DEPLOY_QT}"
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
         --aab
-        $<$<BOOL:${ANDROID_SDK_PLATFORM}>:--android-platform ${ANDROID_SDK_PLATFORM}>
-        $<$<BOOL:${JAVA_HOME}>:--jdk ${JAVA_HOME}>
+        ${android_deploy_qt_jdk_option} "${android_deploy_qt_jdk_arg}"
+        ${android_deploy_qt_platform_option} "${android_deploy_qt_platform_arg}"
         --gradle
         --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
+        DEPENDS ${VS_TARGET_NAME}
         )
