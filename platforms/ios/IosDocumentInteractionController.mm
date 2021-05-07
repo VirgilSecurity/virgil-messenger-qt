@@ -34,8 +34,9 @@
 
 #import "IosDocumentInteractionController.h"
 
-#import "IosViewController.h"
+#import "IosDocumentInteractionControllerDataSource.h"
 
+#import <QuickLook/QuickLook.h>
 #import <UIKit/UIKit.h>
 
 #import <QDebug>
@@ -46,26 +47,9 @@ using Self = IosDocumentInteractionController;
 
 void Self::openUrl(const QUrl& url)
 {
-    NSURL* nsUrl = url.toNSURL();
+    UIViewController* rootController = [[[[UIApplication sharedApplication] windows] firstObject] rootViewController];
 
-    static IosViewController* docViewController = nil;
-    if (docViewController != nil) {
-        [docViewController removeFromParentViewController];
-        [docViewController release];
-    }
-
-    UIDocumentInteractionController* documentInteractionController = nil;
-    documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:nsUrl];
-
-    UIViewController* qtUIViewController =
-        [[[[UIApplication sharedApplication] windows] firstObject] rootViewController];
-    if (qtUIViewController != nil) {
-        docViewController = [[IosViewController alloc] init];
-
-        [qtUIViewController addChildViewController:docViewController];
-        documentInteractionController.delegate = docViewController;
-        if (![documentInteractionController presentPreviewAnimated:YES]) {
-            qWarning() << "Failed to open file preview" << url;
-        }
-    }
+    QLPreviewController* previewController = [[QLPreviewController alloc] init];
+    //previewController.dataSource = [[IosDocumentInteractionControllerDataSource alloc] init];
+    [rootController presentViewController:previewController animated:YES completion:nil];
 }

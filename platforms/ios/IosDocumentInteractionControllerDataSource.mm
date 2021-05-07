@@ -32,27 +32,9 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "ios/IosViewController.h"
+#include "ios/IosDocumentInteractionControllerDataSource.h"
 
-@interface IosViewController ()
-@end
-@implementation IosViewController
-#pragma mark -
-#pragma mark View Life Cycle
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-}
-#pragma mark -
-#pragma mark Document Interaction Controller Delegate Methods
-- (UIViewController*)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController*)controller
-{
-#pragma unused(controller)
-    return self;
-}
-- (void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController*)controller
-{
-#pragma unused(controller)
-    [self removeFromParentViewController];
-}
-@end
+//@interface IosDocumentInteractionControllerDataSource ()
+//@end
+//@implementation IosDocumentInteractionControllerDataSource
+//@end
