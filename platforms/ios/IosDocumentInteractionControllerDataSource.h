@@ -37,7 +37,12 @@
 
 #import <QuickLook/QuickLook.h>
 
-//@interface IosDocumentInteractionControllerDataSource : QLPreviewControllerDataSource
-//@end
+@interface IosDocumentInteractionControllerDataSource : NSObject <QLPreviewControllerDataSource>
+
+@property (nonatomic, strong) NSURL* url;
+
+- (instancetype)initWithURL:(NSURL*)url;
+
+@end
 
 #endif // VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_DATA_SOURCE_H

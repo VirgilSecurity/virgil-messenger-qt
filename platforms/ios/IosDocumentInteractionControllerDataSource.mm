@@ -34,7 +34,29 @@
 
 #include "ios/IosDocumentInteractionControllerDataSource.h"
 
-//@interface IosDocumentInteractionControllerDataSource ()
-//@end
-//@implementation IosDocumentInteractionControllerDataSource
-//@end
+#include "ios/IosDocumentInteractionControllerPreviewItem.h"
+
+@interface IosDocumentInteractionControllerDataSource ()
+@end
+
+@implementation IosDocumentInteractionControllerDataSource
+- (NSInteger)numberOfPreviewItemsInPreviewController:(nonnull QLPreviewController*)controller
+{
+    return 1;
+}
+
+- (nonnull id<QLPreviewItem>)previewController:(nonnull QLPreviewController*)controller
+                            previewItemAtIndex:(NSInteger)index
+{
+    return [[IosDocumentInteractionControllerPreviewItem alloc] initWithURL:self.url];
+}
+
+- (id)initWithURL:(NSURL*)url
+{
+    self = [super init];
+    if (self) {
+        self.url = url;
+    }
+    return self;
+}
+@end

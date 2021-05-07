@@ -32,24 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#import "IosDocumentInteractionController.h"
-
-#import "IosDocumentInteractionControllerDataSource.h"
+#ifndef VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_PREVIEW_ITEM_H
+#define VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_PREVIEW_ITEM_H
 
 #import <QuickLook/QuickLook.h>
-#import <UIKit/UIKit.h>
 
-#import <QDebug>
-#import <QGuiApplication>
+@interface IosDocumentInteractionControllerPreviewItem : NSObject <QLPreviewItem>
 
-using namespace vm;
-using Self = IosDocumentInteractionController;
+@property (nonatomic, strong) NSURL* url;
 
-void Self::openUrl(const QUrl& url)
-{
-    UIViewController* rootController = [[[[UIApplication sharedApplication] windows] firstObject] rootViewController];
+- (instancetype)initWithURL:(NSURL*)url;
 
-    QLPreviewController* previewController = [[QLPreviewController alloc] init];
-    previewController.dataSource = [[IosDocumentInteractionControllerDataSource alloc] initWithURL:url.toNSURL()];
-    [rootController presentViewController:previewController animated:YES completion:nil];
-}
+@end
+
+#endif // VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_PREVIEW_ITEM_H
