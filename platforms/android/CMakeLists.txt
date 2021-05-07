@@ -172,43 +172,43 @@ elseif(EXISTS "/etc/alternatives/java_sdk")
 endif()
 
 if(JAVA_HOME)
-    set(android_deploy_qt_jdk_option "--jdk")
-    set(android_deploy_qt_jdk_arg "${JAVA_HOME}")
+    set(android_deploy_qt_jdk "--jdk ${JAVA_HOME}")
     message(STATUS "Java home: [${JAVA_HOME}]")
 endif()
 
 if(ANDROID_SDK_PLATFORM)
-    set(android_deploy_qt_platform_option "--android-platform")
-    set(android_deploy_qt_platform_arg "${ANDROID_SDK_PLATFORM}")
+    set(android_deploy_qt_platform "--android-platform ${ANDROID_SDK_PLATFORM}")
     message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
 endif()
 
 add_custom_target(apk_release
         COMMENT "Making APK release..."
-        COMMAND "${CMAKE_COMMAND}" -E env JAVA_HOME="${JAVA_HOME}" "${DEPLOY_QT}"
+        COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
         --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
-        ${android_deploy_qt_jdk_option} "${android_deploy_qt_jdk_arg}"
-        ${android_deploy_qt_platform_option} "${android_deploy_qt_platform_arg}"
+        ${android_deploy_qt_platform}
+        ${android_deploy_qt_jdk}
         --gradle
         --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
+        VERBATIM
         )
 
 add_custom_target(aab_release
         COMMENT "Making AAB release..."
-        COMMAND "${CMAKE_COMMAND}" -E env JAVA_HOME="${JAVA_HOME}" "${DEPLOY_QT}"
+        COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
         --aab
-        ${android_deploy_qt_jdk_option} "${android_deploy_qt_jdk_arg}"
-        ${android_deploy_qt_platform_option} "${android_deploy_qt_platform_arg}"
+        ${android_deploy_qt_platform}
+        ${android_deploy_qt_jdk}
         --gradle
         --sign "${VS_KEYCHAIN}" "${VS_KEY_ALIAS}"
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
+        VERBATIM
         )
