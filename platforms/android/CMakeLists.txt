@@ -196,7 +196,6 @@ add_custom_target(apk_release
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
-        DEPENDS ${VS_TARGET_NAME}
         )
 
 add_custom_target(aab_release
@@ -212,5 +211,4 @@ add_custom_target(aab_release
         --storepass "${VS_KEYCHAIN_PASSWORD}"
         --keypass "${VS_KEY_PASSWORD}"
         --no-gdbserver
-        DEPENDS ${VS_TARGET_NAME}
         )
