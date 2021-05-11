@@ -505,16 +505,16 @@ target_include_directories(core-messenger
 
 target_link_libraries(core-messenger
     PUBLIC
-        Qt5::Core
-        Qt5::Concurrent
-        Qt5::Network
-        Qt5::Xml
-
         qxmpp
         comm-kit
         helpers
         settings
         logging
+
+        Qt5::Core
+        Qt5::Concurrent
+        Qt5::Network
+        Qt5::Xml
         )
 
 #
@@ -832,23 +832,23 @@ target_sources(${VS_TARGET_NAME}
 
 target_link_libraries(${VS_TARGET_NAME}
         PRIVATE
-        Qt5::Core
-        Qt5::Quick
-        Qt5::Sql
-        Qt5::Network
-        Qt5::Concurrent
-        Qt5::Qml
-
         comm-kit
         core-messenger
         core-messenger-gui
         customer
         platform
         platform-definitions
-        platform-deps
         platform-fs
         platform-updates
         settings
+
+        platform-deps
+
+        Qt5::Core
+        Qt5::Quick
+        Qt5::Sql
+        Qt5::Concurrent
+        Qt5::Qml
         )
 
 #

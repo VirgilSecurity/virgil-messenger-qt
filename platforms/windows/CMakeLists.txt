@@ -43,23 +43,6 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 #   Libraries
 # ---------------------------------------------------------------------------
 #
-#   Library: platform-deps
-#
-add_library(platform-deps INTERFACE)
-
-target_link_libraries(platform-deps
-        INTERFACE
-        Qt5::Widgets
-        WinSparkle
-        curl
-        )
-
-target_link_directories(platform-deps
-        INTERFACE
-        "$<BUILD_INTERFACE:${PREBUILT_DIR}/windows/winsparkle/x64/Release>"
-        )
-
-#
 #   Library: platform-updates.
 #
 add_library(platform-updates STATIC)
@@ -77,16 +60,28 @@ target_include_directories(platform-updates
         "$<BUILD_INTERFACE:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/include>"
         )
 
+target_link_directories(platform-updates
+        PUBLIC
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/windows/winsparkle/x64/Release>"
+        )
+
 target_link_libraries(platform-updates
         PUBLIC
         platform-updates-api
         customer
+        WinSparkle
         )
 
 # ---------------------------------------------------------------------------
 #   Main target
 # ---------------------------------------------------------------------------
 add_executable(${VS_TARGET_NAME})
+
+target_link_libraries(${VS_TARGET_NAME}
+        PRIVATE
+        Qt5::Widgets
+        curl
+        )
 
 # ---------------------------------------------------------------------------
 #   Configure deployment files.
