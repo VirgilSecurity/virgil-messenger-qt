@@ -35,7 +35,7 @@
 #include "MessageContentAttachment.h"
 
 #include "FileUtils.h"
-#include "Utils.h"
+#include "UidUtils.h"
 
 using namespace vm;
 using Self = MessageContentAttachment;
@@ -211,7 +211,7 @@ bool Self::readLocalFile(const QUrl &localUrl, QString &errorString)
         return false;
     }
 
-    setId(AttachmentId(Utils::createUuid()));
+    setId(AttachmentId(UidUtils::createUuid()));
     setSize(fileSize);
     setLocalPath(QFileInfo(localFilePath).absoluteFilePath());
     return true;

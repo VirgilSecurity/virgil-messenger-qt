@@ -122,9 +122,10 @@ add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
         COMMAND mkdir ARGS -p
             "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks"
 
-        COMMAND cp ARGS -Rf
+        # NOTE: System "rsync" is used to preserve symbolic links within framework.
+        COMMAND rsync ARGS --recursive --links
             "${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework"
-            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks/Sparkle.framework"
+            "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>/Contents/Frameworks"
         )
 
 # ---------------------------------------------------------------------------

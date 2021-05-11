@@ -90,6 +90,7 @@ target_include_directories(platform
 
 target_link_libraries(platform
         PUBLIC
+        platform-deps
         platform-base
         customer-config
         )
@@ -238,7 +239,10 @@ target_link_libraries(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
         PRIVATE
         ${USER_NOTIFICATIONS_LIB}
         ${USER_NOTIFICATIONS_UI_LIB}
+        core-messenger
         )
+
+# target_link_options(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} PRIVATE "-Wl,-U,_main")
 
 add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"

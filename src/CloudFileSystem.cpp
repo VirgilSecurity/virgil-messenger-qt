@@ -40,7 +40,7 @@
 #include "FutureWorker.h"
 #include "Messenger.h"
 #include "Settings.h"
-#include "Utils.h"
+#include "UidUtils.h"
 #include "FileUtils.h"
 #include "PlatformFs.h"
 
@@ -111,7 +111,7 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
     const auto tempDir = m_messenger->settings()->cloudFilesCacheDir();
-    const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + Utils::createUuid());
+    const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + UidUtils::createUuid());
     auto future = m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {

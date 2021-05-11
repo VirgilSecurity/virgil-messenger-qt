@@ -36,7 +36,7 @@
 #   Build platform dependent implementations as libraries.
 #
 #   May depends on targets:
-#       * qt-common
+#       * Qt5::Core
 #       * platform-definitions
 #       * customer-config
 #

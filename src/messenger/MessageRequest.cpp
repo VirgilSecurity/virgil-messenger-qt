@@ -34,7 +34,7 @@
 
 #include "MessageRequest.h"
 
-#include "Utils.h"
+#include "UidUtils.h"
 
 using namespace vm;
 using Self = MessageRequest;
@@ -42,7 +42,7 @@ using Self = MessageRequest;
 static QString generateIdIfNeeded(QString id)
 {
     if (id.isEmpty()) {
-        return Utils::createUuid();
+        return UidUtils::createUuid();
     } else {
         return id;
     }

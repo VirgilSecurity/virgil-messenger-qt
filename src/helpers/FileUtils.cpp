@@ -42,7 +42,6 @@
 #include <QLoggingCategory>
 #include <QMimeDatabase>
 
-
 Q_LOGGING_CATEGORY(lcFileUtils, "file-utils");
 
 using namespace vm;

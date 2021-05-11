@@ -32,49 +32,37 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/EncryptUploadFileOperation.h"
+#include "MessageContentPictureFactory.h"
 
 #include "FileUtils.h"
-#include "Messenger.h"
-#include "Settings.h"
-#include "UidUtils.h"
-#include "operations/EncryptFileOperation.h"
-#include "operations/UploadFileOperation.h"
+#include "MessageContentJsonUtils.h"
+#include "Utils.h"
+
+#include <QImageReader>
 
 using namespace vm;
+using Self = MessageContentPictureFactory;
 
-EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger,
-                                                       const QString &sourcePath)
-    : NetworkOperation(parent),
-      m_messenger(messenger),
-      m_sourcePath(sourcePath),
-      m_tempPath(messenger->settings()->attachmentCacheDir().filePath(UidUtils::createUuid()))
+std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl &localUrl, const QString &imageFormat,
+                                                               const QSize &thumbnailMaxSize, QString &errorString)
 {
-    setName(QLatin1String("EncryptUpload"));
-}
+    MessageContentPicture picture;
+    if (!picture.readLocalFile(localUrl, errorString)) {
+        return std::nullopt;
+    }
 
-void EncryptUploadFileOperation::setSourcePath(const QString &sourcePath)
-{
-    m_sourcePath = sourcePath;
-}
+    const auto fileName = FileUtils::attachmentFileName(localUrl, true);
+    picture.setFileName(fileName.section('.', 0, 0) + imageFormat);
 
-bool EncryptUploadFileOperation::populateChildren()
-{
-    auto encryptOp = new EncryptFileOperation(this, m_messenger, m_sourcePath, m_tempPath);
-    connect(encryptOp, &EncryptFileOperation::encrypted, this, &EncryptUploadFileOperation::encrypted);
-    appendChild(encryptOp);
+    QImage source;
+    QImageReader reader(picture.localPath());
+    if (!Utils::readImage(&reader, &source)) {
+        errorString = QObject::tr("Unable to read image");
+        return std::nullopt;
+    }
 
-    auto uploadOp = new UploadFileOperation(this, m_messenger->fileLoader(), m_tempPath);
-    connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
-    connect(uploadOp, &UploadFileOperation::uploadSlotReceived, this, &EncryptUploadFileOperation::uploadSlotReceived);
-    connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);
-    appendChild(uploadOp);
+    const auto thumbnailSize = Utils::calculateThumbnailSize(source.size(), thumbnailMaxSize, reader.transformation());
+    picture.setThumbnailSize(thumbnailSize);
 
-    return true;
-}
-
-void EncryptUploadFileOperation::cleanup()
-{
-    Operation::cleanup();
-    FileUtils::removeFile(m_tempPath);
+    return picture;
 }

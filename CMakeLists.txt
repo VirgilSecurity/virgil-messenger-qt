@@ -170,22 +170,6 @@ find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml REQUIRED)
 #   Common libraries that is used by different targets.
 # ---------------------------------------------------------------------------
 #
-#   Qt
-#
-add_library(qt-common INTERFACE)
-
-target_link_libraries(qt-common
-        INTERFACE
-        Qt5::Core
-        Qt5::Quick
-        Qt5::Sql
-        Qt5::Network
-        Qt5::Concurrent
-        Qt5::Qml
-        Qt5::Xml
-        )
-
-#
 #   Customers.
 #
 add_library(customer-config INTERFACE)
@@ -280,7 +264,13 @@ target_include_directories(helpers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>
         )
 
-target_link_libraries(helpers PUBLIC qt-common platform-definitions platform-fs)
+target_link_libraries(helpers
+        PUBLIC
+        Qt::Core
+
+        platform-definitions
+        platform-fs
+        )
 
 #
 #   Core Messenger
@@ -412,7 +402,52 @@ target_include_directories(core-messenger
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
         )
 
-target_link_libraries(core-messenger PUBLIC qxmpp qt-common comm-kit helpers)
+target_link_libraries(core-messenger
+    PUBLIC
+        Qt5::Core
+        Qt5::Concurrent
+        Qt5::Network
+        Qt5::Xml
+
+        qxmpp
+        comm-kit
+        helpers
+        )
+
+#
+#   Core Messenger GUI
+#
+add_library(core-messenger-gui STATIC)
+
+target_sources(core-messenger-gui
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/include/Utils.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPictureFactory.h
+
+        ${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPictureFactory.cpp
+        )
+
+target_include_directories(core-messenger
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
+        )
+
+target_link_libraries(core-messenger-gui
+        PUBLIC
+        core-messenger
+        Qt5::Gui
+        )
+
+#
+#   Format
+#
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(helpers)
+    add_clangformat(core-messenger)
+    add_clangformat(core-messenger-gui)
+endif()
 
 # ---------------------------------------------------------------------------
 #   Target sources and libraries
@@ -438,7 +473,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/Messenger.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Settings.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/Utils.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
         ${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
@@ -567,6 +601,7 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
         # Push Notifications
         ${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h
+
         # Android
         # TODO: Hide this under platform API.
         $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/include/VSQAndroid.h>
@@ -584,7 +619,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
@@ -719,9 +753,16 @@ target_sources(${VS_TARGET_NAME}
 
 target_link_libraries(${VS_TARGET_NAME}
         PRIVATE
-        qt-common
+        Qt5::Core
+        Qt5::Quick
+        Qt5::Sql
+        Qt5::Network
+        Qt5::Concurrent
+        Qt5::Qml
+
         comm-kit
         core-messenger
+        core-messenger-gui
         platform
         platform-definitions
         platform-deps
@@ -735,7 +776,6 @@ target_link_libraries(${VS_TARGET_NAME}
 target_include_directories(${VS_TARGET_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/database>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/models>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/ui>

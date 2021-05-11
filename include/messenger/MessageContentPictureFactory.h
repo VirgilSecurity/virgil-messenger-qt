@@ -32,49 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "operations/EncryptUploadFileOperation.h"
+#ifndef VM_MESSAGE_CONTENT_PICTURE_FACTORY_H
+#define VM_MESSAGE_CONTENT_PICTURE_FACTORY_H
 
-#include "FileUtils.h"
-#include "Messenger.h"
-#include "Settings.h"
-#include "UidUtils.h"
-#include "operations/EncryptFileOperation.h"
-#include "operations/UploadFileOperation.h"
+#include "MessageContentPicture.h"
 
-using namespace vm;
+namespace vm {
 
-EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent, Messenger *messenger,
-                                                       const QString &sourcePath)
-    : NetworkOperation(parent),
-      m_messenger(messenger),
-      m_sourcePath(sourcePath),
-      m_tempPath(messenger->settings()->attachmentCacheDir().filePath(UidUtils::createUuid()))
+//
+//  Provides helpers to create MessageContentPicture.
+//
+class MessageContentPictureFactory
 {
-    setName(QLatin1String("EncryptUpload"));
-}
 
-void EncryptUploadFileOperation::setSourcePath(const QString &sourcePath)
-{
-    m_sourcePath = sourcePath;
-}
+public:
+    //
+    //  Create picture message content from the given path.
+    //
+    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl &localUrl, const QString &imageFormat,
+                                                                    const QSize &thumbnailMaxSize,
+                                                                    QString &errorString);
 
-bool EncryptUploadFileOperation::populateChildren()
-{
-    auto encryptOp = new EncryptFileOperation(this, m_messenger, m_sourcePath, m_tempPath);
-    connect(encryptOp, &EncryptFileOperation::encrypted, this, &EncryptUploadFileOperation::encrypted);
-    appendChild(encryptOp);
+    MessageContentPictureFactory() = delete;
+};
+} // namespace vm
 
-    auto uploadOp = new UploadFileOperation(this, m_messenger->fileLoader(), m_tempPath);
-    connect(uploadOp, &UploadFileOperation::progressChanged, this, &EncryptUploadFileOperation::progressChanged);
-    connect(uploadOp, &UploadFileOperation::uploadSlotReceived, this, &EncryptUploadFileOperation::uploadSlotReceived);
-    connect(uploadOp, &UploadFileOperation::uploaded, this, &EncryptUploadFileOperation::uploaded);
-    appendChild(uploadOp);
-
-    return true;
-}
-
-void EncryptUploadFileOperation::cleanup()
-{
-    Operation::cleanup();
-    FileUtils::removeFile(m_tempPath);
-}
+#endif // VM_MESSAGE_CONTENT_PICTURE_FACTORY_H

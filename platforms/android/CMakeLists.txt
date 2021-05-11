@@ -77,6 +77,7 @@ find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
 add_library(platform-deps INTERFACE)
 target_link_libraries(platform-deps
         INTERFACE
+        Qt5::Gui
         Qt5::AndroidExtras
         log
 
@@ -143,9 +144,9 @@ target_include_directories(platform-fs
 
 target_link_libraries(platform-fs
         PUBLIC
+        Qt5::Core
         Qt5::AndroidExtras
 
-        qt-common
         platform-definitions
         platform-fs-api
         )

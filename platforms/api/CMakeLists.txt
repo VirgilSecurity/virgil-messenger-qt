@@ -52,7 +52,7 @@ target_include_directories(platform-api
 
 target_link_libraries(platform-api
         INTERFACE
-        qt-common
+        Qt5::Core
         )
 
 #
@@ -94,7 +94,7 @@ target_include_directories(platform-fs-api
 
 target_link_libraries(platform-fs-api
         INTERFACE
-        qt-common
+        Qt5::Core
         )
 
 #
@@ -136,5 +136,5 @@ target_include_directories(platform-updates-api
 
 target_link_libraries(platform-updates-api
         INTERFACE
-        qt-common
+        Qt5::Core
         )

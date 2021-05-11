@@ -35,7 +35,7 @@
 #include "operations/DownloadDecryptFileOperation.h"
 
 #include "Settings.h"
-#include "Utils.h"
+#include "UidUtils.h"
 #include "FileUtils.h"
 #include "operations/DecryptFileOperation.h"
 #include "operations/DownloadFileOperation.h"
@@ -60,7 +60,7 @@ DownloadDecryptFileOperation::DownloadDecryptFileOperation(NetworkOperation *par
 
 bool DownloadDecryptFileOperation::populateChildren()
 {
-    m_tempPath = m_messenger->settings()->attachmentCacheDir().filePath(Utils::createUuid());
+    m_tempPath = m_messenger->settings()->attachmentCacheDir().filePath(UidUtils::createUuid());
 
     auto downOp = new DownloadFileOperation(this, m_messenger->fileLoader(), m_url, m_bytesTotal, m_tempPath);
     connect(downOp, &DownloadFileOperation::progressChanged, this, &DownloadDecryptFileOperation::progressChanged);

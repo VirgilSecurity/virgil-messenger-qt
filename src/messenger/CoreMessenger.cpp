@@ -40,7 +40,6 @@
 #include "MessageContentJsonUtils.h"
 #include "OutgoingMessage.h"
 #include "UserImpl.h"
-#include "Utils.h"
 #include "Platform.h"
 
 #include "VSQNetworkAnalyzer.h"

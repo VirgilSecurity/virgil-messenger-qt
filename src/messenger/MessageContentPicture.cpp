@@ -34,11 +34,8 @@
 
 #include "MessageContentPicture.h"
 
-#include <QImageReader>
-
 #include "FileUtils.h"
 #include "MessageContentJsonUtils.h"
-#include "Utils.h"
 
 using namespace vm;
 using Self = MessageContentPicture;
@@ -107,32 +104,4 @@ MessageContentFile Self::thumbnail() const
 void MessageContentPicture::setThumbnail(MessageContentFile thumbnail)
 {
     m_thumbnail = std::move(thumbnail);
-}
-
-std::optional<MessageContentPicture> Self::createFromLocalFile(const QUrl &localUrl, const QString &imageFormat,
-                                                               const QSize &thumbnailMaxSize, QString &errorString)
-{
-    MessageContentPicture picture;
-    if (!picture.readLocalFile(localUrl, errorString)) {
-        return std::nullopt;
-    }
-
-    const auto fileName = FileUtils::attachmentFileName(localUrl, true);
-    picture.setFileName(fileName.section('.', 0, 0) + imageFormat);
-    picture.readImage(thumbnailMaxSize, errorString);
-    return picture;
-}
-
-bool MessageContentPicture::readImage(const QSize &thumbnailMaxSize, QString &errorString)
-{
-    QImage source;
-    QImageReader reader(localPath());
-    if (!Utils::readImage(&reader, &source)) {
-        errorString = QObject::tr("Unable to read image");
-        return false;
-    }
-
-    const auto thumbnailSize = Utils::calculateThumbnailSize(source.size(), thumbnailMaxSize, reader.transformation());
-    setThumbnailSize(thumbnailSize);
-    return true;
 }

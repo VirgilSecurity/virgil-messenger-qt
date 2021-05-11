@@ -100,11 +100,6 @@ Contacts getDummyContacts()
 #endif // VS_DUMMY_CONTACTS
 } // namespace
 
-QString Utils::createUuid()
-{
-    return QUuid::createUuid().toString(QUuid::WithoutBraces).toLower();
-}
-
 QString Utils::formattedSize(quint64 fileSize)
 {
     return QLocale::system().formattedDataSize(fileSize);
@@ -302,24 +297,6 @@ QUrl Utils::getContactAvatarUrl(const ContactHandler contact)
     Q_UNUSED(contact)
     return QUrl();
 #endif // VS_ANDROID
-}
-
-QString Utils::contactDisplayName(const QString &name, const QString &username, const QString &phone,
-                                  const QString &email)
-{
-    if (!name.isEmpty()) {
-        return name;
-    }
-    if (!username.isEmpty()) {
-        return username;
-    }
-    if (!phone.isEmpty()) {
-        return phone;
-    }
-    if (!email.isEmpty()) {
-        return email;
-    }
-    return QObject::tr("Unknown");
 }
 
 QString Utils::displayUsername(const QString &username, const UserId &userId)

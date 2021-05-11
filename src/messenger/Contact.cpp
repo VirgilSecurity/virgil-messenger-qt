@@ -34,7 +34,7 @@
 
 #include "Contact.h"
 
-#include "Utils.h"
+#include <QObject>
 
 using namespace vm;
 using Self = Contact;
@@ -146,5 +146,21 @@ void Self::setIsBanned(bool isBanned)
 
 QString Self::displayName() const
 {
-    return Utils::contactDisplayName(m_name, m_username, m_phone, m_email);
+    if (!m_name.isEmpty()) {
+        return m_name;
+    }
+
+    if (!m_username.isEmpty()) {
+        return m_username;
+    }
+
+    if (!m_phone.isEmpty()) {
+        return m_phone;
+    }
+
+    if (!m_email.isEmpty()) {
+        return m_email;
+    }
+
+    return QObject::tr("Unknown");
 }

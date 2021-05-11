@@ -35,7 +35,6 @@
 #include "MessageContentJsonUtils.h"
 
 #include "MessageContentType.h"
-#include "Utils.h"
 
 using namespace vm;
 using Self = MessageContentJsonUtils;

@@ -36,10 +36,11 @@
 
 #include "CustomerEnv.h"
 #include "VSQCustomer.h"
-#include "Utils.h"
+#include "UidUtils.h"
 #include "FileUtils.h"
 #include "Platform.h"
 
+#include <QDateTime>
 #include <QStandardPaths>
 #include <QLoggingCategory>
 
@@ -66,7 +67,7 @@ bool Settings::m_logsDirInitialized = false;
 Q_LOGGING_CATEGORY(lcSettings, "settings")
 
 Settings::Settings(QObject *parent)
-    : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(Utils::createUuid())
+    : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(UidUtils::createUuid())
 {
     Q_ASSERT(imageConversionFormat() == imageConversionFormat().toLower());
 
@@ -368,7 +369,7 @@ void Settings::removeGroup(const QString &group)
 
 void Settings::createDeviceId()
 {
-    setValue(kDeviceId, Utils::createUuid());
+    setValue(kDeviceId, UidUtils::createUuid());
     sync();
 }
 
