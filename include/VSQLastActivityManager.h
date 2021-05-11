@@ -41,6 +41,8 @@
 
 Q_DECLARE_LOGGING_CATEGORY(lcLastActivityManager)
 
+namespace vm {
+
 class Settings;
 
 class VSQLastActivityManager : public QXmppClientExtension
@@ -79,5 +81,7 @@ private:
     QString m_jid;
     int m_timerId = 0;
 };
+
+} // namespace vm
 
 #endif // VM_LASTACTIVITYMANAGER_H

@@ -42,11 +42,12 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class Settings;
-
 Q_DECLARE_LOGGING_CATEGORY(lcCrashReporter)
 
 namespace vm {
+
+class Settings;
+
 class CrashReporter : public QObject
 {
     Q_OBJECT

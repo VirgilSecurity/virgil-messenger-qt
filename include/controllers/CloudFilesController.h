@@ -41,9 +41,8 @@
 #include "CloudFileSystem.h"
 #include "CloudFilesUpdate.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class CloudFilesModel;
 class Messenger;
 class Models;

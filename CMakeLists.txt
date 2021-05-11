@@ -170,21 +170,6 @@ find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml REQUIRED)
 #   Common libraries that is used by different targets.
 # ---------------------------------------------------------------------------
 #
-#   Customers.
-#
-add_library(customer-config INTERFACE)
-
-target_sources(customer-config
-        INTERFACE
-        "${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h"
-        )
-
-target_include_directories(customer-config
-        INTERFACE
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-        )
-
-#
 #   CommKit
 #
 add_library(comm-kit INTERFACE)
@@ -239,6 +224,32 @@ target_compile_definitions(platform-definitions
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/platforms")
 
 #
+#   Customers.
+#
+add_library(customer STATIC)
+
+target_sources(customer
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h"
+
+        "${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp"
+        )
+
+target_include_directories(customer
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(customer
+        PUBLIC
+        Qt5::Core
+
+        PRIVATE
+        platform-definitions
+        )
+
+#
 #   Helpers
 #
 add_library(helpers STATIC)
@@ -268,8 +279,40 @@ target_link_libraries(helpers
         PUBLIC
         Qt::Core
 
-        platform-definitions
         platform-fs
+
+        PRIVATE
+        platform-definitions
+        )
+
+#
+#   Application settings.
+#
+add_library(settings STATIC)
+
+target_sources(settings
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/include/settings/Settings.h
+        ${CMAKE_CURRENT_LIST_DIR}/src/settings/Settings.cpp
+        )
+
+target_include_directories(settings
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/settings>
+        )
+
+
+target_link_libraries(settings
+        PUBLIC
+        Qt5::Core
+
+        customer
+        helpers
+        platform
+        platform-fs
+
+        PRIVATE
+        platform-definitions
         )
 
 #
@@ -412,6 +455,7 @@ target_link_libraries(core-messenger
         qxmpp
         comm-kit
         helpers
+        settings
         )
 
 #
@@ -436,8 +480,8 @@ target_include_directories(core-messenger
 
 target_link_libraries(core-messenger-gui
         PUBLIC
-        core-messenger
         Qt5::Gui
+        core-messenger
         )
 
 #
@@ -445,6 +489,7 @@ target_link_libraries(core-messenger-gui
 #
 if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
     add_clangformat(helpers)
+    add_clangformat(settings)
     add_clangformat(core-messenger)
     add_clangformat(core-messenger-gui)
 endif()
@@ -471,13 +516,11 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityIq.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Messenger.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/Settings.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
         ${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ContactAvatarLoader.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
@@ -617,7 +660,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/Messenger.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityIq.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
@@ -763,11 +805,13 @@ target_link_libraries(${VS_TARGET_NAME}
         comm-kit
         core-messenger
         core-messenger-gui
+        customer
         platform
         platform-definitions
         platform-deps
         platform-fs
         platform-updates
+        settings
         )
 
 #

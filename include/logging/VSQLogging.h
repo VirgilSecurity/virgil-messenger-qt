@@ -43,6 +43,8 @@
 
 class QThread;
 
+namespace vm {
+
 class VSQLogging : public QObject
 {
     Q_OBJECT
@@ -64,6 +66,8 @@ private:
 
     std::unique_ptr<QThread> m_workerThread;
 };
+
+} // namespace vm
 
 Q_DECLARE_METATYPE(QtMsgType)
 Q_DECLARE_METATYPE(VSQMessageLogContext)

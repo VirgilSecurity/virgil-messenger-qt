@@ -71,7 +71,10 @@ target_include_directories(platform
 target_link_libraries(platform
         PUBLIC
         platform-base
-        customer-config
+        customer
+
+        PRIVATE
+        platform-definitions
         )
 
 #

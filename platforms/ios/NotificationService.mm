@@ -34,6 +34,13 @@
 
 #import "NotificationService.h"
 
+#include "CoreMessenger.h"
+#include "Settings.h"
+
+#include <memory>
+
+using namespace vm;
+
 @interface NotificationService ()
 
 @property (nonatomic, strong) void (^contentHandler)(UNNotificationContent *contentToDeliver);
@@ -47,9 +54,21 @@
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     
-    // Modify the notification content here...
+    //
+    //  Replace Base64 with something readable.
+    //
     self.bestAttemptContent.title = @"<...>";
     self.bestAttemptContent.body = @"encrypted message";
+    
+    //
+    //  Extract encrypted message.
+    //
+
+    //
+    //  Try to decrypt encrypted message.
+    //
+    auto settings = std::make_unique<Settings>();
+    CoreMessenger messenger(settings.get());
 }
 
 - (void)serviceExtensionTimeWillExpire {

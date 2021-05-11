@@ -37,9 +37,8 @@
 
 #include "models/ListModel.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class AccountSelectionModel : public ListModel
 {
     Q_OBJECT

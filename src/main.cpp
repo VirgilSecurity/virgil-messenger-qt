@@ -45,6 +45,8 @@
 #    include "Test/Headers.h"
 #endif
 
+using namespace vm;
+
 int main(int argc, char *argv[])
 {
     VSQApplication::initialize();

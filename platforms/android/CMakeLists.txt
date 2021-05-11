@@ -123,7 +123,7 @@ target_link_libraries(platform
         PUBLIC
         platform-deps
         platform-base
-        customer-config
+        customer
         )
 
 #

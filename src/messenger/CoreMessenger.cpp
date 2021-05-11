@@ -81,7 +81,7 @@
 #include <optional>
 
 using namespace vm;
-using namespace platform;
+using namespace vm::platform;
 using namespace notifications::xmpp;
 
 using Self = vm::CoreMessenger;

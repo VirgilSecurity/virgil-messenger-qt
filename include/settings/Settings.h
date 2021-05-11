@@ -40,8 +40,7 @@
 #include <QSettings>
 #include <QSize>
 
-#include "AttachmentId.h"
-
+namespace vm {
 class Settings : public QSettings
 {
     Q_OBJECT
@@ -53,7 +52,7 @@ class Settings : public QSettings
                        chatListLandscapeWidthChanged)
 
 public:
-    explicit Settings(QObject *parent);
+    explicit Settings(QObject *parent = nullptr);
     ~Settings();
 
     void print();
@@ -89,7 +88,7 @@ public:
     QDir cloudFilesCacheDir() const;
 
     QString imageConversionFormat() const;
-    QString makeThumbnailPath(const vm::AttachmentId &attachmentId, bool isPreview) const;
+    QString makeThumbnailPath(const QString &attachmentId, bool isPreview) const;
     QSize thumbnailMaxSize() const;
     QSize previewMaxSize() const;
 
@@ -140,5 +139,5 @@ private:
     QDir m_downloadsDir;
     QDir m_cloudFilesCacheDir;
 };
-
+} // namespace vm
 #endif // VM_SETTINGS_H

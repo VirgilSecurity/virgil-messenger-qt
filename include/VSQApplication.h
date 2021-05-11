@@ -50,6 +50,8 @@
 
 class QNetworkAccessManager;
 
+namespace vm {
+
 class VSQLogging;
 
 class VSQApplication : public QObject
@@ -109,5 +111,7 @@ private:
     vm::KeyboardEventFilter *m_keyboardEventFilter;
     vm::ApplicationStateManager m_applicationStateManager;
 };
+
+} // namespace vm
 
 #endif // VSQApplication

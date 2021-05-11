@@ -38,7 +38,7 @@
 #   May depends on targets:
 #       * Qt5::Core
 #       * platform-definitions
-#       * customer-config
+#       * customer
 #
 #   Create targets:
 #       * platform-deps    - interface library that refers mandatory platform libraries, i.e curl.

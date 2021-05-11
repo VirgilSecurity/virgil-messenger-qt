@@ -37,9 +37,8 @@
 
 #include "CreateThumbnailOperation.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class MessageOperation;
 
 class CreateAttachmentPreviewOperation : public CreateThumbnailOperation

@@ -38,9 +38,8 @@
 #include <QObject>
 #include <QPointer>
 
-class Settings;
-
 namespace vm {
+class Settings;
 class AccountSelectionModel;
 class ChatsModel;
 class CloudFilesModel;

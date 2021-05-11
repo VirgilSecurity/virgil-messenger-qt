@@ -38,10 +38,8 @@
 #include <QObject>
 #include <QPointer>
 
-class Messenger;
-class Settings;
-
 namespace vm {
+class Settings;
 class AttachmentsController;
 class ChatsController;
 class CloudFilesController;

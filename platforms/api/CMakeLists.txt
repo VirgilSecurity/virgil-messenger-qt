@@ -37,21 +37,21 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 #
 #   Library: platform-api
 #
-add_library(platform-api INTERFACE)
+add_library(platform-api STATIC)
 
 target_sources(platform-api
-        INTERFACE
+        PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/Platform.h"
         )
 
 
 target_include_directories(platform-api
-        INTERFACE
+        PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         )
 
 target_link_libraries(platform-api
-        INTERFACE
+        PUBLIC
         Qt5::Core
         )
 
@@ -79,21 +79,21 @@ target_link_libraries(platform-base
 #
 #   Library: platform-fs-api
 #
-add_library(platform-fs-api INTERFACE)
+add_library(platform-fs-api STATIC)
 
 target_sources(platform-fs-api
-        INTERFACE
+        PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/PlatformFs.h"
         )
 
 
 target_include_directories(platform-fs-api
-        INTERFACE
+        PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         )
 
 target_link_libraries(platform-fs-api
-        INTERFACE
+        PUBLIC
         Qt5::Core
         )
 
@@ -121,20 +121,20 @@ target_link_libraries(platform-fs-base
 #
 #   Library: platform-updates-api
 #
-add_library(platform-updates-api INTERFACE)
+add_library(platform-updates-api STATIC)
 
 target_sources(platform-updates-api
-        INTERFACE
+        PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/PlatformUpdates.h"
         )
 
 
 target_include_directories(platform-updates-api
-        INTERFACE
+        PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         )
 
 target_link_libraries(platform-updates-api
-        INTERFACE
+        PUBLIC
         Qt5::Core
         )
