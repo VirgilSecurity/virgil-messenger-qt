@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,69 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQNETWORKANALYZER_H
-#define VSQNETWORKANALYZER_H
+#ifndef VM_LOG_CONTEXT
+#define VM_LOG_CONTEXT
 
 #include <QObject>
-#include <QNetworkConfigurationManager>
-#include <QNetworkSession>
-#include <QMap>
-#include <QTimer>
+#include <QString>
 
-#if VS_MACOS || VS_LINUX
-#    pragma GCC diagnostic push
-#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
-class VSQNetworkAnalyzer : public QObject
+// Copyable alternative of QMessageLogContext
+struct LogContext
 {
-    Q_OBJECT
-
-    typedef QMap<int, QString> VSQNetworkInterfaceData;
-
-public:
-    VSQNetworkAnalyzer(QObject *parent = nullptr);
-    virtual ~VSQNetworkAnalyzer();
-
-    bool isConnected() const noexcept;
-
-signals:
-    void connectedChanged(bool connected);
-    void heartBeat();
-
-protected slots:
-    void onUpdateCompleted();
-
-    void onAnalyzeNetwork();
-
-protected:
-    void printConfiguration(const QNetworkConfiguration &configuration) const;
-
-    void printSession(const QNetworkSession &session) const;
-
-    void printNetworkInterface(const QNetworkInterface &interface) const;
-
-    void printMap(const VSQNetworkInterfaceData &networkInterfaceData) const;
-
-    static const int kTimerInterval = 5000;
-    static const int kSessionTimeoutMs = 1000;
-
-    QNetworkConfigurationManager m_nwManager;
-    bool m_isConnected;
-    VSQNetworkInterfaceData m_networkInterfaceData;
-    QTimer m_timer;
-
-private slots:
-    void onStart();
-
-private:
-    QThread *m_thread;
-
-    bool checkIsNeedStop();
+    QString category;
+    QString fileName;
+    int line = 0;
 };
 
-#if VS_MACOS || VS_LINUX
-#    pragma GCC diagnostic pop
-#endif
+Q_DECLARE_METATYPE(QtMsgType);
+Q_DECLARE_METATYPE(LogContext);
 
-#endif // VSQNETWORKANALYZER_H
+#endif // VM_LOG_CONTEXT

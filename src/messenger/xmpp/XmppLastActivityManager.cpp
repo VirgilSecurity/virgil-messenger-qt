@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,10 +32,10 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQLastActivityManager.h"
+#include "XmppLastActivityManager.h"
 
 #include "Settings.h"
-#include "Utils.h"
+#include "FormatUtils.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppRosterManager.h>
@@ -44,20 +44,20 @@
 #include <QDomElement>
 
 using namespace vm;
-using Self = VSQLastActivityManager;
+using Self = XmppLastActivityManager;
 
 Q_LOGGING_CATEGORY(lcLastActivityManager, "last-activity-manager");
 
-Self::VSQLastActivityManager(Settings *settings) : QXmppClientExtension(), m_settings(settings)
+Self::XmppLastActivityManager(Settings *settings) : QXmppClientExtension(), m_settings(settings)
 {
     connect(this, &Self::lastActivityMissing, this, &Self::lastActivityTextChanged);
     connect(this, &Self::lastActivityDetected, this, [this](std::chrono::seconds seconds) {
-        emit lastActivityTextChanged(vm::Utils::formattedLastSeenActivity(seconds, m_settings->nowInterval()));
+        emit lastActivityTextChanged(FormatUtils::formattedLastSeenActivity(seconds, m_settings->nowInterval()));
     });
     connect(this, &Self::errorOccured, this, &Self::onErrorOccured);
 }
 
-Self::~VSQLastActivityManager()
+Self::~XmppLastActivityManager()
 {
     stopUpdates(true);
 }
@@ -82,13 +82,13 @@ void Self::setEnabled(bool enabled)
 
 QStringList Self::discoveryFeatures() const
 {
-    return VSQLastActivityIq::discoveryFeatures();
+    return XmppLastActivityIq::discoveryFeatures();
 }
 
 bool Self::handleStanza(const QDomElement &element)
 {
-    if (element.tagName() == "iq" && VSQLastActivityIq::isLastActivityId(element)) {
-        VSQLastActivityIq lastActivityIq;
+    if (element.tagName() == "iq" && XmppLastActivityIq::isLastActivityId(element)) {
+        XmppLastActivityIq lastActivityIq;
         lastActivityIq.parse(element);
         if (m_jid != lastActivityIq.from()) {
             return false;
@@ -96,7 +96,7 @@ bool Self::handleStanza(const QDomElement &element)
         if (lastActivityIq.isValid()) {
             emit lastActivityDetected(lastActivityIq.seconds());
         } else if (lastActivityIq.needSubscription()) {
-            emit lastActivityMissing(vm::Utils::formattedLastSeenNoActivity());
+            emit lastActivityMissing(FormatUtils::formattedLastSeenNoActivity());
         } else {
             emit errorOccured(tr("Failed to find last activity"));
         }
@@ -116,7 +116,7 @@ QString Self::requestInfo()
         return QString();
     }
 
-    VSQLastActivityIq request;
+    XmppLastActivityIq request;
     request.setType(QXmppIq::Get);
     request.setTo(m_jid);
     if (client()->sendPacket(request)) {

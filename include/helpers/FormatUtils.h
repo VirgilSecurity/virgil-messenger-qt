@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,26 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_DISCOVERYMANAGER_H
-#define VM_DISCOVERYMANAGER_H
+#ifndef VM_FORMAT_UTILS_H
+#define VM_FORMAT_UTILS_H
 
-#include <qxmpp/QXmppDiscoveryManager.h>
+#include <QtCore>
+#include <QString>
 
-class VSQDiscoveryManager : public QObject
+#include <chrono>
+
+namespace vm {
+class FormatUtils
 {
-    Q_OBJECT
-
 public:
-    explicit VSQDiscoveryManager(QXmppClient *client, QObject *parent = nullptr);
-    ~VSQDiscoveryManager() override;
+    static QString formattedSize(quint64 fileSize);
 
-private:
-    void onClientConnected();
-    void onInfoReceived(const QXmppDiscoveryIq &info);
-    void onItemsReceived(const QXmppDiscoveryIq &info);
+    static QString formattedDataSizeProgress(quint64 loaded, quint64 total);
 
-    QXmppClient *m_client;
-    QXmppDiscoveryManager *m_manager;
+    static QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
+
+    static QString formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval);
+
+    static QString formattedLastSeenNoActivity();
 };
+}; // namespace vm
 
-#endif // VM_DISCOVERYMANAGER_H
+#endif // VM_FORMAT_UTILS_H

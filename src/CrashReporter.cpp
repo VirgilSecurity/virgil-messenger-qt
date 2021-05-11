@@ -36,6 +36,7 @@
 
 #include "Settings.h"
 #include "CustomerEnv.h"
+#include "LogConfig.h"
 
 #include <QDirIterator>
 #include <QNetworkAccessManager>
@@ -79,7 +80,7 @@ bool Self::sendLogFiles(const QString &details)
     }
     qCDebug(lcCrashReporter) << "Collecting of logs...";
 
-    const auto logsDir = m_settings->logsDir();
+    const auto logsDir = LogConfig::instance().logsDir();
     if (!logsDir.exists()) {
         qWarning("Directory [%s] not exist.", qPrintable(logsDir.absolutePath()));
         return false;

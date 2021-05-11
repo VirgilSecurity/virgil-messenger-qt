@@ -34,7 +34,7 @@
 
 #include "CloudFilePropertiesModel.h"
 
-#include "Utils.h"
+#include "FormatUtils.h"
 
 using namespace vm;
 using Self = CloudFilePropertiesModel;
@@ -46,7 +46,7 @@ void Self::setCloudFile(const CloudFileHandler &cloudFile)
     m_values.clear();
     if (cloudFile) {
         m_values << cloudFile->name();
-        m_values << (cloudFile->isFolder() ? QLatin1String("-") : Utils::formattedSize(cloudFile->size()));
+        m_values << (cloudFile->isFolder() ? QLatin1String("-") : FormatUtils::formattedSize(cloudFile->size()));
     }
     endResetModel();
 }

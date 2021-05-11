@@ -42,10 +42,10 @@
 #include "UserImpl.h"
 #include "Platform.h"
 
-#include "VSQNetworkAnalyzer.h"
-#include "VSQDiscoveryManager.h"
-#include "VSQContactManager.h"
-#include "VSQLastActivityManager.h"
+#include "NetworkAnalyzer.h"
+#include "XmppDiscoveryManager.h"
+#include "XmppContactManager.h"
+#include "XmppLastActivityManager.h"
 #include "XmppRoomParticipantsManager.h"
 #include "XmppMucSubManager.h"
 #include "XmppPushNotifications.h"
@@ -266,17 +266,17 @@ public:
     using QueryParamTo = GroupId;
     std::map<QueryId, QueryParamTo> historySyncQueryParams;
 
-    QPointer<VSQNetworkAnalyzer> networkAnalyzer;
+    QPointer<NetworkAnalyzer> networkAnalyzer;
     QPointer<Settings> settings;
 
     std::unique_ptr<QXmppClient> xmpp;
-    std::unique_ptr<VSQDiscoveryManager> discoveryManager;
-    std::unique_ptr<VSQContactManager> contactManager;
+    std::unique_ptr<XmppDiscoveryManager> discoveryManager;
+    std::unique_ptr<XmppContactManager> contactManager;
 
     QPointer<QXmppCarbonManager> xmppCarbonManager;
     QPointer<QXmppUploadRequestManager> xmppUploadManager;
     QPointer<QXmppMucManager> xmppGroupChatManager;
-    QPointer<VSQLastActivityManager> lastActivityManager;
+    QPointer<XmppLastActivityManager> lastActivityManager;
     QPointer<XmppRoomParticipantsManager> xmppRoomParticipantsManager;
     QPointer<XmppMucSubManager> xmppMucSubManager;
     QPointer<QXmppMamManager> xmppMamManager;
@@ -385,11 +385,11 @@ Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_im
     //
     //  Configure Network Analyzer.
     //
-    m_impl->networkAnalyzer = new VSQNetworkAnalyzer(nullptr); // will be moved to the thread
+    m_impl->networkAnalyzer = new NetworkAnalyzer(nullptr); // will be moved to the thread
     m_impl->settings = settings;
-    m_impl->lastActivityManager = new VSQLastActivityManager(settings);
+    m_impl->lastActivityManager = new XmppLastActivityManager(settings);
 
-    connect(m_impl->networkAnalyzer, &VSQNetworkAnalyzer::connectedChanged, this, &Self::onProcessNetworkState);
+    connect(m_impl->networkAnalyzer, &NetworkAnalyzer::connectedChanged, this, &Self::onProcessNetworkState);
 
     //
     //  Configure Push Notifications
@@ -479,8 +479,8 @@ void Self::onResetXmppConfiguration()
     m_impl->xmpp = std::make_unique<QXmppClient>();
 
     // Add receipt messages extension
-    m_impl->discoveryManager = std::make_unique<VSQDiscoveryManager>(m_impl->xmpp.get(), this);
-    m_impl->contactManager = std::make_unique<VSQContactManager>(m_impl->xmpp.get(), this);
+    m_impl->discoveryManager = std::make_unique<XmppDiscoveryManager>(m_impl->xmpp.get(), this);
+    m_impl->contactManager = std::make_unique<XmppContactManager>(m_impl->xmpp.get(), this);
 
     //  Create & connect extensions.
     m_impl->xmppCarbonManager = new QXmppCarbonManager();
@@ -500,7 +500,7 @@ void Self::onResetXmppConfiguration()
     m_impl->xmpp->addExtension(m_impl->xmppMamManager);
 
     // Connect XMPP signals
-    connect(m_impl->lastActivityManager, &VSQLastActivityManager::lastActivityTextChanged, this,
+    connect(m_impl->lastActivityManager, &XmppLastActivityManager::lastActivityTextChanged, this,
             &Self::lastActivityTextChanged);
 
     connect(m_impl->xmppUploadManager, &QXmppUploadRequestManager::serviceFoundChanged, this,

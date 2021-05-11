@@ -32,9 +32,6 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
-#include <QtQml>
-
 #include "Platform.h"
 #include "PlatformUpdates.h"
 #include "CustomerEnv.h"
@@ -42,12 +39,14 @@
 #include "VSQApplication.h"
 #include "VSQClipboardProxy.h"
 #include "VSQCustomer.h"
-#include "VSQLogging.h"
+#include "Logging.h"
 #include "VSQUiHelper.h"
 
-#include <QGuiApplication>
-#include <QFont>
 #include <QDesktopServices>
+#include <QFont>
+#include <QGuiApplication>
+#include <QtCore>
+#include <QtQml>
 
 using namespace vm;
 using namespace platform;
@@ -115,7 +114,7 @@ void Self::initialize()
 }
 
 /******************************************************************************/
-int Self::run(const QString &basePath, VSQLogging *logging)
+int Self::run(const QString &basePath, Logging *logging)
 {
 
     VSQUiHelper uiHelper;

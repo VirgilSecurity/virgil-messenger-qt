@@ -61,10 +61,7 @@ static const QString kSignedInUsername = "SignedInUsername";
 using namespace vm;
 using namespace platform;
 
-QDir Settings::m_logsDir = QDir();
-bool Settings::m_logsDirInitialized = false;
-
-Q_LOGGING_CATEGORY(lcSettings, "settings")
+Q_LOGGING_CATEGORY(lcSettings, "settings");
 
 Settings::Settings(QObject *parent)
     : QSettings(settingsFileName(), settingsFormat(), parent), m_sessionId(UidUtils::createUuid())
@@ -208,19 +205,6 @@ void Settings::setRunFlag(bool run)
         qCDebug(lcSettings) << "Reset session id";
         removeGroupKey(kLastSessionGroup, kSessionId);
     }
-}
-
-QDir Settings::logsDir()
-{
-    if (!m_logsDirInitialized) {
-        m_logsDir.setPath(Platform::instance().appDataLocation().filePath(QLatin1String("logs")));
-        m_logsDirInitialized = true;
-    }
-    if (!m_logsDir.exists()) {
-        qCDebug(lcSettings) << "Create logs dir:" << m_logsDir.absolutePath();
-        QDir().mkpath(m_logsDir.absolutePath());
-    }
-    return m_logsDir;
 }
 
 QDir Settings::databaseDir() const

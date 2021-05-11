@@ -77,8 +77,6 @@ public:
     void setRunFlag(bool run);
 
     // Attachments
-
-    static QDir logsDir();
     QDir databaseDir() const;
     quint64 attachmentMaxFileSize() const;
     QDir attachmentCacheDir() const;
@@ -131,8 +129,6 @@ private:
     static Format settingsFormat();
 
     QString m_sessionId;
-    static QDir m_logsDir;
-    static bool m_logsDirInitialized;
     QDir m_databaseDir;
     QDir m_attachmentCacheDir;
     QDir m_thumbnaisDir;

@@ -32,35 +32,67 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LASTACTIVITYIQ_H
-#define VM_LASTACTIVITYIQ_H
-
-#include <chrono>
+#include "XmppLastActivityIq.h"
 
 #include <QLoggingCategory>
+#include <QDomElement>
 
-#include <qxmpp/QXmppIq.h>
+using namespace vm;
+using Self = XmppLastActivityIq;
 
-Q_DECLARE_LOGGING_CATEGORY(lcLastActivity)
+static constexpr const char *const ns_last = "jabber:iq:last";
 
-class VSQLastActivityIq : public QXmppIq
+Q_LOGGING_CATEGORY(lcLastActivity, "lastActivity");
+
+bool Self::isValid() const
 {
-public:
-    bool isValid() const;
-    std::chrono::seconds seconds() const;
+    return m_valid;
+}
 
-    bool needSubscription() const;
+std::chrono::seconds Self::seconds() const
+{
+    return m_seconds;
+}
 
-    static bool isLastActivityId(const QDomElement &element);
-    static QStringList discoveryFeatures();
+bool Self::needSubscription() const
+{
+    return type() == QXmppIq::Type::Error && error().code() == 407;
+}
 
-protected:
-    void parseElementFromChild(const QDomElement &element) override;
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
+bool Self::isLastActivityId(const QDomElement &element)
+{
+    const QDomElement queryElement = element.firstChildElement("query");
+    return queryElement.namespaceURI() == ns_last;
+}
 
-private:
-    bool m_valid = false;
-    std::chrono::seconds m_seconds = std::chrono::seconds(0);
-};
+QStringList Self::discoveryFeatures()
+{
+    return { ns_last };
+}
 
-#endif // VM_LASTACTIVITYIQ_H
+void Self::parseElementFromChild(const QDomElement &element)
+{
+    m_valid = false;
+    QXmppIq::parseElementFromChild(element);
+    if (type() == QXmppIq::Type::Result) {
+        QDomElement queryElement = element.firstChildElement("query");
+        const auto secondsStr = queryElement.attribute("seconds");
+        m_seconds = std::chrono::seconds(secondsStr.toUInt(&m_valid));
+        if (!m_valid) {
+            qCWarning(lcLastActivity) << "Convertation error:" << secondsStr;
+        }
+    } else {
+        if (type() == QXmppIq::Type::Error) {
+            qCWarning(lcLastActivity) << "Error: " << error().code() << error().text();
+        } else {
+            qCWarning(lcLastActivity) << "Invalid result type: " << type();
+        }
+    }
+}
+
+void Self::toXmlElementFromChild(QXmlStreamWriter *writer) const
+{
+    writer->writeStartElement("query");
+    writer->writeDefaultNamespace(ns_last);
+    writer->writeEndElement();
+}

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,56 +32,32 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_LASTACTIVITYMANAGER_H
-#define VM_LASTACTIVITYMANAGER_H
+#include "LogConfig.h"
 
-#include <qxmpp/QXmppClientExtension.h>
+#include "Platform.h"
+#include "LogContext.h"
 
-#include "VSQLastActivityIq.h"
+using namespace vm;
+using namespace vm::platform;
+using Self = LogConfig;
 
-Q_DECLARE_LOGGING_CATEGORY(lcLastActivityManager)
-
-namespace vm {
-
-class Settings;
-
-class VSQLastActivityManager : public QXmppClientExtension
+Self &Self::instance()
 {
-    Q_OBJECT
+    static Self instance;
+    return instance;
+}
 
-public:
-    VSQLastActivityManager(Settings *settings);
-    ~VSQLastActivityManager() override;
+Self::LogConfig() : m_logsDir(Platform::instance().appDataLocation().filePath(QLatin1String("logs")))
+{
+    qRegisterMetaType<LogContext>("LogContext");
+}
 
-    void setCurrentJid(const QString &jid);
-    void setEnabled(bool enabled);
+QDir Self::logsDir() const
+{
+    std::lock_guard _(m_logsDirMutex);
+    if (!m_logsDir.exists()) {
+        QDir().mkpath(m_logsDir.absolutePath());
+    }
 
-    QStringList discoveryFeatures() const override;
-    bool handleStanza(const QDomElement &element) override;
-
-signals:
-    void lastActivityDetected(std::chrono::seconds seconds);
-    void lastActivityMissing(const QString &reason);
-    void lastActivityTextChanged(const QString &text);
-    void errorOccured(const QString &errorText);
-
-private:
-    void timerEvent(QTimerEvent *) override;
-
-    QString requestInfo();
-    bool canStart() const;
-
-    void startUpdates(bool reset);
-    void stopUpdates(bool reset);
-
-    void onErrorOccured(const QString &errorText);
-
-    Settings *m_settings;
-    bool m_enabled = true;
-    QString m_jid;
-    int m_timerId = 0;
-};
-
-} // namespace vm
-
-#endif // VM_LASTACTIVITYMANAGER_H
+    return m_logsDir;
+}

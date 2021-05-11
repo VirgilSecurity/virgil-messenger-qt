@@ -52,7 +52,7 @@ class QNetworkAccessManager;
 
 namespace vm {
 
-class VSQLogging;
+class Logging;
 
 class VSQApplication : public QObject
 {
@@ -69,7 +69,7 @@ public:
 
     static void initialize();
 
-    int run(const QString &basePath, VSQLogging *logging);
+    int run(const QString &basePath, Logging *logging);
 
     Q_INVOKABLE
     void reloadQml();

@@ -218,9 +218,17 @@ target_compile_definitions(platform-definitions
         $<BUILD_INTERFACE:VS_MACOS=$<STREQUAL:"${VS_PLATFORM}","macos">>
         $<BUILD_INTERFACE:VS_LINUX=$<STREQUAL:"${VS_PLATFORM}","linux">>
         $<BUILD_INTERFACE:VS_WINDOWS=$<STREQUAL:"${VS_PLATFORM}","windows">>
+
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG>>
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
+        $<BUILD_INTERFACE:$<$<CONFIG:Debug>:QT_QML_DEBUG>>
+        $<BUILD_INTERFACE:$<$<CONFIG:RelWithDebInfo>:QT_QML_DEBUG>>
         )
 
 
+#
+#   All platform dependent implementations.
+#
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/platforms")
 
 #
@@ -250,6 +258,38 @@ target_link_libraries(customer
         )
 
 #
+#   Logging
+#
+add_library(logging STATIC)
+
+target_sources(logging
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/LogConfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/LogContext.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/Logging.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/LogWorker.h"
+
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/LogConfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/Logging.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/LogWorker.cpp"
+        )
+
+target_include_directories(logging
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/logging>"
+        )
+
+target_link_libraries(logging
+        PUBLIC
+        Qt::Core
+        platform
+
+        PRIVATE
+        platform-definitions
+        )
+
+
+#
 #   Helpers
 #
 add_library(helpers STATIC)
@@ -259,26 +299,29 @@ target_sources(helpers
         #
         #   Includes
         #
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FileUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/UidUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/FileUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/FormatUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/UidUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h"
 
         #
         #   Sources
         #
-        ${CMAKE_CURRENT_LIST_DIR}/src/helpers/FileUtils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/helpers/UidUtils.cpp
+        "${CMAKE_CURRENT_LIST_DIR}/src/helpers/FileUtils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/helpers/FormatUtils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/helpers/UidUtils.cpp"
         )
 
 target_include_directories(helpers
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>"
         )
 
 target_link_libraries(helpers
         PUBLIC
         Qt::Core
 
+        logging
         platform-fs
 
         PRIVATE
@@ -292,13 +335,13 @@ add_library(settings STATIC)
 
 target_sources(settings
         PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/include/settings/Settings.h
-        ${CMAKE_CURRENT_LIST_DIR}/src/settings/Settings.cpp
+        "${CMAKE_CURRENT_LIST_DIR}/include/settings/Settings.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/settings/Settings.cpp"
         )
 
 target_include_directories(settings
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/settings>
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/settings>"
         )
 
 
@@ -325,124 +368,139 @@ target_sources(core-messenger
         #
         #   Includes
         #
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsSharedGroupId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupAffiliation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupInvitationStatus.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupMember.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupUpdate.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContent.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentAttachment.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentDownloadStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentEncrypted.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentGroupInvitation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentJsonUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPicture.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentText.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdateable.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessageStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/User.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserImpl.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppRoomParticipantsManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubIq.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubManager.h
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFileId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsSharedGroupId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupAffiliation.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupInvitationStatus.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupMember.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupUpdate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContent.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentAttachment.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentDownloadStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentEncrypted.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentFile.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentGroupInvitation.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentJsonUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPicture.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentText.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentType.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdateable.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessageStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/User.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserImpl.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppContactManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppDiscoveryManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppLastActivityIq.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppLastActivityManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubIq.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppPushNotifications.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppRoomParticipantsManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/network/NetworkAnalyzer.h"
 
         #
         #   Sources
         #
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Contact.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ContactUpdate.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolder.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsSharedGroupId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupAffiliation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupInvitationStatus.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupMember.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupUpdate.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentAttachment.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentDownloadStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentEncrypted.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentGroupInvitation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentJsonUtils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPicture.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentText.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentType.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessageStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/User.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/UserId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppRoomParticipantsManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubIq.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubManager.cpp
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFileId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolder.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsSharedGroupId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Contact.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ContactUpdate.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupAffiliation.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupInvitationStatus.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupMember.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupUpdate.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentAttachment.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentDownloadStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentEncrypted.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentFile.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentGroupInvitation.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentJsonUtils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPicture.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentText.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentType.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessageStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/User.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/UserId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppContactManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppDiscoveryManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppLastActivityIq.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppLastActivityManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubIq.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppPushNotifications.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppRoomParticipantsManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/network/NetworkAnalyzer.cpp"
         )
 
 target_include_directories(core-messenger
         SYSTEM PUBLIC
-        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
+        "$<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>"
+        "$<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>"
         )
 
 target_include_directories(core-messenger
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>"
 
         PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/network>"
         )
 
 target_link_libraries(core-messenger
@@ -456,6 +514,7 @@ target_link_libraries(core-messenger
         comm-kit
         helpers
         settings
+        logging
         )
 
 #
@@ -465,17 +524,17 @@ add_library(core-messenger-gui STATIC)
 
 target_sources(core-messenger-gui
         PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/include/Utils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPictureFactory.h
+        "${CMAKE_CURRENT_LIST_DIR}/include/Utils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPictureFactory.h"
 
-        ${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPictureFactory.cpp
+        "${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPictureFactory.cpp"
         )
 
 target_include_directories(core-messenger
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>"
         )
 
 target_link_libraries(core-messenger-gui
@@ -488,6 +547,7 @@ target_link_libraries(core-messenger-gui
 #   Format
 #
 if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(logging)
     add_clangformat(helpers)
     add_clangformat(settings)
     add_clangformat(core-messenger)
@@ -509,21 +569,15 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/JsonUtils.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQContactManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CrashReporter.h
         ${CMAKE_CURRENT_LIST_DIR}/include/FileLoader.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDiscoveryManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityIq.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Messenger.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
         ${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ContactAvatarLoader.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileMember.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
@@ -577,10 +631,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchChats.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchGroups.h
-        # Logging
-        ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQMessageLogContext.h
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/include/models/AccountSelectionModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatObject.h
@@ -642,8 +692,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
-        # Push Notifications
-        ${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h
 
         # Android
         # TODO: Hide this under platform API.
@@ -653,14 +701,9 @@ target_sources(${VS_TARGET_NAME}
         #  Sources
         #
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQContactManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CrashReporter.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/FileLoader.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDiscoveryManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/Messenger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityIq.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
@@ -669,7 +712,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfiler.cpp
@@ -719,9 +761,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchChats.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchGroups.cpp
-        # Logging
-        ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatObject.cpp
@@ -781,8 +820,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadAttachmentOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadFileOperation.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/operations/UploadCloudFileOperation.cpp
-        # Push Notifications
-        ${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp
         # QT QRC
         ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
         ${VS_CUSTOMER_DIR}/src/customer.qrc
@@ -846,11 +883,6 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
         $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
         $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
-
-        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG>>
-        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
-        $<BUILD_INTERFACE:$<$<CONFIG:Debug>:QT_QML_DEBUG>>
-        $<BUILD_INTERFACE:$<$<CONFIG:RelWithDebInfo>:QT_QML_DEBUG>>
         )
 
 target_compile_options(${VS_TARGET_NAME}

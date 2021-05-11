@@ -37,7 +37,7 @@
 #include "models/ListProxyModel.h"
 #include "models/ListSelectionModel.h"
 #include "Settings.h"
-#include "Utils.h"
+#include "FormatUtils.h"
 #include "Model.h"
 
 using namespace vm;
@@ -141,7 +141,7 @@ QVariant CloudFilesModel::data(const QModelIndex &index, int role) const
     case IsFolderRole:
         return file->isFolder();
     case DisplayFileSizeRole:
-        return file->isFolder() ? QString() : Utils::formattedSize(file->size());
+        return file->isFolder() ? QString() : FormatUtils::formattedSize(file->size());
     case IsSharedRole:
         return file->isShared();
     case SortRole:

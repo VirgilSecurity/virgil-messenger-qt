@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,36 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGWORKER_H
-#define VSQLOGWORKER_H
+#ifndef VM_LOG_WORKER
+#define VM_LOG_WORKER
 
-#include "VSQMessageLogContext.h"
+#include "LogContext.h"
 
 #include <QObject>
 #include <QFile>
+#include <QDir>
 
-class VSQLogWorker : public QObject
+#include <optional>
+
+namespace vm {
+class LogWorker : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit VSQLogWorker(QObject *parent = nullptr);
-    ~VSQLogWorker() override = default;
+    explicit LogWorker(QObject *parent = nullptr);
+    ~LogWorker() override = default;
 
-    void processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void processMessage(QtMsgType type, const LogContext &context, const QString &message);
 
 private:
     static QString formatLogType(QtMsgType type);
     static QString getLogFileName(int logIndex);
 
-    void fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void fileMessageHandler(QtMsgType type, const LogContext &context, const QString &message);
+    void consoleMessageHandler(QtMsgType type, const LogContext &context, const QString &message);
 
     //
     //  Prepare log file for writing of message with size messageLen
     //  Return false if message can't be written
     //
     bool prepareLogFile(qint64 messageLen);
+
     //
     //  Rotate log files
     //
@@ -70,8 +75,10 @@ private:
     void logToFile(const QString &formattedMessage);
     void logToConsole(const QString &formattedMessage);
 
+private:
     QFile m_logFile; // automatically closed in destructor
     bool m_isFirstMessage = true;
 };
+} // namespace vm
 
-#endif // VSQLOGGWORKER_H
+#endif // VM_LOG_WORKER

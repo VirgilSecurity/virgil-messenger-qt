@@ -50,16 +50,6 @@ find_package(Qt5 COMPONENTS QmlImportScanner Gui REQUIRED)
 #   Libraries
 # ---------------------------------------------------------------------------
 #
-#   Library: platform-deps.
-#
-add_library(platform-deps INTERFACE)
-target_link_libraries(platform-deps
-        INTERFACE
-        Qt5::Gui
-        Qt5::QIosOptionalPlugin_NSPhotoLibrary
-        )
-
-#
 #   Library: platform.
 #
 add_library(platform STATIC)
@@ -68,7 +58,26 @@ target_sources(platform
         PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/PlatformIos.h"
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformIos.mm"
+        )
 
+target_link_libraries(platform
+        PUBLIC
+        platform-base
+        customer
+        )
+
+target_include_directories(platform
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+#
+#   Library: platform-gui.
+#
+add_library(platform-gui STATIC)
+
+target_sources(platform-gui
+        PRIVATE
         # TODO: Move to the include/src.
         # TODO: Hide implementation under platform API.
         "${CMAKE_CURRENT_LIST_DIR}/AppDelegate.mm"
@@ -78,7 +87,7 @@ target_sources(platform
         "${CMAKE_CURRENT_LIST_DIR}/IosViewController.mm"
         )
 
-target_include_directories(platform
+target_include_directories(platform-gui
         PUBLIC
         # TODO: When implementation will be hidden under platform API, then remove it.
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../include/controllers>"
@@ -88,11 +97,10 @@ target_include_directories(platform
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         )
 
-target_link_libraries(platform
+target_link_libraries(platform-gui
         PUBLIC
-        platform-deps
-        platform-base
-        customer
+        Qt5::Gui
+        platform
         )
 
 #
@@ -137,7 +145,18 @@ set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
 
 add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
 
-# Settings for signing
+#
+#   Platform specific dependencies.
+#
+target_link_libraries(${VS_TARGET_NAME}
+        PUBLIC
+        Qt5::QIosOptionalPlugin_NSPhotoLibrary
+        platform-gui
+        )
+
+#
+#   Settings for signing.
+#
 if (VS_CODE_SIGN_IDENTITY)
 set_xcode_property(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "${VS_CODE_SIGN_IDENTITY}")
 endif ()
@@ -156,7 +175,10 @@ set_target_properties(${VS_TARGET_NAME}
     XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
     XCODE_ATTRIBUTE_SKIP_INSTALL "No"
     )
-# Storyboard default
+
+#
+#   Storyboard default.
+#
 configure_file("${CMAKE_CURRENT_LIST_DIR}/LaunchScreen.storyboard.in"
     "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
 configure_file("${CMAKE_CURRENT_LIST_DIR}/Default-568h@2x.png"

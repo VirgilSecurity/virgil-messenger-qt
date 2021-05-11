@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,50 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UTILS_H
-#define VM_UTILS_H
+#ifndef VM_CONFIG_H
+#define VM_CONFIG_H
 
-#include <QImage>
-#include <QImageReader>
+#include <QDir>
 
-#include "Contact.h"
-#include "Message.h"
-#include "MessageContentAttachment.h"
+#include <mutex>
 
 namespace vm {
-namespace Utils {
-// String processing/format
+class LogConfig
+{
+public:
+    static LogConfig &instance();
 
-QString elidedText(const QString &text, const int maxLength);
+    QDir logsDir() const;
 
-QString messageContentDisplayText(const MessageContent &messageContent);
+private:
+    LogConfig();
 
-QString printableLoadProgress(quint64 loaded, quint64 total);
+private:
+    QDir m_logsDir;
+    mutable std::mutex m_logsDirMutex;
+};
 
-QString printableContactsList(const Contacts &contacts);
-
-// Debug
-
-void printThreadId(const QString &message);
-
-// Image functions
-
-QSize applyOrientation(const QSize &size, const int orientation);
-
-QImage applyOrientation(const QImage &image, const int orientation);
-
-QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
-
-bool readImage(QImageReader *reader, QImage *image);
-
-// Contacts
-
-Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
-
-QUrl getContactAvatarUrl(const ContactHandler contact);
-
-QString displayUsername(const QString &username, const UserId &userId);
-} // namespace Utils
 } // namespace vm
 
-#endif // VM_UTILS_H
+#endif // VM_CONFIG_H

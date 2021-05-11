@@ -107,7 +107,7 @@ QXmppPushEnableIq Self::buildEnableIq() const
     {
         QXmppDataForm::Field field;
         field.setKey("topic");
-        field.setValue(kPushNotificationsTopic); // FIXME: Retore ENV functionlity ".stg", ".dev"
+        field.setValue(kPushNotificationsTopic); // FIXME: Restore ENV functionality ".stg", ".dev"
         fields << field;
     }
     {

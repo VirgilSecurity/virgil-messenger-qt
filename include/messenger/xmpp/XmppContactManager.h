@@ -37,13 +37,14 @@
 
 #include <qxmpp/QXmppRosterManager.h>
 
-class VSQContactManager : public QObject
+namespace vm {
+class XmppContactManager : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit VSQContactManager(QXmppClient *client, QObject *parent = nullptr);
-    ~VSQContactManager() override;
+    explicit XmppContactManager(QXmppClient *client, QObject *parent = nullptr);
+    ~XmppContactManager() override;
 
     bool addContact(const QString &jid, const QString &name, const QString &reason);
     bool removeContact(const QString &jid);
@@ -67,5 +68,6 @@ private:
     QXmppRosterManager *m_manager;
     QString m_lastErrorText;
 };
+} // namespace vm
 
 #endif // VM_CONTACTMANAGER_H

@@ -32,26 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQDiscoveryManager.h"
+#include "XmppDiscoveryManager.h"
 
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppCarbonManager.h>
 
 #include <QLoggingCategory>
 
+using namespace vm;
+using Self = XmppDiscoveryManager;
+
 Q_LOGGING_CATEGORY(lcDiscoveryManager, "discovery-manager");
 
-VSQDiscoveryManager::VSQDiscoveryManager(QXmppClient *client, QObject *parent)
+Self::XmppDiscoveryManager(QXmppClient *client, QObject *parent)
     : QObject(parent), m_client(client), m_manager(client->findExtension<QXmppDiscoveryManager>())
 {
-    connect(client, &QXmppClient::connected, this, &VSQDiscoveryManager::onClientConnected);
-    connect(m_manager, &QXmppDiscoveryManager::infoReceived, this, &VSQDiscoveryManager::onInfoReceived);
-    connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &VSQDiscoveryManager::onItemsReceived);
+    connect(client, &QXmppClient::connected, this, &Self::onClientConnected);
+    connect(m_manager, &QXmppDiscoveryManager::infoReceived, this, &Self::onInfoReceived);
+    connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &Self::onItemsReceived);
 }
 
-VSQDiscoveryManager::~VSQDiscoveryManager() { }
+Self::~XmppDiscoveryManager() { }
 
-void VSQDiscoveryManager::onClientConnected()
+void Self::onClientConnected()
 {
     const auto domain = m_client->configuration().domain();
 
@@ -62,7 +65,7 @@ void VSQDiscoveryManager::onClientConnected()
     qCDebug(lcDiscoveryManager) << "Discovery manager items requested" << domain << "id:" << itemsId;
 }
 
-void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
+void Self::onInfoReceived(const QXmppDiscoveryIq &info)
 {
     if (info.from() != m_client->configuration().domain()) {
         return;
@@ -90,7 +93,7 @@ void VSQDiscoveryManager::onInfoReceived(const QXmppDiscoveryIq &info)
     }
 }
 
-void VSQDiscoveryManager::onItemsReceived(const QXmppDiscoveryIq &info)
+void Self::onItemsReceived(const QXmppDiscoveryIq &info)
 {
     const auto domain = m_client->configuration().domain();
     const QList<QXmppDiscoveryIq::Item> items = info.items();

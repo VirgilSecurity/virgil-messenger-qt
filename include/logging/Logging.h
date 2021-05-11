@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,50 +32,41 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UTILS_H
-#define VM_UTILS_H
+#ifndef VM_LOGGING_H
+#define VM_LOGGING_H
 
-#include <QImage>
-#include <QImageReader>
+#include "LogContext.h"
 
-#include "Contact.h"
-#include "Message.h"
-#include "MessageContentAttachment.h"
+#include <QObject>
+#include <QMessageLogContext>
+
+#include <memory>
+
+class QThread;
 
 namespace vm {
-namespace Utils {
-// String processing/format
+class Logging : public QObject
+{
+    Q_OBJECT
 
-QString elidedText(const QString &text, const int maxLength);
+public:
+    explicit Logging(QObject *parent = nullptr);
+    virtual ~Logging();
 
-QString messageContentDisplayText(const MessageContent &messageContent);
+signals:
+    void messageCreated(QtMsgType type, const LogContext &context, const QString &message);
+    void formattedMessageCreated(const QString &message);
 
-QString printableLoadProgress(quint64 loaded, quint64 total);
+private:
+    void formatMessage(QtMsgType type, const LogContext &context, const QString &message);
 
-QString printableContactsList(const Contacts &contacts);
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
-// Debug
+    static Logging *m_instance;
 
-void printThreadId(const QString &message);
+    std::unique_ptr<QThread> m_workerThread;
+};
 
-// Image functions
-
-QSize applyOrientation(const QSize &size, const int orientation);
-
-QImage applyOrientation(const QImage &image, const int orientation);
-
-QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
-
-bool readImage(QImageReader *reader, QImage *image);
-
-// Contacts
-
-Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
-
-QUrl getContactAvatarUrl(const ContactHandler contact);
-
-QString displayUsername(const QString &username, const UserId &userId);
-} // namespace Utils
 } // namespace vm
 
-#endif // VM_UTILS_H
+#endif // VM_LOGGING_H

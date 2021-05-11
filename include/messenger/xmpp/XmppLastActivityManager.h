@@ -32,44 +32,56 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQLOGGING_H
-#define VSQLOGGING_H
+#ifndef VM_LASTACTIVITYMANAGER_H
+#define VM_LASTACTIVITYMANAGER_H
 
-#include <memory>
+#include <qxmpp/QXmppClientExtension.h>
 
-#include <QObject>
+#include "XmppLastActivityIq.h"
 
-#include "VSQMessageLogContext.h"
-
-class QThread;
+Q_DECLARE_LOGGING_CATEGORY(lcLastActivityManager)
 
 namespace vm {
 
-class VSQLogging : public QObject
+class Settings;
+
+class XmppLastActivityManager : public QXmppClientExtension
 {
     Q_OBJECT
 
 public:
-    explicit VSQLogging(QObject *parent = nullptr);
-    virtual ~VSQLogging();
+    XmppLastActivityManager(Settings *settings);
+    ~XmppLastActivityManager() override;
+
+    void setCurrentJid(const QString &jid);
+    void setEnabled(bool enabled);
+
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement &element) override;
 
 signals:
-    void messageCreated(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
-    void formattedMessageCreated(const QString &message);
+    void lastActivityDetected(std::chrono::seconds seconds);
+    void lastActivityMissing(const QString &reason);
+    void lastActivityTextChanged(const QString &text);
+    void errorOccured(const QString &errorText);
 
 private:
-    void formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message);
+    void timerEvent(QTimerEvent *) override;
 
-    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+    QString requestInfo();
+    bool canStart() const;
 
-    static VSQLogging *m_instance;
+    void startUpdates(bool reset);
+    void stopUpdates(bool reset);
 
-    std::unique_ptr<QThread> m_workerThread;
+    void onErrorOccured(const QString &errorText);
+
+    Settings *m_settings;
+    bool m_enabled = true;
+    QString m_jid;
+    int m_timerId = 0;
 };
 
 } // namespace vm
 
-Q_DECLARE_METATYPE(QtMsgType)
-Q_DECLARE_METATYPE(VSQMessageLogContext)
-
-#endif // VSQLOGGING_H
+#endif // VM_LASTACTIVITYMANAGER_H

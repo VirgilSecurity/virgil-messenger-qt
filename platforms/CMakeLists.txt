@@ -36,12 +36,11 @@
 #   Build platform dependent implementations as libraries.
 #
 #   May depends on targets:
-#       * Qt5::Core
+#       * Qt5::*
 #       * platform-definitions
 #       * customer
 #
 #   Create targets:
-#       * platform-deps    - interface library that refers mandatory platform libraries, i.e curl.
 #       * platform-api     - interface library that declares API for generic platform operations.
 #       * platform-base    - base implementation of platform-api.
 #       * platform         - platform specific implementation of platform-api.

@@ -32,10 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQContactManager.h"
 #include "VSQCustomer.h"
-#include "VSQDiscoveryManager.h"
-#include "VSQLastActivityManager.h"
 #include "Messenger.h"
 #include "Utils.h"
 #include "Settings.h"

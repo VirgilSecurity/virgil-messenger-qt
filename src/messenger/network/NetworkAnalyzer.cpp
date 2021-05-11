@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,7 +32,7 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQNetworkAnalyzer.h"
+#include "NetworkAnalyzer.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -42,6 +42,9 @@
 #include <QRegularExpression>
 #include <QNetworkSession>
 #include <QLoggingCategory>
+
+using namespace vm;
+using Self = NetworkAnalyzer;
 
 #if !defined(DEBUG_NETWORK)
 #    define DEBUG_NETWORK 0
@@ -54,7 +57,7 @@ Q_LOGGING_CATEGORY(lcNetwork, "network");
 #    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-VSQNetworkAnalyzer::VSQNetworkAnalyzer(QObject *parent) : QObject(parent), m_nwManager(this), m_isConnected(false)
+Self::NetworkAnalyzer(QObject *parent) : QObject(parent), m_nwManager(this), m_isConnected(false)
 {
     // To disable issue: QNetworkAccessManager shows "Network access is disabled."
     qputenv("QT_BEARER_POLL_TIMEOUT", QByteArray::number(-1));
@@ -69,9 +72,9 @@ VSQNetworkAnalyzer::VSQNetworkAnalyzer(QObject *parent) : QObject(parent), m_nwM
     m_thread->start();
 }
 
-VSQNetworkAnalyzer::~VSQNetworkAnalyzer()
+Self::~NetworkAnalyzer()
 {
-    // Stop execuion of NetworkAnalyzer::onAnalyzeNetwork() if it's running
+    // Stop execuion of Self::onAnalyzeNetwork() if it's running
     m_thread->requestInterruption();
 
     // Do quit in correct thread
@@ -86,7 +89,7 @@ VSQNetworkAnalyzer::~VSQNetworkAnalyzer()
     }
 }
 
-void VSQNetworkAnalyzer::onStart()
+void Self::onStart()
 {
     m_timer.setInterval(kTimerInterval);
     m_timer.setSingleShot(false);
@@ -95,19 +98,19 @@ void VSQNetworkAnalyzer::onStart()
     onUpdateCompleted();
 }
 
-bool VSQNetworkAnalyzer::isConnected() const noexcept
+bool Self::isConnected() const noexcept
 {
     return m_isConnected;
 }
 
-void VSQNetworkAnalyzer::onUpdateCompleted()
+void Self::onUpdateCompleted()
 {
     onAnalyzeNetwork();
 
     m_timer.start();
 };
 
-bool VSQNetworkAnalyzer::checkIsNeedStop()
+bool Self::checkIsNeedStop()
 {
     bool needStop = QThread::currentThread()->isInterruptionRequested();
     if (needStop) {
@@ -116,7 +119,7 @@ bool VSQNetworkAnalyzer::checkIsNeedStop()
     return needStop;
 }
 
-void VSQNetworkAnalyzer::onAnalyzeNetwork()
+void Self::onAnalyzeNetwork()
 {
     bool currentState = false;
     static bool initialized = false;
@@ -244,7 +247,7 @@ void VSQNetworkAnalyzer::onAnalyzeNetwork()
     checkIsNeedStop();
 }
 
-void VSQNetworkAnalyzer::printNetworkInterface(const QNetworkInterface &interface) const
+void Self::printNetworkInterface(const QNetworkInterface &interface) const
 {
 #if DEBUG_NETWORK
     qCDebug(lcNetwork).noquote().nospace()
@@ -260,7 +263,7 @@ void VSQNetworkAnalyzer::printNetworkInterface(const QNetworkInterface &interfac
 #endif
 }
 
-void VSQNetworkAnalyzer::printMap(const VSQNetworkInterfaceData &nid) const
+void Self::printMap(const VSQNetworkInterfaceData &nid) const
 {
 #if DEBUG_NETWORK
     QMapIterator<int, QString> i(nid);
@@ -273,7 +276,7 @@ void VSQNetworkAnalyzer::printMap(const VSQNetworkInterfaceData &nid) const
 #endif
 }
 
-void VSQNetworkAnalyzer::printSession(const QNetworkSession &session) const
+void Self::printSession(const QNetworkSession &session) const
 {
 #if DEBUG_NETWORK
     bool sessionConnected = session.state() == QNetworkSession::Connected ? true : false;
@@ -292,7 +295,7 @@ void VSQNetworkAnalyzer::printSession(const QNetworkSession &session) const
 #endif
 }
 
-void VSQNetworkAnalyzer::printConfiguration(const QNetworkConfiguration &configuration) const
+void Self::printConfiguration(const QNetworkConfiguration &configuration) const
 {
 #if DEBUG_NETWORK
     qCDebug(lcNetwork).noquote().nospace()

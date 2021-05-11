@@ -32,17 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VSQMESSAGELOGCONTEXT_H
-#define VSQMESSAGELOGCONTEXT_H
+#ifndef VM_DISCOVERYMANAGER_H
+#define VM_DISCOVERYMANAGER_H
 
-#include <QString>
+#include <qxmpp/QXmppDiscoveryManager.h>
 
-// Copyable alternative of QMessageLogContext
-struct VSQMessageLogContext
+namespace vm {
+class XmppDiscoveryManager : public QObject
 {
-    QString category;
-    QString fileName;
-    int line = 0;
-};
+    Q_OBJECT
 
-#endif // VSQMESSAGELOGCONTEXT_H
+public:
+    explicit XmppDiscoveryManager(QXmppClient *client, QObject *parent = nullptr);
+    ~XmppDiscoveryManager() override;
+
+private:
+    void onClientConnected();
+    void onInfoReceived(const QXmppDiscoveryIq &info);
+    void onItemsReceived(const QXmppDiscoveryIq &info);
+
+    QXmppClient *m_client;
+    QXmppDiscoveryManager *m_manager;
+};
+} // namespace vm
+
+#endif // VM_DISCOVERYMANAGER_H

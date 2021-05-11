@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,50 +32,71 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_UTILS_H
-#define VM_UTILS_H
+#ifndef VM_NETWORK_ANALYZER_H
+#define VM_NETWORK_ANALYZER_H
 
-#include <QImage>
-#include <QImageReader>
+#include <QObject>
+#include <QNetworkConfigurationManager>
+#include <QNetworkSession>
+#include <QMap>
+#include <QTimer>
 
-#include "Contact.h"
-#include "Message.h"
-#include "MessageContentAttachment.h"
+#if VS_MACOS || VS_LINUX
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 namespace vm {
-namespace Utils {
-// String processing/format
+class NetworkAnalyzer : public QObject
+{
+    Q_OBJECT
 
-QString elidedText(const QString &text, const int maxLength);
+    typedef QMap<int, QString> VSQNetworkInterfaceData;
 
-QString messageContentDisplayText(const MessageContent &messageContent);
+public:
+    NetworkAnalyzer(QObject *parent = nullptr);
+    virtual ~NetworkAnalyzer();
 
-QString printableLoadProgress(quint64 loaded, quint64 total);
+    bool isConnected() const noexcept;
 
-QString printableContactsList(const Contacts &contacts);
+signals:
+    void connectedChanged(bool connected);
+    void heartBeat();
 
-// Debug
+protected slots:
+    void onUpdateCompleted();
 
-void printThreadId(const QString &message);
+    void onAnalyzeNetwork();
 
-// Image functions
+protected:
+    void printConfiguration(const QNetworkConfiguration &configuration) const;
 
-QSize applyOrientation(const QSize &size, const int orientation);
+    void printSession(const QNetworkSession &session) const;
 
-QImage applyOrientation(const QImage &image, const int orientation);
+    void printNetworkInterface(const QNetworkInterface &interface) const;
 
-QSize calculateThumbnailSize(const QSize &size, const QSize &maxSize, const int orientation = 0);
+    void printMap(const VSQNetworkInterfaceData &networkInterfaceData) const;
 
-bool readImage(QImageReader *reader, QImage *image);
+    static const int kTimerInterval = 5000;
+    static const int kSessionTimeoutMs = 1000;
 
-// Contacts
+    QNetworkConfigurationManager m_nwManager;
+    bool m_isConnected;
+    VSQNetworkInterfaceData m_networkInterfaceData;
+    QTimer m_timer;
 
-Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
+private slots:
+    void onStart();
 
-QUrl getContactAvatarUrl(const ContactHandler contact);
+private:
+    QThread *m_thread;
 
-QString displayUsername(const QString &username, const UserId &userId);
-} // namespace Utils
+    bool checkIsNeedStop();
+};
 } // namespace vm
 
-#endif // VM_UTILS_H
+#if VS_MACOS || VS_LINUX
+#    pragma GCC diagnostic pop
+#endif
+
+#endif // VM_NETWORK_ANALYZER_H

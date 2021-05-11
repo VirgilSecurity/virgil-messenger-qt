@@ -32,22 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "VSQContactManager.h"
+#include "XmppContactManager.h"
 
 #include <qxmpp/QXmppClient.h>
 
 #include <QLoggingCategory>
 
+using namespace vm;
+using Self = XmppContactManager;
+
 Q_LOGGING_CATEGORY(lcContactManager, "contact-manager");
 
-VSQContactManager::VSQContactManager(QXmppClient *client, QObject *parent)
+Self::XmppContactManager(QXmppClient *client, QObject *parent)
     : QObject(parent), m_client(client), m_manager(client->findExtension<QXmppRosterManager>())
 {
 }
 
-VSQContactManager::~VSQContactManager() { }
+Self::~XmppContactManager() { }
 
-bool VSQContactManager::addContact(const QString &jid, const QString &name, const QString &reason)
+bool Self::addContact(const QString &jid, const QString &name, const QString &reason)
 {
     if (m_client->state() != QXmppClient::ConnectedState) {
         return setLastErrorText(tr("No connection"));
@@ -69,7 +72,7 @@ bool VSQContactManager::addContact(const QString &jid, const QString &name, cons
     return true;
 }
 
-bool VSQContactManager::removeContact(const QString &jid)
+bool Self::removeContact(const QString &jid)
 {
     if (m_client->state() != QXmppClient::ConnectedState) {
         return setLastErrorText(tr("No connection"));
@@ -93,7 +96,7 @@ bool VSQContactManager::removeContact(const QString &jid)
     return true;
 }
 
-bool VSQContactManager::renameContact(const QString &jid, const QString &newName)
+bool Self::renameContact(const QString &jid, const QString &newName)
 {
     if (m_client->state() != QXmppClient::ConnectedState) {
         return setLastErrorText(tr("No connection"));
@@ -106,12 +109,12 @@ bool VSQContactManager::renameContact(const QString &jid, const QString &newName
     return true;
 }
 
-QString VSQContactManager::lastErrorText() const
+QString Self::lastErrorText() const
 {
     return m_lastErrorText;
 }
 
-VSQContactManager::ContactInfo VSQContactManager::find(const QString &jid) const
+Self::ContactInfo Self::find(const QString &jid) const
 {
     ContactInfo status;
     status.exists = m_manager->getRosterBareJids().contains(jid);
@@ -122,7 +125,7 @@ VSQContactManager::ContactInfo VSQContactManager::find(const QString &jid) const
     return status;
 }
 
-bool VSQContactManager::setLastErrorText(const QString &text)
+bool Self::setLastErrorText(const QString &text)
 {
     m_lastErrorText = text;
     qCWarning(lcContactManager) << text;

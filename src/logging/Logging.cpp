@@ -32,18 +32,18 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "logging/VSQLogging.h"
+#include "Logging.h"
+
+#include "LogWorker.h"
 
 #include <QThread>
 
-#include "logging/VSQLogWorker.h"
-
 using namespace vm;
-using Self = VSQLogging;
+using Self = Logging;
 
 Self *Self::m_instance = nullptr;
 
-Self::VSQLogging(QObject *parent) : QObject(parent)
+Self::Logging(QObject *parent) : QObject(parent)
 {
     // Set instance
     if (m_instance) {
@@ -54,24 +54,24 @@ Self::VSQLogging(QObject *parent) : QObject(parent)
 
     // Register
     qRegisterMetaType<QtMsgType>();
-    qRegisterMetaType<VSQMessageLogContext>();
+    qRegisterMetaType<LogContext>();
 
     // Internal connections
     connect(this, &Self::messageCreated, this, &Self::formatMessage);
 
     // Setup thread, worker and connections
     m_workerThread = std::make_unique<QThread>();
-    auto worker = new VSQLogWorker();
+    auto worker = new LogWorker();
     worker->moveToThread(m_workerThread.get());
-    connect(this, &Self::messageCreated, worker, &VSQLogWorker::processMessage);
-    connect(m_workerThread.get(), &QThread::finished, worker, &VSQLogWorker::deleteLater);
+    connect(this, &Self::messageCreated, worker, &LogWorker::processMessage);
+    connect(m_workerThread.get(), &QThread::finished, worker, &LogWorker::deleteLater);
     m_workerThread->start();
 
     // Install handler
     qInstallMessageHandler(&Self::messageHandler);
 }
 
-Self::~VSQLogging()
+Self::~Logging()
 {
     // Unset handler
     qInstallMessageHandler(0);
@@ -84,7 +84,7 @@ Self::~VSQLogging()
     m_instance = nullptr;
 }
 
-void Self::formatMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
+void Self::formatMessage(QtMsgType type, const LogContext &context, const QString &message)
 {
     QChar preffix;
     QString color;
@@ -118,6 +118,6 @@ void Self::formatMessage(QtMsgType type, const VSQMessageLogContext &context, co
 
 void Self::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
-    VSQMessageLogContext logContext { context.category, context.file, context.line };
+    LogContext logContext { context.category, context.file, context.line };
     emit m_instance->messageCreated(type, logContext, message);
 }

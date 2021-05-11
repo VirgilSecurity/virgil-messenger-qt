@@ -32,24 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "logging/VSQLogWorker.h"
+#include "LogWorker.h"
 
-#include "Settings.h"
+#include "LogConfig.h"
 
 #include <QTextStream>
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QDir>
 
-#include <stdio.h>
+#include <cstdio>
 
 constexpr const qint64 LOG_MAX_FILESIZE = 1024 * 1024 / 2; // 0.5 Mb
 
 using namespace vm;
+using Self = LogWorker;
 
-VSQLogWorker::VSQLogWorker(QObject *parent) : QObject(parent), m_logFile() { }
+Self::LogWorker(QObject *parent) : QObject(parent), m_logFile() { }
 
-void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
+void Self::processMessage(QtMsgType type, const LogContext &context, const QString &message)
 {
 #ifdef QT_DEBUG
     consoleMessageHandler(type, context, message);
@@ -57,7 +58,7 @@ void VSQLogWorker::processMessage(QtMsgType type, const VSQMessageLogContext &co
     fileMessageHandler(type, context, message);
 }
 
-void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
+void Self::fileMessageHandler(QtMsgType type, const LogContext &context, const QString &message)
 {
 
     auto formattedMessage = QString("%1 [%2] [%3:%4] %5")
@@ -69,13 +70,13 @@ void VSQLogWorker::fileMessageHandler(QtMsgType type, const VSQMessageLogContext
     logToFile(formattedMessage);
 }
 
-void VSQLogWorker::consoleMessageHandler(QtMsgType type, const VSQMessageLogContext &context, const QString &message)
+void Self::consoleMessageHandler(QtMsgType type, const LogContext &context, const QString &message)
 {
     auto formattedMessage = QString("%1 [%2] %3").arg(formatLogType(type)).arg(context.category).arg(message);
     logToConsole(formattedMessage);
 }
 
-bool VSQLogWorker::prepareLogFile(qint64 messageLen)
+bool Self::prepareLogFile(qint64 messageLen)
 {
     if (messageLen > LOG_MAX_FILESIZE) {
         // Skip very long messages where size exceeds file size limit.
@@ -104,7 +105,7 @@ bool VSQLogWorker::prepareLogFile(qint64 messageLen)
     return true;
 }
 
-void VSQLogWorker::rotateLogFiles()
+void Self::rotateLogFiles()
 {
     const auto currentFileName = getLogFileName(0);
     if (QFile::exists(currentFileName)) {
@@ -112,7 +113,7 @@ void VSQLogWorker::rotateLogFiles()
     }
 }
 
-void VSQLogWorker::logToFile(const QString &formattedMessage)
+void Self::logToFile(const QString &formattedMessage)
 {
     if (!prepareLogFile(formattedMessage.size())) {
         return;
@@ -121,7 +122,7 @@ void VSQLogWorker::logToFile(const QString &formattedMessage)
     QTextStream { &m_logFile } << formattedMessage << "\n";
 }
 
-void VSQLogWorker::logToConsole(const QString &formattedMessage)
+void Self::logToConsole(const QString &formattedMessage)
 {
     fflush(stdout);
     QFile consoleFile;
@@ -130,7 +131,7 @@ void VSQLogWorker::logToConsole(const QString &formattedMessage)
     }
 }
 
-QString VSQLogWorker::formatLogType(QtMsgType type)
+QString Self::formatLogType(QtMsgType type)
 {
     switch (type) {
     case QtDebugMsg:
@@ -153,8 +154,8 @@ QString VSQLogWorker::formatLogType(QtMsgType type)
     }
 }
 
-QString VSQLogWorker::getLogFileName(int logIndex)
+QString Self::getLogFileName(int logIndex)
 {
     const auto fileName = QCoreApplication::applicationName() + "_" + QString::number(logIndex) + ".log";
-    return Settings::logsDir().filePath(fileName);
+    return LogConfig::instance().logsDir().filePath(fileName);
 }
