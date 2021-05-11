@@ -842,13 +842,13 @@ target_link_libraries(${VS_TARGET_NAME}
         platform-updates
         settings
 
-        platform-deps
-
         Qt5::Core
         Qt5::Quick
         Qt5::Sql
         Qt5::Concurrent
         Qt5::Qml
+
+        platform-deps # must be the last
         )
 
 #

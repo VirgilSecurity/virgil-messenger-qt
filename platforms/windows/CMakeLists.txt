@@ -43,6 +43,16 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 #   Libraries
 # ---------------------------------------------------------------------------
 #
+#   Library: platform-deps
+#
+add_library(platform-deps INTERFACE)
+
+target_link_libraries(platform-deps
+        INTERFACE
+        curl
+        )
+
+#
 #   Library: platform-updates.
 #
 add_library(platform-updates STATIC)
