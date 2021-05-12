@@ -72,38 +72,6 @@ target_include_directories(platform
         )
 
 #
-#   Library: platform-gui.
-#
-add_library(platform-gui STATIC)
-
-target_sources(platform-gui
-        PRIVATE
-        # TODO: Move to the include/src.
-        # TODO: Hide implementation under platform API.
-        "${CMAKE_CURRENT_LIST_DIR}/AppDelegate.mm"
-        "${CMAKE_CURRENT_LIST_DIR}/IosDocumentInteractionController.h"
-        "${CMAKE_CURRENT_LIST_DIR}/IosDocumentInteractionController.mm"
-        "${CMAKE_CURRENT_LIST_DIR}/IosViewController.h"
-        "${CMAKE_CURRENT_LIST_DIR}/IosViewController.mm"
-        )
-
-target_include_directories(platform-gui
-        PUBLIC
-        # TODO: When implementation will be hidden under platform API, then remove it.
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../include/controllers>"
-
-        PUBLIC
-        # TODO: When implementation will be hidden under platform API, make it PRIVATE.
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-        )
-
-target_link_libraries(platform-gui
-        PUBLIC
-        Qt5::Gui
-        platform
-        )
-
-#
 #   Library: platform-fs.
 #
 add_library(platform-fs STATIC)
@@ -124,6 +92,39 @@ target_link_libraries(platform-fs
         platform-fs-base
         )
 
+#
+#   Library: platform-gui.
+#
+add_library(platform-gui STATIC)
+
+target_sources(platform-gui
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformDocumentInteractionControllerDataSourceIos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformDocumentInteractionControllerIos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformDocumentInteractionControllerPreviewItemIos.h"
+
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerDataSourceIos.mm"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerIos.mm"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerPreviewItemIos.mm"
+
+        "${CMAKE_CURRENT_LIST_DIR}/src/AppDelegate.mm"
+        )
+
+target_include_directories(platform-gui
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+find_library(QUICK_LOOK_FRAMEWORK QuickLook REQUIRED)
+
+target_link_libraries(platform-gui
+        PUBLIC
+        platform
+        platform-gui-api
+
+        ${QUICK_LOOK_FRAMEWORK}
+        Qt5::Gui
+        )
 # ---------------------------------------------------------------------------
 #   Common build settings.
 # ---------------------------------------------------------------------------
@@ -173,13 +174,13 @@ set_target_properties(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
 #
 target_sources(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
         PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/NotificationService.mm"
-        "${CMAKE_CURRENT_SOURCE_DIR}/NotificationService.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/NotificationService.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/NotificationService.mm"
         )
 
 target_include_directories(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
-        PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>"
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         )
 
 #
@@ -224,6 +225,13 @@ set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS "YES")
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} DEPLOYMENT_POSTPROCESSING[variant=MinSizeRel] "YES")
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} DEPLOYMENT_POSTPROCESSING[variant=Release] "YES")
+
+#
+#   Format.
+#
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(${VS_TARGET_NOTIFICATION_EXTENSION_NAME})
+endif()
 
 # ---------------------------------------------------------------------------
 #   Main Application.

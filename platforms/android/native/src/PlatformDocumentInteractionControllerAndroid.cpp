@@ -32,49 +32,29 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#import "NotificationService.h"
+#include "PlatformDocumentInteractionControllerAndroid.h"
 
-#include "CoreMessenger.h"
-#include "Settings.h"
+#include <QAndroidJniObject>
+#include <QtAndroid>
 
-#include <memory>
+#include "PlatformFs.h"
 
 using namespace vm;
+using namespace vm::platform;
+using Self = PlatformDocumentInteractionControllerAndroid;
 
-@interface NotificationService ()
-
-@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent *contentToDeliver);
-@property (nonatomic, strong) UNMutableNotificationContent *bestAttemptContent;
-
-@end
-
-@implementation NotificationService
-
-- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
-    self.contentHandler = contentHandler;
-    self.bestAttemptContent = [request.content mutableCopy];
-    
-    //
-    //  Replace Base64 with something readable.
-    //
-    self.bestAttemptContent.title = @"<...>";
-    self.bestAttemptContent.body = @"encrypted message";
-    
-    //
-    //  Extract encrypted message.
-    //
-
-    //
-    //  Try to decrypt encrypted message.
-    //
-    auto settings = std::make_unique<Settings>();
-    CoreMessenger messenger(settings.get());
+PlatformDocumentInteractionController *PlatformDocumentInteractionController::create(QObject *parent)
+{
+    return new Self(parent);
 }
 
-- (void)serviceExtensionTimeWillExpire {
-    // Called just before the extension will be terminated by the system.
-    // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
-    self.contentHandler(self.bestAttemptContent);
+void Self::openUrl(const QUrl &url)
+{
+    const auto filePath = QAndroidJniObject::fromString(PlatformFs::instance().urlToLocalFile(url));
+    const auto javaResult = QAndroidJniObject::callStaticMethod<jboolean>(
+            "org/virgil/utils/DocumentInteraction", "viewFile", "(Landroid/content/Context;Ljava/lang/String;)Z",
+            QtAndroid::androidActivity().object<jobject>(), filePath.object<jstring>());
+    if (!static_cast<bool>(javaResult)) {
+        emit notificationCreated(tr("File preview is not avaialable"), false);
+    }
 }
-
-@end

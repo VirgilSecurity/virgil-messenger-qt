@@ -36,21 +36,18 @@
 
 #include "Settings.h"
 #include "Messenger.h"
+#include "PlatformDocumentInteractionController.h"
 #include "controllers/AttachmentsController.h"
 #include "controllers/ChatsController.h"
 #include "controllers/CloudFilesController.h"
-#include "controllers/DocumentInteractionController.h"
 #include "controllers/MessagesController.h"
 #include "controllers/UsersController.h"
 #include "database/UserDatabase.h"
 #include "models/DiscoveredContactsModel.h"
 #include "models/Models.h"
 
-#if VS_IOS
-#    include "IosDocumentInteractionController.h"
-#endif
-
 using namespace vm;
+using namespace vm::platform;
 
 Controllers::Controllers(Messenger *messenger, Settings *settings, Models *models, UserDatabase *userDatabase,
                          QObject *parent)
@@ -67,11 +64,13 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     connect(m_chats, &ChatsController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_cloudFiles, &CloudFilesController::notificationCreated, this, &Controllers::notificationCreated);
     connect(m_users, &UsersController::notificationCreated, this, &Controllers::notificationCreated);
+    connect(m_documentInteraction, &PlatformDocumentInteractionController::notificationCreated, this,
+            &Controllers::notificationCreated);
 
     connect(m_attachments, &AttachmentsController::openUrlRequested, m_documentInteraction,
-            &DocumentInteractionController::openUrl);
+            &PlatformDocumentInteractionController::openUrl);
     connect(m_cloudFiles, &CloudFilesController::openUrlRequested, m_documentInteraction,
-            &DocumentInteractionController::openUrl);
+            &PlatformDocumentInteractionController::openUrl);
 
     connect(userDatabase, &UserDatabase::opened, m_chats, &ChatsController::loadChats);
     connect(userDatabase, &UserDatabase::closed, m_chats, &ChatsController::clearChats);
@@ -85,7 +84,7 @@ Controllers::Controllers(Messenger *messenger, Settings *settings, Models *model
     qRegisterMetaType<MessagesController *>("MessagesController*");
     qRegisterMetaType<UsersController *>("UsersController*");
     qRegisterMetaType<CloudFilesController *>("CloudFilesController*");
-    qRegisterMetaType<DocumentInteractionController *>("DocumentInteractionController*");
+    qRegisterMetaType<platform::PlatformDocumentInteractionController *>("DocumentInteractionController*");
 }
 
 const AttachmentsController *Controllers::attachments() const
@@ -138,21 +137,17 @@ CloudFilesController *Controllers::cloudFiles()
     return m_cloudFiles;
 }
 
-const DocumentInteractionController *Controllers::documentInteraction() const
+const PlatformDocumentInteractionController *Controllers::documentInteraction() const
 {
     return m_documentInteraction;
 }
 
-DocumentInteractionController *Controllers::documentInteraction()
+PlatformDocumentInteractionController *Controllers::documentInteraction()
 {
     return m_documentInteraction;
 }
 
-DocumentInteractionController *Controllers::createDocumentInteraction()
+PlatformDocumentInteractionController *Controllers::createDocumentInteraction()
 {
-#if VS_IOS
-    return new IosDocumentInteractionController(this);
-#else
-    return new DocumentInteractionController(this);
-#endif
+    return PlatformDocumentInteractionController::create(this);
 }

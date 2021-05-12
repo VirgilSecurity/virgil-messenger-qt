@@ -150,6 +150,32 @@ target_link_libraries(platform-fs
         platform-fs-api
         )
 
+#
+#   Library: platform-gui.
+#
+add_library(platform-gui STATIC)
+
+target_sources(platform-gui
+        PRIVATE
+        # TODO: Hide implementation under platform API.
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformDocumentInteractionControllerAndroid.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformDocumentInteractionControllerAndroid.cpp"
+        )
+
+target_include_directories(platform-gui
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+        )
+
+target_link_libraries(platform-gui
+        PUBLIC
+        platform
+        platform-fs
+        platform-gui-api
+
+        Qt5::Gui
+        )
+
 # ---------------------------------------------------------------------------
 #   Main target
 # ---------------------------------------------------------------------------

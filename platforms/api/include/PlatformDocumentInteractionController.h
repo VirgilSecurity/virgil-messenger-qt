@@ -32,14 +32,33 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "DocumentInteractionController.h"
+#ifndef VM_PLATFORM_DOCUMENT_INTERACTION_CONTROLLER_H
+#define VM_PLATFORM_DOCUMENT_INTERACTION_CONTROLLER_H
 
-#include <QDesktopServices>
+#include <QObject>
+#include <QString>
+#include <QUrl>
 
-using namespace vm;
-using Self = DocumentInteractionController;
-
-void Self::openUrl(const QUrl &url)
+namespace vm {
+namespace platform {
+class PlatformDocumentInteractionController : public QObject
 {
-    QDesktopServices::openUrl(url);
-}
+    Q_OBJECT
+
+signals:
+    void notificationCreated(const QString &notification, const bool error);
+
+public:
+    Q_INVOKABLE virtual void openUrl(const QUrl &url) = 0;
+
+    static PlatformDocumentInteractionController *create(QObject *parent = nullptr);
+
+    virtual ~PlatformDocumentInteractionController() noexcept = default;
+
+protected:
+    using QObject::QObject;
+};
+} // namespace platform
+} // namespace vm
+
+#endif // VM_PLATFORM_DOCUMENT_INTERACTION_CONTROLLER_H

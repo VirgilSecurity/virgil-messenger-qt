@@ -112,3 +112,27 @@ if (NOT TARGET platform-updates)
             platform-updates-api
             )
 endif()
+
+#
+#   Library: platform-gui.
+#
+if (NOT TARGET platform-gui)
+    add_library(platform-gui STATIC)
+
+    target_sources(platform-gui
+            PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/include/PlatformDocumentInteractionControllerDefault.h"
+            "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerDefault.cpp"
+            )
+
+    target_include_directories(platform-gui
+            PRIVATE
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+            )
+
+    target_link_libraries(platform-gui
+            PUBLIC
+            Qt5::Gui
+            platform-gui-api
+            )
+endif()

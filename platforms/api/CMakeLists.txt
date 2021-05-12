@@ -138,3 +138,24 @@ target_link_libraries(platform-updates-api
         PUBLIC
         Qt5::Core
         )
+
+#
+#   Library: platform-gui
+#
+add_library(platform-gui-api STATIC)
+
+target_sources(platform-gui-api
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformDocumentInteractionController.h"
+        )
+
+
+target_include_directories(platform-gui-api
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform-gui-api
+        PUBLIC
+        Qt5::Core
+        )

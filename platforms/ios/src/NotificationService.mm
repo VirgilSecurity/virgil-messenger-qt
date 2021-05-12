@@ -32,12 +32,53 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef IOS_VIEW_CONTROLLER_H
-#define IOS_VIEW_CONTROLLER_H
+#import "NotificationService.h"
 
-#import <UIKit/UIKit.h>
+#include "CoreMessenger.h"
+#include "Settings.h"
 
-@interface IosViewController : UIViewController <UIDocumentInteractionControllerDelegate>
+#include <memory>
+
+using namespace vm;
+
+@interface NotificationService ()
+
+@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
+@property (nonatomic, strong) UNMutableNotificationContent* bestAttemptContent;
+
 @end
 
-#endif // IOS_VIEW_CONTROLLER_H
+@implementation NotificationService
+
+- (void)didReceiveNotificationRequest:(UNNotificationRequest*)request
+                   withContentHandler:(void (^)(UNNotificationContent* _Nonnull))contentHandler
+{
+    self.contentHandler = contentHandler;
+    self.bestAttemptContent = [request.content mutableCopy];
+
+    //
+    //  Replace Base64 with something readable.
+    //
+    self.bestAttemptContent.title = @"<...>";
+    self.bestAttemptContent.body = @"encrypted message";
+
+    //
+    //  Extract encrypted message.
+    //
+
+    //
+    //  Try to decrypt encrypted message.
+    //
+    auto settings = std::make_unique<Settings>();
+    CoreMessenger messenger(settings.get());
+}
+
+- (void)serviceExtensionTimeWillExpire
+{
+    // Called just before the extension will be terminated by the system.
+    // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push
+    // payload will be used.
+    self.contentHandler(self.bestAttemptContent);
+}
+
+@end

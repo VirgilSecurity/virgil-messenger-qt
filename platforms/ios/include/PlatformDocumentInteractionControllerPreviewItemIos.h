@@ -32,21 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_H
-#define VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_H
+#ifndef VM_PLATFORM_DOCUMENT_INTERACTION_CONTROLLER_PREVIEW_ITEM_IOS_H
+#define VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_PREVIEW_ITEM_H
 
-#include "DocumentInteractionController.h"
+#import <QuickLook/QuickLook.h>
 
-namespace vm {
-class IosDocumentInteractionController : public DocumentInteractionController
-{
-    Q_OBJECT
+@interface PlatformDocumentInteractionControllerPreviewItemIos : NSObject <QLPreviewItem>
 
-public:
-    using DocumentInteractionController::DocumentInteractionController;
+@property (nonatomic, strong) NSURL* url;
 
-    void openUrl(const QUrl &url) override;
-};
-} // namespace vm
+- (instancetype)initWithURL:(NSURL*)url;
 
-#endif // VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_H
+@end
+
+#endif // VM_PLATFORM_DOCUMENT_INTERACTION_CONTROLLER_PREVIEW_ITEM_IOS_H

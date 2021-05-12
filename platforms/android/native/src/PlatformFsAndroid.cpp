@@ -54,8 +54,8 @@ PlatformFs &PlatformFs::instance()
 QString Self::urlToLocalFile(const QUrl &url) const
 {
     qCDebug(lcPlatformFsAndroid) << "File URL (before urlToLocalFile):" << url.toString();
-    const auto options = url.isLocalFile() ? QUrl::FormattingOptions(QUrl::RemoveScheme) : QUrl::PrettyDecoded;
-    const auto res = QUrl::fromPercentEncoding(url.toString(options).toUtf8());
+    const auto resUrl = url.isLocalFile() ? url.adjusted(QUrl::RemoveScheme) : url;
+    const auto res = resUrl.toEncoded();
     qCDebug(lcPlatformFsAndroid) << "File path (after urlToLocalFile):" << res;
     return res;
 }

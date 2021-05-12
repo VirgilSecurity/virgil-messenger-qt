@@ -169,7 +169,7 @@ void Self::removeFile(const QString &filePath)
     }
 }
 
-void FileUtils::removeDir(const QString &dirPath)
+void Self::removeDir(const QString &dirPath)
 {
     if (fileExists(dirPath)) {
         if (QDir(dirPath).removeRecursively()) {
@@ -178,12 +178,12 @@ void FileUtils::removeDir(const QString &dirPath)
     }
 }
 
-QString FileUtils::fileName(const QString &filePath)
+QString Self::fileName(const QString &filePath)
 {
     return QFileInfo(filePath).fileName();
 }
 
-QString FileUtils::fileExt(const QString &filePath)
+QString Self::fileExt(const QString &filePath)
 {
     return QFileInfo(filePath).completeSuffix();
 }
@@ -193,7 +193,7 @@ QString Self::attachmentFileName(const QUrl &url, bool isPicture)
     return PlatformFs::instance().fileDisplayName(url, isPicture);
 }
 
-QString FileUtils::fileMimeType(const QString &filePath)
+QString Self::fileMimeType(const QString &filePath)
 {
     static QMimeDatabase db;
     return db.mimeTypeForFile(filePath).name();

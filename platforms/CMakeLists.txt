@@ -41,12 +41,14 @@
 #       * customer
 #
 #   Create targets:
-#       * platform-api     - interface library that declares API for generic platform operations.
+#       * platform-api     - library that declares API for generic platform operations.
 #       * platform-base    - base implementation of platform-api.
 #       * platform         - platform specific implementation of platform-api.
-#       * platform-fs-api  - interface library that declares API for specific File System operations.
+#       * platform-fs-api  - library that declares API for specific File System operations.
 #       * platform-fs-base - base implementation of platform-fs-api.
 #       * platform-fs      - platform specific implementation of platform-fs-api.
+#       * platform-gui-api - library that declares API for platform UI interactions.
+#       * platform-gui      - platform specific implementation of platform-gui-api.
 #
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
@@ -71,5 +73,7 @@ if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
     add_clangformat(platform-fs-base)
     add_clangformat(platform-fs)
     add_clangformat(platform-updates)
+    add_clangformat(platform-gui-api)
+    add_clangformat(platform-gui)
 endif()
 

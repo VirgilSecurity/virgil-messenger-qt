@@ -32,40 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#import "IosDocumentInteractionController.h"
+#include "PlatformDocumentInteractionControllerDataSourceIos.h"
 
-#import "IosViewController.h"
+#include "PlatformDocumentInteractionControllerPreviewItemIos.h"
 
-#import <UIKit/UIKit.h>
+@interface PlatformDocumentInteractionControllerDataSourceIos ()
+@end
 
-#import <QDebug>
-#import <QGuiApplication>
-
-using namespace vm;
-using Self = IosDocumentInteractionController;
-
-void Self::openUrl(const QUrl& url)
+@implementation PlatformDocumentInteractionControllerDataSourceIos
+- (NSInteger)numberOfPreviewItemsInPreviewController:(nonnull QLPreviewController*)controller
 {
-    NSURL* nsUrl = url.toNSURL();
-
-    static IosViewController* docViewController = nil;
-    if (docViewController != nil) {
-        [docViewController removeFromParentViewController];
-        [docViewController release];
-    }
-
-    UIDocumentInteractionController* documentInteractionController = nil;
-    documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:nsUrl];
-
-    UIViewController* qtUIViewController =
-        [[[[UIApplication sharedApplication] windows] firstObject] rootViewController];
-    if (qtUIViewController != nil) {
-        docViewController = [[IosViewController alloc] init];
-
-        [qtUIViewController addChildViewController:docViewController];
-        documentInteractionController.delegate = docViewController;
-        if (![documentInteractionController presentPreviewAnimated:YES]) {
-            qWarning() << "Failed to open file preview" << url;
-        }
-    }
+    return 1;
 }
+
+- (nonnull id<QLPreviewItem>)previewController:(nonnull QLPreviewController*)controller
+                            previewItemAtIndex:(NSInteger)index
+{
+    return [[PlatformDocumentInteractionControllerPreviewItemIos alloc] initWithURL:self.url];
+}
+
+- (id)initWithURL:(NSURL*)url
+{
+    self = [super init];
+    if (self) {
+        self.url = url;
+    }
+    return self;
+}
+@end
