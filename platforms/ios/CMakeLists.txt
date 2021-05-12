@@ -314,7 +314,9 @@ set_target_properties(${VS_TARGET_NAME}
 #
 #   Scan and link to implicit dependencies.
 #
-qt5_import_qml_plugins(${VS_TARGET_NAME})
+qt5_import_qml_plugins(${VS_TARGET_NAME}
+        PATH_TO_SCAN "${PROJECT_SOURCE_DIR}/src/qml"
+        )
 
 #
 #   Copy extensions.
