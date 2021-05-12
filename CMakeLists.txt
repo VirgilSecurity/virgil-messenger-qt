@@ -32,7 +32,7 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 # ---------------------------------------------------------------------------
 # Include Cmake helpers
 # ---------------------------------------------------------------------------
@@ -155,6 +155,7 @@ vs_customer_prepare()
 # ---------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
@@ -224,7 +225,6 @@ target_compile_definitions(platform-definitions
         $<BUILD_INTERFACE:$<$<CONFIG:Debug>:QT_QML_DEBUG>>
         $<BUILD_INTERFACE:$<$<CONFIG:RelWithDebInfo>:QT_QML_DEBUG>>
         )
-
 
 #
 #   All platform dependent implementations.
@@ -889,15 +889,6 @@ target_compile_options(${VS_TARGET_NAME}
         INTERFACE
         -Wno-multichar
         )
-
-#
-#  Generate .dSYM file for all configurations and strip them from the release.
-#
-if (CMAKE_GENERATOR STREQUAL "Xcode")
-  set_xcode_property(${VS_TARGET_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS "YES")
-  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=MinSizeRel] "YES")
-  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=Release] "YES")
-endif()
 
 if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
     add_clangformat(${VS_TARGET_NAME})
