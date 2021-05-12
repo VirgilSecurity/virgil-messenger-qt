@@ -32,7 +32,12 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+if(XCODE_VERSION)
+    cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+else()
+    cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+endif()
+
 # ---------------------------------------------------------------------------
 # Include Cmake helpers
 # ---------------------------------------------------------------------------
@@ -155,7 +160,13 @@ vs_customer_prepare()
 # ---------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY)
+
+if(XCODE_VERSION)
+    #
+    #   Available from CMake 3.19
+    #
+    set(CMAKE_XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY)
+endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
