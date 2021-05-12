@@ -32,12 +32,17 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef IOS_VIEW_CONTROLLER_H
-#define IOS_VIEW_CONTROLLER_H
+#ifndef VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_DATA_SOURCE_H
+#define VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_DATA_SOURCE_H
 
-#import <UIKit/UIKit.h>
+#import <QuickLook/QuickLook.h>
 
-@interface IosViewController : UIViewController <UIDocumentInteractionControllerDelegate>
+@interface IosDocumentInteractionControllerDataSource : NSObject <QLPreviewControllerDataSource>
+
+@property (nonatomic, strong) NSURL* url;
+
+- (instancetype)initWithURL:(NSURL*)url;
+
 @end
 
-#endif // IOS_VIEW_CONTROLLER_H
+#endif // VM_IOS_DOCUMENT_INTERACTION_CONTROLLER_DATA_SOURCE_H

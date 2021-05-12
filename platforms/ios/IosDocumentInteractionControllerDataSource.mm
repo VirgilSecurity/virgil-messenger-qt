@@ -32,27 +32,31 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "ios/IosViewController.h"
+#include "ios/IosDocumentInteractionControllerDataSource.h"
 
-@interface IosViewController ()
+#include "ios/IosDocumentInteractionControllerPreviewItem.h"
+
+@interface IosDocumentInteractionControllerDataSource ()
 @end
-@implementation IosViewController
-#pragma mark -
-#pragma mark View Life Cycle
-- (void)viewDidLoad
+
+@implementation IosDocumentInteractionControllerDataSource
+- (NSInteger)numberOfPreviewItemsInPreviewController:(nonnull QLPreviewController*)controller
 {
-    [super viewDidLoad];
+    return 1;
 }
-#pragma mark -
-#pragma mark Document Interaction Controller Delegate Methods
-- (UIViewController*)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController*)controller
+
+- (nonnull id<QLPreviewItem>)previewController:(nonnull QLPreviewController*)controller
+                            previewItemAtIndex:(NSInteger)index
 {
-#pragma unused(controller)
+    return [[IosDocumentInteractionControllerPreviewItem alloc] initWithURL:self.url];
+}
+
+- (id)initWithURL:(NSURL*)url
+{
+    self = [super init];
+    if (self) {
+        self.url = url;
+    }
     return self;
-}
-- (void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController*)controller
-{
-#pragma unused(controller)
-    [self removeFromParentViewController];
 }
 @end
