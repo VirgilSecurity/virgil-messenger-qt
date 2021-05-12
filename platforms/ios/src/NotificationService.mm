@@ -59,8 +59,8 @@ using namespace vm;
     //
     //  Replace Base64 with something readable.
     //
-    self.bestAttemptContent.title = @"<...>";
-    self.bestAttemptContent.body = @"encrypted message";
+    self.bestAttemptContent.title = @"New Message";
+    self.bestAttemptContent.body = @"<encrypted>";
 
     //
     //  Extract encrypted message.
