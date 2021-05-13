@@ -238,11 +238,6 @@ target_compile_definitions(platform-definitions
         )
 
 #
-#   All platform dependent implementations.
-#
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/platforms")
-
-#
 #   Customers.
 #
 add_library(customer STATIC)
@@ -267,6 +262,11 @@ target_link_libraries(customer
         PRIVATE
         platform-definitions
         )
+
+#
+#   All platform dependent implementations.
+#
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/platforms")
 
 #
 #   Logging
