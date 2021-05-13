@@ -71,7 +71,7 @@ Self::PlatformUpdatesWindows()
     //
     win_sparkle_set_appcast_url(Customer::kWinSparklURL.toUtf8().constData());
     win_sparkle_set_dsa_pub_pem(
-            reinterpret_cast<const char *>(QResource(":qml/resources/windows/dsa_pub.pem").data()));
+            reinterpret_cast<const char *>(QResource("://qml/resources/windows/dsa_pub.pem").data()));
     win_sparkle_set_app_details(Customer::ApplicationName.toStdWString().c_str(),
                                 Customer::OrganizationDisplayName.toStdWString().c_str(),
                                 QString(kVersion).toStdWString().c_str());
