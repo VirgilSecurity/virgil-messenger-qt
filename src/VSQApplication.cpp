@@ -148,7 +148,7 @@ int Self::run(const QString &basePath, Logging *logging)
 
     reloadQml();
 
-    if (!Platform::instance().prepare()) {
+    if (!Platform::instance().init()) {
         // TODO: Improve - show error and then quit.
         qCritical("Unable to prepare platform");
         return -1;
@@ -191,6 +191,11 @@ QString Self::applicationDisplayName() const
 QString Self::currentVersion() const
 {
     return CustomerEnv::version();
+}
+
+void Self::uiInit()
+{
+    Platform::instance().uiInit();
 }
 
 bool Self::isIosSimulator() const

@@ -47,9 +47,14 @@ class PlatformAndroid : public PlatformBase
 {
 public:
     //
-    //  Prepare Android Services: firebase, etc.
+    //  Prepare Android Services
     //
-    bool prepare() const override;
+    bool init() const override;
+
+    //
+    //  Initialize JNI-based resources
+    //
+    bool uiInit() const override;
 
     //
     //  Return path to the custom CA bundle file (cert.pem).

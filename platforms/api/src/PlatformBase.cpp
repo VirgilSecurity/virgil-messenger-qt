@@ -41,7 +41,12 @@ using namespace platform;
 
 using Self = PlatformBase;
 
-bool Self::prepare() const
+bool Self::init() const
+{
+    return true;
+}
+
+bool Self::uiInit() const
 {
     return true;
 }

@@ -49,7 +49,12 @@ public:
     //
     //  Do nothing, return true.
     //
-    bool prepare() const override;
+    bool init() const override;
+
+    //
+    //  Do nothing, return true.
+    //
+    bool uiInit() const override;
 
     //
     //  Return writable location for the application.

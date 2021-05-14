@@ -82,6 +82,8 @@ public:
 
     Q_INVOKABLE QString currentVersion() const;
 
+    Q_INVOKABLE void uiInit();
+
     // Names
 
     QString organizationDisplayName() const;

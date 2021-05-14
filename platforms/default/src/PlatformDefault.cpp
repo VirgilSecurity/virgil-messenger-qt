@@ -45,7 +45,12 @@ Platform &Platform::instance()
     return impl;
 }
 
-bool Self::prepare() const
+bool Self::init() const
+{
+    return true;
+}
+
+bool Self::uiInit() const
 {
     return true;
 }

@@ -113,5 +113,6 @@ ApplicationWindow {
         crashReporter.reportErrorOccurred.connect(notificationPopup.showError)
 
         Platform.detect()
+        app.uiInit()
     }
 }

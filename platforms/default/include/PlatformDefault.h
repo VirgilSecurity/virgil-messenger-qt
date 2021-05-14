@@ -49,7 +49,12 @@ public:
     //
     //  Do nothing.
     //
-    bool prepare() const override;
+    bool init() const override;
+
+    //
+    //  Do nothing.
+    //
+    bool uiInit() const override;
 
     //
     //  Return an invalid or an empty string.

@@ -45,18 +45,24 @@ namespace platform {
 //
 //  Provides General Platform Initialization.
 //
-class Platform : public QObject {
+class Platform : public QObject
+{
     Q_OBJECT
 
 signals:
-    void pushTokenUpdated(const QString& pushToken);
+    void pushTokenUpdated(const QString &pushToken);
 
 public:
     //
     //  Initialize system resources.
     //  Note, Qt Resources should be available at this point.
     //
-    virtual bool prepare() const = 0;
+    virtual bool init() const = 0;
+
+    //
+    //  Initialize resources after UI initialization.
+    //
+    virtual bool uiInit() const = 0;
 
     //
     //  Return writable location for the application.
@@ -83,10 +89,10 @@ public:
     //
     //  This method should be implemented within derived class.
     //
-    static Platform& instance();
+    static Platform &instance();
 };
 
-} // platform
-} // vm
+} // namespace platform
+} // namespace vm
 
 #endif // VM_PLATFORM_PLATFORM

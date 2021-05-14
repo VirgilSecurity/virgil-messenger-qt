@@ -128,12 +128,8 @@ static bool runLoggingThread()
     return true;
 }
 
-bool Self::prepare() const
+bool Self::init() const
 {
-    if (!jniRequestPermissions()) {
-        return false;
-    }
-
     const bool isLoggingThreadStarted = runLoggingThread();
     Q_UNUSED(isLoggingThreadStarted); // It is not critical, so can be ignored.
 
@@ -141,6 +137,15 @@ bool Self::prepare() const
     QFile::remove(destCertFile);
     const bool isCertPrepared = QFile::copy(":qml/resources/cert.pem", destCertFile);
     if (!isCertPrepared) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Self::uiInit() const
+{
+    if (!jniRequestPermissions()) {
         return false;
     }
 
