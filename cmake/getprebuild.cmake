@@ -39,10 +39,10 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 #
 function(get_prebuild EXT_DEST_DIR)
     set(PREBUILT_CORE_ARCHIVE "${EXT_DEST_DIR}/downloads/prebuilt-${VS_CORE_VERSION}.tgz")
-    message(STATUS "Get prebuild libraries [https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz]...")
+    message(STATUS "Get prebuild libraries [https://downloads.virgilsecurity.com/messenger-prebuild/prebuilt-${VS_CORE_VERSION}.tgz]...")
     if (NOT EXISTS "${PREBUILT_CORE_ARCHIVE}")
         file(DOWNLOAD
-                "https://virgilsecurity.bintray.com/iotl-demo-cdn/prebuilt-${VS_CORE_VERSION}.tgz"
+                "https://downloads.virgilsecurity.com/messenger-prebuild/prebuilt-${VS_CORE_VERSION}.tgz"
                 "${PREBUILT_CORE_ARCHIVE}"
                 SHOW_PROGRESS
                 )
