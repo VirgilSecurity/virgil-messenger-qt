@@ -80,9 +80,6 @@ target_link_libraries(platform-deps
         Qt5::AndroidExtras
         log
 
-        firebase_messaging
-        firebase_app
-        firebase_auth
         curl
         ssl_1_1
         crypto_1_1
@@ -123,6 +120,10 @@ target_link_libraries(platform
         platform-deps
         platform-base
         customer
+
+        firebase_messaging
+        firebase_app
+        firebase_auth
         )
 
 #
@@ -157,7 +158,6 @@ add_library(platform-gui STATIC)
 
 target_sources(platform-gui
         PRIVATE
-        # TODO: Hide implementation under platform API.
         "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformDocumentInteractionControllerAndroid.h"
         "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformDocumentInteractionControllerAndroid.cpp"
         )
