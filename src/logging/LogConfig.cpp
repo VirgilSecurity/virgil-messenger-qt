@@ -47,10 +47,7 @@ Self &Self::instance()
     return instance;
 }
 
-Self::LogConfig() : m_logsDir(Platform::instance().appDataLocation().filePath(QLatin1String("logs")))
-{
-    qRegisterMetaType<LogContext>("LogContext");
-}
+Self::LogConfig() : m_logsDir(Platform::instance().appDataLocation().filePath(QLatin1String("logs"))) { }
 
 QDir Self::logsDir() const
 {
