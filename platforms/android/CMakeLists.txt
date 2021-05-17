@@ -64,8 +64,6 @@ set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${VS_TARGET_VERSI
 message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
 message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
 
-set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-
 find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
 
 # ---------------------------------------------------------------------------
@@ -177,7 +175,62 @@ target_link_libraries(platform-gui
         )
 
 # ---------------------------------------------------------------------------
-#   Main target
+#   Configure.
+# ---------------------------------------------------------------------------
+#
+#  Check.
+#
+if(ANDROID_PACKAGE_SOURCE_DIR)
+    set(GRADLE_BUILD_DIR "${ANDROID_PACKAGE_SOURCE_DIR}")
+else()
+    message(FATAL_ERROR "CMake variable ANDROID_PACKAGE_SOURCE_DIR is undefined, but should point to a Gradle project")
+endif()
+
+
+#
+#  Copy customer's files first.
+#
+file(COPY "${VS_CUSTOMER_DIR}/platforms/android/" DESTINATION "${GRADLE_BUILD_DIR}")
+
+#
+#  Copy Gradle support files.
+#
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradle" DESTINATION "${GRADLE_BUILD_DIR}")
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/build.gradle" DESTINATION "${GRADLE_BUILD_DIR}")
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew" DESTINATION "${GRADLE_BUILD_DIR}")
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew.bat" DESTINATION "${GRADLE_BUILD_DIR}")
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/project.properties" DESTINATION "${GRADLE_BUILD_DIR}")
+
+#
+#  Copy Source file.
+#
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/src" DESTINATION "${GRADLE_BUILD_DIR}")
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/res" DESTINATION "${GRADLE_BUILD_DIR}")
+
+#
+#  Configure Gradle build.
+#
+configure_file(
+        "${CMAKE_CURRENT_LIST_DIR}/AndroidManifest.xml.in"
+        "${GRADLE_BUILD_DIR}/AndroidManifest.xml"
+        @ONLY
+        )
+
+configure_file(
+        "${GRADLE_BUILD_DIR}/google-services.json.in"
+        "${GRADLE_BUILD_DIR}/google-services.json"
+        @ONLY
+        )
+
+set(VS_FIREBASE_DIR "${PREBUILT_DIR}/firebase_cpp_sdk")
+configure_file(
+        "${CMAKE_CURRENT_LIST_DIR}/gradle.properties.in"
+        "${GRADLE_BUILD_DIR}/gradle.properties"
+        @ONLY
+        )
+
+# ---------------------------------------------------------------------------
+#   Main target.
 # ---------------------------------------------------------------------------
 add_library(${VS_TARGET_NAME} SHARED)
 

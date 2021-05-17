@@ -78,10 +78,41 @@ set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
 set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
 message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
-message(STATUS "Include customer cmake target name: [customer-target.cmake]")
-# Include customer file for project target name
-include("${VS_CUSTOMER_DIR}/customer.cmake")
-include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
+include("${VS_CUSTOMER_DIR}/customer.cmake") # Include customer file for project target name
+
+# ---------------------------------------------------------------------------
+# Detecting platform if VS_PLATFORM not specified
+# ---------------------------------------------------------------------------
+if (NOT VS_PLATFORM)
+    if (MINGW32 OR MINGW64 OR CYGWIN OR WIN32)
+        message(STATUS "Detected target platform: [Windows]")
+        set(VS_PLATFORM "windows")
+    elseif (ANDROID OR ANDROID_NDK)
+        message(STATUS "Detected target platform: [Android]")
+        set(VS_PLATFORM "android")
+    elseif (IOS)
+        message(STATUS "Detected target platform: [iOS]")
+        set(VS_PLATFORM "ios")
+    elseif (APPLE)
+        message(STATUS "Detected target platform: [macOS]")
+        set(VS_PLATFORM "macos")
+    elseif (UNIX)
+        message(STATUS "Detected target platform: [Unix]")
+        set(VS_PLATFORM "linux")
+    endif ()
+endif ()
+
+# ---------------------------------------------------------------------------
+# Define specific defaults for Android Multi ABI build within Qt Creator.
+# ---------------------------------------------------------------------------
+if(NOT PROJECT_NAME AND VS_PLATFORM STREQUAL "android")
+    # Android API level
+    set(ANDROID_MIN_SDK_VERSION "26")
+    set(ANDROID_TARGET_SDK_VERSION "29")
+    set(ANDROID_SDK_PLATFORM "${ANDROID_TARGET_SDK_VERSION}")
+    set(ANDROID_NATIVE_API_LEVEL "${ANDROID_MIN_SDK_VERSION}")
+    message(STATUS "Android API level: [${ANDROID_NATIVE_API_LEVEL}]")
+endif()
 
 # ---------------------------------------------------------------------------
 # Define project
@@ -92,26 +123,31 @@ message(STATUS "CMAKE_PREFIX_PATH: [${CMAKE_PREFIX_PATH}]")
 message(STATUS "CMAKE_FIND_ROOT_PATH: [${CMAKE_FIND_ROOT_PATH}]")
 
 # ---------------------------------------------------------------------------
-# Detecting platform if VS_PLATFORM not specified
+# Define generic platform specific settings.
 # ---------------------------------------------------------------------------
-if (NOT VS_PLATFORM)
-    if (MINGW32 OR MINGW64 OR CYGWIN OR WIN32)
-        message(STATUS "Detected target platform: [Windows]")
-        set(VS_PLATFORM "windows")
-    elseif (ANDROID)
-        message(STATUS "Detected target platform: [Android]")
-        set(VS_PLATFORM "android")
-    elseif (IOS)
-        message(STATUS "Detected target platform: [IOS]")
-        set(VS_PLATFORM "ios")
-    elseif (APPLE)
-        message(STATUS "Detected target platform: [MacOS]")
-        set(VS_PLATFORM "macos")
-    elseif (UNIX)
-        message(STATUS "Detected target platform: [Unix]")
-        set(VS_PLATFORM "linux")
-    endif ()
-endif ()
+if(XCODE_VERSION)
+    #
+    #   Available from CMake 3.19
+    #
+    set(CMAKE_XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY)
+endif()
+
+if(VS_PLATFORM STREQUAL "macos")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
+
+elseif(VS_PLATFORM STREQUAL "ios")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "9.0")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${PROJECT_NAME}")
+
+elseif(VS_PLATFORM STREQUAL "android")
+    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/platforms/android/gradle" CACHE INTERNAL "")
+endif()
 
 # ---------------------------------------------------------------------------
 # Get prebuild core libraries
@@ -152,7 +188,6 @@ message(STATUS "Setting prebuild library directory: [${PREBUILT_LIB_DIR}]")
 # Include customer file and prepare data
 # ---------------------------------------------------------------------------
 include("${VS_CUSTOMER_DIR}/customer.cmake")
-include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
 vs_customer_prepare()
 
 # ---------------------------------------------------------------------------
@@ -160,13 +195,6 @@ vs_customer_prepare()
 # ---------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(XCODE_VERSION)
-    #
-    #   Available from CMake 3.19
-    #
-    set(CMAKE_XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY)
-endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
@@ -240,12 +268,17 @@ target_compile_definitions(platform-definitions
 #
 #   Customers.
 #
+configure_file(
+        "${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/include/VSQCustomer.h"
+        )
+
 add_library(customer STATIC)
 
 target_sources(customer
         PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h"
-        "${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/include/VSQCustomer.h"
 
         "${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp"
         )
@@ -253,6 +286,7 @@ target_sources(customer
 target_include_directories(customer
         PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
         )
 
 target_link_libraries(customer

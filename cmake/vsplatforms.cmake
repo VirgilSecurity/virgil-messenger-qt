@@ -86,7 +86,7 @@ endif ()
 if (NOT VS_PLATFORM OR NOT VS_CUSTOMER)
     if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
         include("${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
-        message(STATUS "Set VS_PLATFORM from  transitive-args.cmake")
+        message(STATUS "Set VS_PLATFORM from transitive-args.cmake")
     endif ()
 endif ()
 
