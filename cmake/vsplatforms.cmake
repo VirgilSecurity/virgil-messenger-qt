@@ -133,6 +133,7 @@ message(STATUS "Current environment : [${VS_ENV}]")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_ENV "${VS_ENV}")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_PLATFORM "${VS_PLATFORM}")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_CUSTOMER "${VS_CUSTOMER}")
+add_transitive_arg("${TRANSITIVE_ARGS_FILE}" ANDROID_SDK "${ANDROID_SDK}")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 
