@@ -81,7 +81,7 @@ function(ADD_TRANSITIVE_ARG path name value)
     file(STRINGS "${path}" file_content)
 
     if(NOT file_content MATCHES "${name}")
-        file(APPEND "${path}" "set(${name} \"${value}\" CACHE STRING \"\")\n")
+        file(APPEND "${path}" "set(${name} \"${value}\" CACHE INTERNAL \"\")\n")
     endif()
 endfunction()
 
