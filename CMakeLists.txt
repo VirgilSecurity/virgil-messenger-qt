@@ -201,6 +201,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_VERBOSE_MAKEFILE OFF CACHE BOOL "Enable extra compile output")
+
 include(GNUInstallDirs)
 include(FetchContent)
 
