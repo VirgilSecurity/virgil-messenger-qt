@@ -45,7 +45,7 @@ endmacro(set_xcode_property)
 # Set CMAKE_FIND_ROOT_PATH for QT cmake include directory
 # ---------------------------------------------------------------------------
 function(PREPARE_QT_SDK CMAKE_PREFIX_PATH_OUT CMAKE_FIND_ROOT_PATH_OUT QT_QMAKE_EXECUTABLE_OUT QT_RELATIVE_PATH_OUT)
-    if (DEFINED ENV{QTDIR})
+    if(DEFINED ENV{QTDIR})
         get_filename_component(QT_RELATIVE_PATH "$ENV{QTDIR}/../" ABSOLUTE)
         set(${CMAKE_FIND_ROOT_PATH_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}" PARENT_SCOPE)
         set(${CMAKE_PREFIX_PATH_OUT} "${QT_RELATIVE_PATH}/${QT_PREFIX_PATH}" PARENT_SCOPE)
@@ -53,64 +53,108 @@ function(PREPARE_QT_SDK CMAKE_PREFIX_PATH_OUT CMAKE_FIND_ROOT_PATH_OUT QT_QMAKE_
         set(${QT_RELATIVE_PATH_OUT} "${QT_RELATIVE_PATH}" PARENT_SCOPE)
     else ()
         message(FATAL_ERROR "Error detecting QT SDK (Env QTDIR not set)")
-    endif ()
+    endif()
 endfunction()
 
 # ---------------------------------------------------------------------------
-# Check target platform and customer variable
+#   Qt creator runs cmake several time for Multi ABI configuration, so
+#   next configurable variables must be preserved:
+#       - VS_PLATFORM
+#       - VS_CUSTOMER
+#       - VS_ENV
+#       - CMAKE_BUILD_TYPE
+#
+#   For this purpose file "transitive-args.cmake" is used.
+#   Function ADD_TRANSITIVE_ARG() writes variable and it's value to the file.
 # ---------------------------------------------------------------------------
+set(TRANSITIVE_ARGS_FILE "${CMAKE_SOURCE_DIR}/transitive-args.cmake")
 
-if (VS_PLATFORM OR VS_CUSTOMER AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
-    file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
-    set(VS_ENV "prod" CACHE STRING "Virgil messenger environment type")
-    string(TOLOWER "${VS_ENV}" VS_ENV)
-    message("-- Virgil environment: [${VS_ENV}]")
-    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_ENV \"${VS_ENV}\" CACHE STRING \"Virgil messenger environment type\")\n")
-endif ()
+function(ADD_TRANSITIVE_ARG path name value)
+    if(NOT value)
+        return()
+    endif()
 
-if (VS_PLATFORM)
-    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_PLATFORM \"${VS_PLATFORM}\" CACHE STRING \"Target build platform\")\n")
-    message(STATUS "Write VS_PLATFORM transitive-args.cmake")
-endif ()
-
-if (VS_CUSTOMER)
-    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(VS_CUSTOMER \"${VS_CUSTOMER}\" CACHE STRING \"Customer name\")\n")
-    message(STATUS "Write VS_CUSTOMER transitive-args.cmake")
-endif ()
-
-if (CMAKE_BUILD_TYPE AND VS_PLATFORM)
-    file(APPEND "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake" "set(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\" CACHE STRING \"Build type\")\n")
-    message(STATUS "Write CMAKE_BUILD_TYPE  transitive-args.cmake")
-endif ()
-
-if (NOT VS_PLATFORM OR NOT VS_CUSTOMER)
-    if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
-        include("${CMAKE_CURRENT_LIST_DIR}/../transitive-args.cmake")
-        message(STATUS "Set VS_PLATFORM from transitive-args.cmake")
+    if(NOT EXISTS "${path}")
+        file(WRITE "${path}" "")
     endif ()
-endif ()
+
+    file(STRINGS "${path}" file_content)
+
+    if(NOT file_content MATCHES "${name}")
+        file(APPEND "${path}" "set(${name} \"${value}\" CACHE STRING \"\")\n")
+    endif()
+endfunction()
+
+if(EXISTS "${TRANSITIVE_ARGS_FILE}")
+    include("${TRANSITIVE_ARGS_FILE}")
+    message(STATUS "Load cached configuration from ${TRANSITIVE_ARGS_FILE}")
+endif()
+
+#
+#   Define: VS_PLATFORM
+#
+if(NOT VS_PLATFORM)
+    if(MINGW32 OR MINGW64 OR CYGWIN OR WIN32)
+        message(STATUS "Detected target platform: [Windows]")
+        set(PLATFORM "windows")
+
+    elseif(ANDROID OR ANDROID_NDK OR ANDROID_PLATFORM OR ANDROID_ABI)
+        message(STATUS "Detected target platform: [Android]")
+        set(PLATFORM "android")
+
+    elseif(IOS)
+        message(STATUS "Detected target platform: [iOS]")
+        set(PLATFORM "ios")
+
+    elseif(APPLE)
+        message(STATUS "Detected target platform: [macOS]")
+        set(PLATFORM "macos")
+
+    elseif(UNIX)
+        message(STATUS "Detected target platform: [Unix]")
+        set(PLATFORM "linux")
+
+    else()
+        message(FATAL_ERROR "Can not detect target platform. Expected VS_PLATFORM={macos, ios, windows, android}")
+    endif()
+
+    set(VS_PLATFORM "${PLATFORM}" CACHE STRING "Target platform: macos, ios, windows, android")
+endif()
+
+#
+#   Define: VS_ENV
+#
+set(VS_ENV "prod" CACHE STRING "Target environment: prod, env, dev")
+message(STATUS "Current environment : [${VS_ENV}]")
+
+#
+#   Write options to the "transitive-args.cmake".
+#
+add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_ENV "${VS_ENV}")
+add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_PLATFORM "${VS_PLATFORM}")
+add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_CUSTOMER "${VS_CUSTOMER}")
+add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
+add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 
 # ---------------------------------------------------------------------------
 # Prepare target platform
 # ---------------------------------------------------------------------------
-
-# Autodetect sdk, ndk for specified platform
 list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "macos" "windows")
 set(VS_DESKTOP_PLATFORM_LIST "linux" "macos" "windows")
 set(VS_MOBILE_PLATFORM_LIST "ios" "android")
 
-if (VS_PLATFORM)
+if(VS_PLATFORM)
     message(STATUS "Autodetecting environment for target platform: [${VS_PLATFORM}]")
     # Check platform name
-    if (NOT VS_PLATFORM IN_LIST VS_PLATFORM_LIST)
+    if(NOT VS_PLATFORM IN_LIST VS_PLATFORM_LIST)
         message(FATAL_ERROR "-- Target platform if wrong. Set VS_PLATFORM to [ ${VS_PLATFORM_LIST} ]")
-    endif ()
+    endif()
     # -- Linux
-    if (VS_PLATFORM STREQUAL "linux")
+    if(VS_PLATFORM STREQUAL "linux")
         set(QT_PREFIX_PATH "gcc_64")
 
     # -- Android
-    elseif (VS_PLATFORM STREQUAL "android")
+    elseif(VS_PLATFORM STREQUAL "android")
         set(QT_PREFIX_PATH "android")
         #   Android NDK ABIs
         set(ANDROID_ABI "x86" CACHE STRING "Android default ABI")
@@ -126,41 +170,41 @@ if (VS_PLATFORM)
         message(STATUS "ANDROID_BUILD_ABI_x86_64: ${ANDROID_BUILD_ABI_x86_64}")
 
         #  Android NDK
-        if (NOT CMAKE_TOOLCHAIN_FILE)
-            if (ANDROID_NDK)
+        if(NOT CMAKE_TOOLCHAIN_FILE)
+            if(ANDROID_NDK)
                 set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake")
-            elseif (DEFINED ENV{ANDROID_NDK})
+            elseif(DEFINED ENV{ANDROID_NDK})
                 set(CMAKE_TOOLCHAIN_FILE "$ENV{ANDROID_NDK}/build/cmake/android.toolchain.cmake")
             else ()
                 message(FATAL_ERROR "-- Enviroment variable ANDROID_NDK not set")
-            endif ()
-        endif ()
+            endif()
+        endif()
         message(STATUS "Android toolchain file: [${CMAKE_TOOLCHAIN_FILE}]")
         #  Android SDK
-        if (ANDROID_SDK)
+        if(ANDROID_SDK)
             message(STATUS "ANDROID_SDK: [${ANDROID_SDK}]")
-        elseif (DEFINED ENV{ANDROID_SDK})
+        elseif(DEFINED ENV{ANDROID_SDK})
             set(ANDROID_SDK "$ENV{ANDROID_SDK}")
             message(STATUS "Set ANDROID_SDK from environment value: [ ${ANDROID_SDK} ]")
         else ()
             message(FATAL_ERROR "-- Enviroment variable ANDROID_SDK not set")
-        endif ()
+        endif()
 
         execute_process(COMMAND bash -c "cd ${ANDROID_SDK}/build-tools && ls -rd -- */ | head -n 1 | cut -d'/' -f1 | tr -d '\n'" OUTPUT_VARIABLE ANDROID_SDK_BUILD_TOOLS_REVISION)
         message(STATUS "Android SDK build tool version: [${ANDROID_SDK_BUILD_TOOLS_REVISION}]")
         set(QT_ANDROID_DEPLOYMENT_DEPENDENCIES "\"sdkBuildToolsRevision\": \"${ANDROID_SDK_BUILD_TOOLS_REVISION}\",")
 
     # -- MacOS
-    elseif (VS_PLATFORM STREQUAL "macos")
+    elseif(VS_PLATFORM STREQUAL "macos")
         set(QT_PREFIX_PATH "clang_64")
 
     # -- IOS
-    elseif (VS_PLATFORM STREQUAL "ios" AND NOT VS_IOS_SIMULATOR)
+    elseif(VS_PLATFORM STREQUAL "ios" AND NOT VS_IOS_SIMULATOR)
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
 
     # -- IOS-SIM
-    elseif (VS_PLATFORM STREQUAL "ios" AND VS_IOS_SIMULATOR)
+    elseif(VS_PLATFORM STREQUAL "ios" AND VS_IOS_SIMULATOR)
         set(QT_PREFIX_PATH "ios")
         set(CMAKE_SYSTEM_NAME "iOS")
         execute_process(COMMAND xcodebuild -version -sdk iphonesimulator Path
@@ -168,15 +212,18 @@ if (VS_PLATFORM)
                 ERROR_QUIET
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         message(STATUS "Using SDK: ${CMAKE_OSX_SYSROOT} for platform: IOS Simulator")
-        if (NOT EXISTS ${CMAKE_OSX_SYSROOT})
+        if(NOT EXISTS ${CMAKE_OSX_SYSROOT})
             message(FATAL_ERROR "Invalid CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT} does not exist.")
-        endif ()
+        endif()
 
     # -- Windows
-    elseif (VS_PLATFORM STREQUAL "windows")
+    elseif(VS_PLATFORM STREQUAL "windows")
         set(QT_PREFIX_PATH "mingw81_64")
-    endif ()
+
+    else()
+        message(FATAL_ERROR "Unhandled VS_PLATFORM=${VS_PLATFORM}.")
+    endif()
 
     prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
-endif ()
+endif()
 

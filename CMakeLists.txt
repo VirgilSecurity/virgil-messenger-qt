@@ -47,7 +47,6 @@ include(vsplatforms)
 include(clangformat)
 include(android_version)
 include(getprebuild)
-include(customers)
 
 # ---------------------------------------------------------------------------
 # Project version
@@ -79,28 +78,6 @@ set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
 message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
 include("${VS_CUSTOMER_DIR}/customer.cmake") # Include customer file for project target name
-
-# ---------------------------------------------------------------------------
-# Detecting platform if VS_PLATFORM not specified
-# ---------------------------------------------------------------------------
-if (NOT VS_PLATFORM)
-    if (MINGW32 OR MINGW64 OR CYGWIN OR WIN32)
-        message(STATUS "Detected target platform: [Windows]")
-        set(VS_PLATFORM "windows")
-    elseif (ANDROID OR ANDROID_NDK)
-        message(STATUS "Detected target platform: [Android]")
-        set(VS_PLATFORM "android")
-    elseif (IOS)
-        message(STATUS "Detected target platform: [iOS]")
-        set(VS_PLATFORM "ios")
-    elseif (APPLE)
-        message(STATUS "Detected target platform: [macOS]")
-        set(VS_PLATFORM "macos")
-    elseif (UNIX)
-        message(STATUS "Detected target platform: [Unix]")
-        set(VS_PLATFORM "linux")
-    endif ()
-endif ()
 
 # ---------------------------------------------------------------------------
 # Define specific defaults for Android Multi ABI build within Qt Creator.
@@ -154,9 +131,9 @@ endif()
 # ---------------------------------------------------------------------------
 get_prebuild("${CMAKE_CURRENT_LIST_DIR}/ext")
 
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
-endif ()
+endif()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 message("-- Build type: [${CMAKE_BUILD_TYPE}]")
 
@@ -165,15 +142,15 @@ set(CMAKE_BUILD_TYPE_LOWER "release")
 set(PREBUILT_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
 set(PREBUILT_QT_DIR "${PREBUILT_DIR}/qt")
 
-if (VS_IOS_SIMULATOR AND VS_PLATFORM STREQUAL "ios")
+if(VS_IOS_SIMULATOR AND VS_PLATFORM STREQUAL "ios")
     set(VS_IOS_SIM_PREFIX "-sim")
-endif ()
+endif()
 
-if (VS_PLATFORM STREQUAL "android")
+if(VS_PLATFORM STREQUAL "android")
     set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}.${ANDROID_ABI}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
 else ()
     set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}${VS_IOS_SIM_PREFIX}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
-endif ()
+endif()
 
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
@@ -188,7 +165,6 @@ message(STATUS "Setting prebuild library directory: [${PREBUILT_LIB_DIR}]")
 # Include customer file and prepare data
 # ---------------------------------------------------------------------------
 include("${VS_CUSTOMER_DIR}/customer.cmake")
-vs_customer_prepare()
 
 # ---------------------------------------------------------------------------
 # Define generic build options.
