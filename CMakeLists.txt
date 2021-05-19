@@ -88,7 +88,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/cmake/getprebuild.cmake")
 # ---------------------------------------------------------------------------
 set(VS_CUSTOMER "Virgil" CACHE STRING "Customer for build")
 set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
-set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
 message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
 include("${VS_CUSTOMER_DIR}/customer.cmake")
