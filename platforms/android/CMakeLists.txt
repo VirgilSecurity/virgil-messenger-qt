@@ -267,7 +267,7 @@ add_custom_target(apk_release
         COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
-        --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
+        --apk "${CMAKE_BINARY_DIR}/android-build/${VS_TARGET_NAME}.apk"
         ${android_deploy_qt_platform}
         ${android_deploy_qt_jdk}
         --gradle

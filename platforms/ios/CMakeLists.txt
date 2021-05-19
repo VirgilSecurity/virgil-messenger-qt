@@ -286,19 +286,19 @@ set_target_properties(${VS_TARGET_NAME}
 #
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/LaunchScreen.storyboard.in"
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/LaunchScreen.storyboard"
         @ONLY
         )
 
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/Default-568h@2x.png"
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/Default-568h@2x.png"
         COPYONLY
         )
 
 set(STORYBOARD_DEFAULT
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard"
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/LaunchScreen.storyboard"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/Default-568h@2x.png"
         )
 
 set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
@@ -354,23 +354,23 @@ add_custom_target(xcarchive
         COMMENT "Building xcarchive..."
 
         COMMAND xcodebuild
-            -project "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.xcodeproj"
-            -scheme ${PROJECT_NAME}
+            -project "${PROJECT_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj"
+            -scheme ${VS_TARGET_NAME}
             -sdk iphoneos
             -destination generic/platform=iOS
             -configuration Release
             archive
-            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
 
         COMMAND "${CMAKE_COMMAND}" -E
-            tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" -- "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            tar czf "${VS_TARGET_NAME}-${PROJECT_VERSION}.tgz" -- "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
         )
 
 add_custom_target(upload
         COMMENT "Upload xcarchive..."
         COMMAND xcodebuild
             -exportArchive
-            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
             -exportOptionsPlist "${CMAKE_CURRENT_LIST_DIR}/exportOptions.plist"
             -allowProvisioningUpdates
         )
@@ -379,7 +379,7 @@ add_custom_target(ipa
         COMMENT "Build IPA..."
         COMMAND xcodebuild
         -exportArchive
-        -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+        -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
         -exportOptionsPlist "${CMAKE_CURRENT_LIST_DIR}/exportOptions-ipa.plist"
         -allowProvisioningUpdates
         -exportPath "${CMAKE_BINARY_DIR}"

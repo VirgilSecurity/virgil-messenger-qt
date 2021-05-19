@@ -113,7 +113,7 @@ configure_file(
 # ---------------------------------------------------------------------------
 find_program(DEPLOY_QT cqtdeployer)
 
-set(DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dist")
+set(DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dist")
 add_custom_target(deploy
         COMMENT "Running QT deployer for Windows..."
         COMMAND ${DEPLOY_QT}

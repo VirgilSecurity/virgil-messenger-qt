@@ -205,16 +205,16 @@ add_custom_target(create_dmg
         COMMENT "Creating DMG..."
 
         COMMAND "${CMAKE_COMMAND}" -E
-            rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            rm -f "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
 
         COMMAND "${MAC_APPDMG}"
             "${CMAKE_CURRENT_BINARY_DIR}/dmg.json"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
             -v
 
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/seticon"
             "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
 
         DEPENDS
             deploy
@@ -226,7 +226,7 @@ add_custom_target(notarize_dmg
         COMMENT "Notarizing DMG..."
 
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/dmg-notarization.sh"
-            -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            -f "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
             -u ${NOTARIZATION_LOGIN}
             -p ${NOTARIZATION_PASSWORD}
             -i "${MACOSX_BUNDLE_GUI_IDENTIFIER}"
@@ -239,8 +239,8 @@ add_custom_target(dmg_update
         COMMENT "Creating Sparkle update files..."
 
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
-            "${CMAKE_CURRENT_BINARY_DIR}/update/${PROJECT_NAME}-${PROJECT_VERSION}.dmg"
+            "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
+            "${CMAKE_CURRENT_BINARY_DIR}/update/${VS_TARGET_NAME}-${PROJECT_VERSION}.dmg"
 
         COMMAND "${PREBUILT_DIR}/macos/sparkle/bin/generate_appcast" "${CMAKE_CURRENT_BINARY_DIR}/update"
 
@@ -257,7 +257,7 @@ add_custom_target(dmg_debug
         COMMENT "Create debug MacOS DMG (without signing)..."
 
         COMMAND "${CMAKE_COMMAND}" -E
-            rm -f "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            rm -f "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
 
         COMMAND "${MAC_DEPLOY_QT}"
             "$<TARGET_BUNDLE_DIR:${VS_TARGET_NAME}>"
@@ -266,7 +266,7 @@ add_custom_target(dmg_debug
             -dmg
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/seticon"
             "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dmg"
+            "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.dmg"
 
         DEPENDS ${VS_TARGET_NAME}
         )
