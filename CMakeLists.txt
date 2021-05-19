@@ -39,35 +39,49 @@ else()
 endif()
 
 # ---------------------------------------------------------------------------
-# Include Cmake helpers
+# Define platform toolchain.
 # ---------------------------------------------------------------------------
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
-include(vsplatforms)
-include(clangformat)
-include(android_version)
-include(getprebuild)
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/vsplatforms.cmake")
 
 # ---------------------------------------------------------------------------
-# Project version
+# Define project.
 # ---------------------------------------------------------------------------
-set(VERSIONMAJOR "3")
-set(VERSIONMINOR "10")
-set(VERSIONBUILD "13")
-set(VS_TARGET_VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}")
+project(messenger VERSION "3.10.3" LANGUAGES C CXX)
+
+# ---------------------------------------------------------------------------
+# Configuration.
+# ---------------------------------------------------------------------------
 set(VS_CORE_VERSION "0.2.1.94")
-set(VERSION_DATABASE_SCHEME "3")
+set(VS_VERSION_DATABASE_SCHEME "3")
 
 # ---------------------------------------------------------------------------
-# Code formatting
+# Build options.
+# ---------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# ---------------------------------------------------------------------------
+# Configurable build options.
 # ---------------------------------------------------------------------------
 set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangformat.")
-
-# ---------------------------------------------------------------------------
-# Other build options.
-# ---------------------------------------------------------------------------
 set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
 set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
+
+# ---------------------------------------------------------------------------
+# Include Cmake helpers
+# ---------------------------------------------------------------------------
+include(GNUInstallDirs)
+include(FetchContent)
+
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/clangformat.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/android_version.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/getprebuild.cmake")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
@@ -77,30 +91,10 @@ set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
 set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
 message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
-include("${VS_CUSTOMER_DIR}/customer.cmake") # Include customer file for project target name
+include("${VS_CUSTOMER_DIR}/customer.cmake")
 
 # ---------------------------------------------------------------------------
-# Define specific defaults for Android Multi ABI build within Qt Creator.
-# ---------------------------------------------------------------------------
-if(NOT PROJECT_NAME AND VS_PLATFORM STREQUAL "android")
-    # Android API level
-    set(ANDROID_MIN_SDK_VERSION "26")
-    set(ANDROID_TARGET_SDK_VERSION "29")
-    set(ANDROID_SDK_PLATFORM "${ANDROID_TARGET_SDK_VERSION}")
-    set(ANDROID_NATIVE_API_LEVEL "${ANDROID_MIN_SDK_VERSION}")
-    message(STATUS "Android API level: [${ANDROID_NATIVE_API_LEVEL}]")
-endif()
-
-# ---------------------------------------------------------------------------
-# Define project
-# ---------------------------------------------------------------------------
-project(${VS_TARGET_NAME} VERSION ${VS_TARGET_VERSION} LANGUAGES C CXX)
-
-message(STATUS "CMAKE_PREFIX_PATH: [${CMAKE_PREFIX_PATH}]")
-message(STATUS "CMAKE_FIND_ROOT_PATH: [${CMAKE_FIND_ROOT_PATH}]")
-
-# ---------------------------------------------------------------------------
-# Define generic platform specific settings.
+# Define platform specific settings.
 # ---------------------------------------------------------------------------
 if(XCODE_VERSION)
     #
@@ -124,6 +118,7 @@ elseif(VS_PLATFORM STREQUAL "ios")
 
 elseif(VS_PLATFORM STREQUAL "android")
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/platforms/android/gradle" CACHE INTERNAL "")
+    set(QT_ANDROID_APPLICATION_BINARY ${VS_TARGET_NAME})
 endif()
 
 # ---------------------------------------------------------------------------
@@ -162,31 +157,10 @@ message(STATUS "Setting prebuild include directory: [${PREBUILT_INCLUDE_DIR}]")
 message(STATUS "Setting prebuild library directory: [${PREBUILT_LIB_DIR}]")
 
 # ---------------------------------------------------------------------------
-# Include customer file and prepare data
-# ---------------------------------------------------------------------------
-include("${VS_CUSTOMER_DIR}/customer.cmake")
-
-# ---------------------------------------------------------------------------
-# Define generic build options.
-# ---------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-set(CMAKE_VERBOSE_MAKEFILE OFF CACHE BOOL "Enable extra compile output")
-
-include(GNUInstallDirs)
-include(FetchContent)
-
-find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml REQUIRED)
-
-# ---------------------------------------------------------------------------
 #   Common libraries that is used by different targets.
 # ---------------------------------------------------------------------------
+find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml REQUIRED)
+
 #
 #   CommKit
 #
@@ -224,7 +198,7 @@ target_link_directories(comm-kit
 add_library(platform-definitions INTERFACE)
 target_compile_definitions(platform-definitions
         INTERFACE
-        $<BUILD_INTERFACE:VERSION=${VS_TARGET_VERSION}>
+        $<BUILD_INTERFACE:VERSION=${PROJECT_VERSION}>
 
         $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
         $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
@@ -901,7 +875,7 @@ target_compile_definitions(${VS_TARGET_NAME}
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
-        $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VERSION_DATABASE_SCHEME}>
+        $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VS_VERSION_DATABASE_SCHEME}>
         $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
         $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
         $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>

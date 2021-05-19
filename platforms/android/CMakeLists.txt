@@ -60,7 +60,7 @@ message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
 get_firebase("${PROJECT_SOURCE_DIR}/ext")
 
-set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${VS_TARGET_VERSION}")
+set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${PROJECT_VERSION}")
 message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
 message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
 
@@ -259,6 +259,8 @@ if(ANDROID_SDK_PLATFORM)
     set(android_deploy_qt_platform "--android-platform ${ANDROID_SDK_PLATFORM}")
     message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
 endif()
+
+set(QT_ANDROID_APPLICATION_BINARY ${VS_TARGET_NAME})
 
 add_custom_target(apk_release
         COMMENT "Making APK release..."
