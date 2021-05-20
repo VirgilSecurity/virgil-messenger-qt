@@ -513,6 +513,12 @@ target_link_libraries(core-messenger
         Qt5::Xml
         )
 
+target_compile_definitions(core-messenger
+        PUBLIC
+        $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
+        $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
+        )
+
 #
 #   Core Messenger GUI
 #
@@ -876,8 +882,6 @@ target_compile_definitions(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:CFG_CLIENT=1>
         $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VS_VERSION_DATABASE_SCHEME}>
         $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
-        $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
-        $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
         )
 
 target_compile_options(${VS_TARGET_NAME}
