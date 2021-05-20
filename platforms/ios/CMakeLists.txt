@@ -354,7 +354,7 @@ add_custom_target(xcarchive
         COMMENT "Building xcarchive..."
 
         COMMAND xcodebuild
-            -project "${PROJECT_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj"
+            -project "${PROJECT_BINARY_DIR}/messenger.xcodeproj"
             -scheme ${VS_TARGET_NAME}
             -sdk iphoneos
             -destination generic/platform=iOS
