@@ -34,9 +34,9 @@
 
 #include "PlatformAndroid.h"
 
-#include "FirebaseListener.h"
-
 #include <QtAndroid>
+
+#include "PlatformNotifications.h"
 
 #include <android/log.h>
 #include <pthread.h>
@@ -44,8 +44,7 @@
 #include <cstdio>
 
 using namespace vm;
-using namespace vm::platform;
-using namespace vm::notifications;
+using namespace platform;
 
 using Self = PlatformAndroid;
 
@@ -149,7 +148,7 @@ bool Self::uiInit() const
         return false;
     }
 
-    FirebaseListener::instance().init();
+    PlatformNotifications::instance().init();
 
     return true;
 }

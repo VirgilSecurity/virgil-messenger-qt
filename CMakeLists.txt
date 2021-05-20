@@ -68,6 +68,7 @@ set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangfo
 # ---------------------------------------------------------------------------
 set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
 set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
+set(USE_PUSHY_ME_NOTIFICATION_SERVICE OFF CACHE BOOL "Use pushy.me notification service.")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
@@ -860,6 +861,7 @@ target_link_libraries(${VS_TARGET_NAME}
         platform
         platform-definitions
         platform-fs
+        platform-notifications
         platform-updates
         platform-gui
         settings

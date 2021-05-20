@@ -58,7 +58,9 @@ endif()
 
 message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
-get_firebase("${PROJECT_SOURCE_DIR}/ext")
+if(NOT USE_PUSHY_ME_NOTIFICATION_SERVICE)
+    get_firebase("${PROJECT_SOURCE_DIR}/ext")
+endif()
 
 set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${VS_TARGET_VERSION}")
 message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
@@ -83,14 +85,8 @@ target_link_libraries(platform-deps
         crypto_1_1
         )
 
-target_include_directories(platform-deps
-        SYSTEM INTERFACE
-        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/include>"
-        )
-
 target_link_directories(platform-deps
         INTERFACE
-        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>"
         "$<BUILD_INTERFACE:${VS_ANDROID_SSL_DIR}>"
         )
 
@@ -102,10 +98,7 @@ add_library(platform STATIC)
 target_sources(platform
         PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformAndroid.h"
-        "${CMAKE_CURRENT_LIST_DIR}/native/include/FirebaseListener.h"
-
         "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformAndroid.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/native/src/FirebaseListener.cpp"
         )
 
 target_include_directories(platform
@@ -118,10 +111,42 @@ target_link_libraries(platform
         platform-deps
         platform-base
         customer
+        )
+
+#
+#   Library: platform-notifications.
+#
+add_library(platform-notifications STATIC)
+
+target_sources(platform-notifications
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsAndroid.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/FirebaseListener.h"
+
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsAndroid.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/FirebaseListener.cpp"
+        )
+
+target_include_directories(platform-notifications
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/include>"
+        )
+
+target_link_libraries(platform-notifications
+        PUBLIC
+        Qt5::AndroidExtras
+
+        platform-notifications-api
 
         firebase_messaging
         firebase_app
         firebase_auth
+        )
+
+target_compile_definitions(platform-notifications
+        PRIVATE
+        $<BUILD_INTERFACE:USE_PUSHY_ME_NOTIFICATION_SERVICE=$<BOOL:${USE_PUSHY_ME_NOTIFICATION_SERVICE}>>
         )
 
 #
@@ -196,7 +221,6 @@ file(COPY "${VS_CUSTOMER_DIR}/platforms/android/" DESTINATION "${GRADLE_BUILD_DI
 #  Copy Gradle support files.
 #
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradle" DESTINATION "${GRADLE_BUILD_DIR}")
-file(COPY "${CMAKE_CURRENT_LIST_DIR}/build.gradle" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew.bat" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/project.properties" DESTINATION "${GRADLE_BUILD_DIR}")
@@ -228,6 +252,10 @@ configure_file(
         "${GRADLE_BUILD_DIR}/gradle.properties"
         @ONLY
         )
+
+file(READ "${CMAKE_CURRENT_LIST_DIR}/build.gradle" BUILD_GRADLE_CONTENTS)
+file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+file(APPEND "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
 
 # ---------------------------------------------------------------------------
 #   Main target.
