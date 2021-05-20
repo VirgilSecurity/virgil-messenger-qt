@@ -32,31 +32,21 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "PlatformNotificationsAndroid.h"
+#ifndef VM_NOTIFICATIONS_ANDROID_PUSHY_ME_LISTENER_H
+#define VM_NOTIFICATIONS_ANDROID_PUSHY_ME_LISTENER_H
 
-#if USE_PUSHY_ME_NOTIFICATION_SERVICE
-#    include "PushyMeListener.h"
-#else
-#    include "FirebaseListener.h"
-#endif
+namespace vm {
+namespace notifications {
 
-using namespace vm;
-using namespace platform;
-using namespace notifications;
-
-using Self = PlatformNotificationsAndroid;
-
-PlatformNotifications &PlatformNotifications::instance()
+class PushyMeListener
 {
-    static Self impl;
-    return impl;
-}
+public:
+    static PushyMeListener &instance();
 
-void Self::init()
-{
-#if USE_PUSHY_ME_NOTIFICATION_SERVICE
-    PushyMeListener::instance().init();
-#else
-    FirebaseListener::instance().init();
-#endif
-}
+    void init();
+};
+
+} // namespace notifications
+} // namespace vm
+
+#endif // VM_NOTIFICATIONS_ANDROID_PUSHY_ME_LISTENER_H

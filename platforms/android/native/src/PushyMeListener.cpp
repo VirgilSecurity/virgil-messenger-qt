@@ -32,31 +32,28 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "PlatformNotificationsAndroid.h"
+#include "PushyMeListener.h"
 
-#if USE_PUSHY_ME_NOTIFICATION_SERVICE
-#    include "PushyMeListener.h"
-#else
-#    include "FirebaseListener.h"
-#endif
+#include "PlatformAndroid.h"
 
-using namespace vm;
-using namespace platform;
-using namespace notifications;
+#include <QLoggingCategory>
+#include <QtAndroid>
 
-using Self = PlatformNotificationsAndroid;
+Q_DECLARE_LOGGING_CATEGORY(lcPushyMeListener);
+Q_LOGGING_CATEGORY(lcPushyMeListener, "pushyme");
 
-PlatformNotifications &PlatformNotifications::instance()
+using namespace vm::platform;
+using namespace vm::notifications;
+using Self = PushyMeListener;
+
+PushyMeListener &Self::instance()
 {
-    static Self impl;
-    return impl;
+    static Self instance;
+    return instance;
 }
 
 void Self::init()
 {
-#if USE_PUSHY_ME_NOTIFICATION_SERVICE
-    PushyMeListener::instance().init();
-#else
-    FirebaseListener::instance().init();
-#endif
+    qCDebug(lcPushyMeListener) << "Initializing listener...";
+    // TODO: implement
 }

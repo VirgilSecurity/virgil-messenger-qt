@@ -254,8 +254,14 @@ configure_file(
         )
 
 file(READ "${CMAKE_CURRENT_LIST_DIR}/build.gradle" BUILD_GRADLE_CONTENTS)
-file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
-file(APPEND "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
+if(USE_PUSHY_ME_NOTIFICATION_SERVICE)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/pushyme.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+else()
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+endif()
+file(WRITE "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
+
+message(STATUS "### ${GRADLE_BUILD_DIR}/build.gradle")
 
 # ---------------------------------------------------------------------------
 #   Main target.
