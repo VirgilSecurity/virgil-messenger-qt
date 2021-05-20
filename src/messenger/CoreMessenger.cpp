@@ -1526,6 +1526,12 @@ Self::Result Self::sendGroupMessage(const MessageHandler &message)
     }
 }
 
+std::variant<Self::Result, MessageHandler>
+Self::decryptStandaloneMessage(const QString &recipientJid, const QString &senderJid, const QString &ciphertext)
+{
+    return Self::Result::Success;
+}
+
 QFuture<Self::Result> Self::processReceivedXmppMessage(const QXmppMessage &xmppMessage)
 {
     return QtConcurrent::run([this, xmppMessage]() -> Result {

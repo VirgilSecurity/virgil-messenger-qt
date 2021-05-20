@@ -226,6 +226,13 @@ public:
     QFuture<Result> sendMessage(MessageHandler message);
 
     //
+    //  Try to decrypt given message for any local user.
+    //  It is used to decrypt notification messages.
+    //
+    std::variant<Result, MessageHandler> decryptStandaloneMessage(const QString &recipientJid, const QString &senderJid,
+                                                                  const QString &ciphertext);
+
+    //
     //  Encrypt given file and returns a key for decryption and signature.
     //
     std::tuple<Result, QByteArray, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);

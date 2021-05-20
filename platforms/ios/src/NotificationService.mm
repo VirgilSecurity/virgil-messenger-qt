@@ -35,11 +35,14 @@
 #import "NotificationService.h"
 
 #include "CoreMessenger.h"
+#include "Logging.h"
 #include "Settings.h"
 
 #include <memory>
 
 using namespace vm;
+
+Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
 
 @interface NotificationService ()
 
@@ -65,12 +68,66 @@ using namespace vm;
     //
     //  Extract encrypted message.
     //
+    auto encryptedContent = request.content.body;
+    auto senderJid = (NSString*)request.content.userInfo[@"from"];
+    auto recipientJid = (NSString*)request.content.userInfo[@"to"];
+    auto ciphertext = (NSString*)request.content.userInfo[@"ciphertext"];
+
+    if (0 == senderJid.length) {
+        qCWarning(lcNotificationExtension) << "Required field 'from' is missing.";
+        return;
+    } else {
+        qCDebug(lcNotificationExtension) << "Sender JID" << senderJid;
+    }
+
+    if (0 == recipientJid.length) {
+        qCWarning(lcNotificationExtension) << "Required field 'to' is missing.";
+        return;
+    } else {
+        qCDebug(lcNotificationExtension) << "Recipient JID" << recipientJid;
+    }
+
+    if (0 == ciphertext.length) {
+        qCWarning(lcNotificationExtension) << "Required field 'ciphertext' is missing.";
+        return;
+    } else {
+        qCDebug(lcNotificationExtension) << "Ciphertext" << ciphertext;
+    }
 
     //
     //  Try to decrypt encrypted message.
     //
+    Logging logging;
+
     auto settings = std::make_unique<Settings>();
     CoreMessenger messenger(settings.get());
+
+    auto decryptResult = messenger.decryptStandaloneMessage(
+        QString::fromNSString(recipientJid), QString::fromNSString(senderJid), QString::fromNSString(ciphertext));
+
+    if (auto result = std::get_if<CoreMessengerStatus>(&decryptResult)) {
+        qCWarning(lcNotificationExtension) << "Failed to decrypt message.";
+        return;
+    }
+
+    auto message = std::move(*std::get_if<MessageHandler>(&decryptResult));
+    self.bestAttemptContent.title = message->senderUsername().toNSString();
+
+    if (auto text = std::get_if<MessageContentText>(&message->content())) {
+        self.bestAttemptContent.body = text->text().toNSString();
+
+    } else if (auto file = std::get_if<MessageContentFile>(&message->content())) {
+        self.bestAttemptContent.body = [NSString stringWithFormat:@"File: %@", file->fileName().toNSString()];
+
+    } else if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
+        self.bestAttemptContent.body = @"Picture";
+
+    } else if (auto groupInvitation = std::get_if<MessageContentGroupInvitation>(&message->content())) {
+        self.bestAttemptContent.body = @"Group Invitation";
+
+    } else {
+        qCWarning(lcNotificationExtension) << "Unexpected message content.";
+    }
 }
 
 - (void)serviceExtensionTimeWillExpire
