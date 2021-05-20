@@ -106,8 +106,6 @@ target_sources(platform-gui
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerDataSourceIos.mm"
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerIos.mm"
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerPreviewItemIos.mm"
-
-        "${CMAKE_CURRENT_LIST_DIR}/src/AppDelegate.mm"
         )
 
 target_include_directories(platform-gui
@@ -237,6 +235,17 @@ endif()
 #   Main Application.
 # ---------------------------------------------------------------------------
 add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
+
+target_sources(${VS_TARGET_NAME}
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/src/AppDelegate.mm"
+        )
+
+#   TODO: Remove next includes when Notifications goes to a separate library.
+target_include_directories(${VS_TARGET_NAME}
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        )
 
 #
 #   Dependencies.

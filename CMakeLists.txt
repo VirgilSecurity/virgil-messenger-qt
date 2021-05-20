@@ -506,6 +506,7 @@ target_link_libraries(core-messenger
         helpers
         settings
         logging
+        platform-definitions
 
         Qt5::Core
         Qt5::Concurrent
