@@ -46,7 +46,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/cmake/vsplatforms.cmake")
 # ---------------------------------------------------------------------------
 # Define project.
 # ---------------------------------------------------------------------------
-project(messenger VERSION "3.10.3" LANGUAGES C CXX)
+project(messenger VERSION "3.11.0" LANGUAGES C CXX)
 
 # ---------------------------------------------------------------------------
 # Configuration.
