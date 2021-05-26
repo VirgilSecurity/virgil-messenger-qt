@@ -69,7 +69,8 @@ public:
     void setUserCredential(const QString &username, const QString &userCredential);
 
     QString userInfo(const QString &username) const;
-    void setUserInfo(const QString &username, const QString &userInfo);
+    QString usernameForId(const QString &userId) const;
+    void setUserInfo(const QString &username, const QString &userId, const QString &userInfo);
 
     // Device id, run flags
     QString deviceId() const;

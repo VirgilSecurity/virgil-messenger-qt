@@ -98,12 +98,10 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
     //  Try to decrypt encrypted message.
     //
     Logging logging;
+    Settings settings;
 
-    auto settings = std::make_unique<Settings>();
-    CoreMessenger messenger(settings.get());
-
-    auto decryptResult = messenger.decryptStandaloneMessage(
-        QString::fromNSString(recipientJid), QString::fromNSString(senderJid), QString::fromNSString(ciphertext));
+    auto decryptResult = CoreMessenger::decryptStandaloneMessage(settings, QString::fromNSString(recipientJid),
+        QString::fromNSString(senderJid), QString::fromNSString(ciphertext));
 
     if (auto result = std::get_if<CoreMessengerStatus>(&decryptResult)) {
         qCWarning(lcNotificationExtension) << "Failed to decrypt message.";
