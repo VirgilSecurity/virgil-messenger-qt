@@ -136,10 +136,6 @@ else ()
     set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
-set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
-set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
-
 
 # ---------------------------------------------------------------------------
 #   Notification Extension.
@@ -211,6 +207,8 @@ if(VS_PROVISIONING_PROFILE_SPECIFIER)
             )
 endif()
 
+set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} TARGETED_DEVICE_FAMILY "1,2")
+set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} ONLY_ACTIVE_ARCH NO)
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
         CODE_SIGN_ENTITLEMENTS
@@ -246,6 +244,9 @@ target_include_directories(${VS_TARGET_NAME}
         PRIVATE
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         )
+
+set_xcode_property(${VS_TARGET_NAME} TARGETED_DEVICE_FAMILY "1,2")
+set_xcode_property(${VS_TARGET_NAME} ONLY_ACTIVE_ARCH NO)
 
 #
 #   Dependencies.
