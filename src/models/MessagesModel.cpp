@@ -454,7 +454,11 @@ QString Self::statusIconPath(MessageHandler message)
         if (message->isOutgoing()) {
             // TODO(fpohtmeh): implement smarter check?
             if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
-                return path.arg("M-Delivered"); // TODO(fpohtmeh): should be "M-Delivered"
+                if (message->isGroupChatMessage()) {
+                    return path.arg("M-Read");
+                } else {
+                    return path.arg("M-Delivered");
+                }
             } else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
                 return path.arg("M-Read");
             }

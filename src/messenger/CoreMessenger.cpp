@@ -1527,6 +1527,7 @@ Self::Result Self::sendGroupMessage(const MessageHandler &message)
     if (isSent) {
         qCDebug(lcCoreMessenger) << "XMPP message was sent";
         return Self::Result::Success;
+
     } else {
         qCWarning(lcCoreMessenger) << "Can not send message - XMPP send failed";
         return Self::Result::Error_SendMessageFailed;
@@ -1773,14 +1774,18 @@ Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessag
 
 Self::Result Self::processGroupChatReceivedXmppMessage(const QXmppMessage &xmppMessage)
 {
+    const auto groupId = groupIdFromJid(xmppMessage.from());
+    const auto senderId = groupUserIdFromJid(xmppMessage.from());
+    const auto recipientId = UserId(groupId);
 
-    auto groupId = groupIdFromJid(xmppMessage.from());
+    if (senderId == currentUser()->id()) {
+        return processGroupChatReceivedXmppCarbonMessage(xmppMessage);
+    }
 
     auto message = std::make_unique<IncomingMessage>();
-
     message->setId(MessageId(xmppMessage.id()));
-    message->setRecipientId(UserId(QString(groupIdFromJid(xmppMessage.from()))));
-    message->setSenderId(groupUserIdFromJid(xmppMessage.from()));
+    message->setRecipientId(recipientId);
+    message->setSenderId(senderId);
     message->setCreatedAt(xmppMessage.stamp());
     message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
 
@@ -3640,20 +3645,20 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
         return;
     }
 
-    QXmppMessage mark;
-
-    switch (message->chatType()) {
-    case ChatType::Personal:
-        mark.setType(QXmppMessage::Chat);
-        mark.setTo(userIdToJid(message->senderId()));
-        break;
-
-    case ChatType::Group:
-        mark.setType(QXmppMessage::GroupChat);
-        mark.setTo(groupIdToJid(message->groupChatInfo()->groupId()));
-        break;
+    if (message->chatType() != ChatType::Personal) {
+        //
+        //  For now "displayed" should be send for personal messages only.
+        //  Motivation:
+        //      - Marker "Displayed" triggers push-notification, and should be filtered within messenger application.
+        //      - This marker is not used for Group Chats as expected:
+        //          - "Displayed" status is not shown per group member.
+        //
+        return;
     }
 
+    QXmppMessage mark;
+    mark.setType(QXmppMessage::Chat);
+    mark.setTo(userIdToJid(message->senderId()));
     mark.setFrom(currentUserJid());
     mark.setId(QXmppUtils::generateStanzaUuid());
     mark.setMarkerId(message->id());
