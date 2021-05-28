@@ -60,12 +60,6 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
     self.bestAttemptContent = [request.content mutableCopy];
 
     //
-    //  Replace Base64 with something readable.
-    //
-    self.bestAttemptContent.title = @"New Message";
-    self.bestAttemptContent.body = @"<encrypted>";
-
-    //
     //  Extract encrypted message.
     //
     auto encryptedContent = request.content.body;
