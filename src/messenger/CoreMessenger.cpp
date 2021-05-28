@@ -911,9 +911,9 @@ QFuture<Self::Result> Self::signOut()
         qCInfo(lcCoreMessenger) << "Signing out";
 
         emit deregisterPushNotifications();
-        emit cleanupCommKitMessenger();
-        emit cleanupXmppMucRooms();
         emit disconnectXmppServer();
+        emit cleanupXmppMucRooms();
+        emit cleanupCommKitMessenger();
 
         return Self::Result::Success;
     });
