@@ -40,13 +40,14 @@
 #include "FutureWorker.h"
 #include "Messenger.h"
 #include "Settings.h"
-#include "Utils.h"
+#include "UidUtils.h"
 #include "FileUtils.h"
-#include "android/VSQAndroid.h"
-
-Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs")
+#include "PlatformFs.h"
 
 using namespace vm;
+using namespace platform;
+
+Q_LOGGING_CATEGORY(lcCloudFileSystem, "cloud-fs");
 
 CloudFileSystem::CloudFileSystem(CoreMessenger *coreMessenger, Messenger *messenger)
     : QObject(messenger), m_coreMessenger(coreMessenger), m_messenger(messenger)
@@ -72,11 +73,7 @@ void CloudFileSystem::signOut()
 
 bool CloudFileSystem::checkPermissions()
 {
-#if VS_ANDROID
-    return VSQAndroid::checkWriteExternalStoragePermission();
-#else
-    return true;
-#endif
+    return PlatformFs::instance().requestExternalStorageWritePermission();
 }
 
 bool CloudFileSystem::createDownloadsDir()
@@ -114,7 +111,7 @@ CloudFileRequestId CloudFileSystem::createFile(const QString &filePath, const Cl
     const auto requestId = ++m_requestId;
     const auto parentFolderId = parentFolder->id().coreFolderId();
     const auto tempDir = m_messenger->settings()->cloudFilesCacheDir();
-    const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + Utils::createUuid());
+    const auto encFilePath = tempDir.filePath(QLatin1String("upload-") + UidUtils::createUuid());
     auto future = m_coreFs->createFile(filePath, encFilePath, parentFolderId, parentFolder->publicKey());
     FutureWorker::run(future, [this, filePath, encFilePath, parentFolder, requestId](auto result) {
         if (std::holds_alternative<CoreMessengerStatus>(result)) {

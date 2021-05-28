@@ -38,9 +38,8 @@
 #include "NetworkOperation.h"
 #include "TimeProfiler.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class MessageOperation;
 
 class LoadAttachmentOperation : public NetworkOperation

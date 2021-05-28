@@ -44,19 +44,7 @@
 
 namespace vm {
 namespace Utils {
-QString createUuid();
-
 // String processing/format
-
-QString formattedSize(quint64 fileSize);
-
-QString formattedDataSizeProgress(quint64 loaded, quint64 total);
-
-QString formattedElapsedSeconds(std::chrono::seconds seconds, std::chrono::seconds nowInterval);
-
-QString formattedLastSeenActivity(std::chrono::seconds seconds, std::chrono::seconds updateInterval);
-
-QString formattedLastSeenNoActivity();
 
 QString elidedText(const QString &text, const int maxLength);
 
@@ -85,8 +73,6 @@ bool readImage(QImageReader *reader, QImage *image);
 Contacts getDeviceContacts(const Contacts &cachedContacts = Contacts());
 
 QUrl getContactAvatarUrl(const ContactHandler contact);
-
-QString contactDisplayName(const QString &name, const QString &username, const QString &phone, const QString &email);
 
 QString displayUsername(const QString &username, const UserId &userId);
 } // namespace Utils

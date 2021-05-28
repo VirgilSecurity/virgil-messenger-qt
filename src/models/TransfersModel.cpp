@@ -34,7 +34,7 @@
 
 #include "TransfersModel.h"
 
-#include "Utils.h"
+#include "FormatUtils.h"
 #include "Model.h"
 
 using namespace vm;
@@ -91,7 +91,7 @@ QString Self::displayedProgress(const Transfer &item)
     if (item.bytesLoaded == 0) {
         return isDownload ? tr("Waiting for download...") : tr("Waiting for upload...");
     }
-    return Utils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
+    return FormatUtils::formattedDataSizeProgress(item.bytesLoaded, item.bytesTotal);
 }
 
 int Self::rowCount(const QModelIndex &parent) const

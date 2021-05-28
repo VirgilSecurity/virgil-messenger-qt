@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -53,7 +53,13 @@ public:
 
     static std::optional<QString> readTextFile(const QString &filePath);
 
+    static bool fileExists(const QUrl &fileUrl);
+
     static bool fileExists(const QString &filePath);
+
+    static quint64 fileSize(const QUrl &fileUrl);
+
+    static quint64 fileSize(const QString &filePath);
 
     static void removeFile(const QString &filePath);
 

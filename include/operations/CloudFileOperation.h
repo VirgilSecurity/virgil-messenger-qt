@@ -40,9 +40,8 @@
 
 #include <QPointer>
 
-class Settings;
-
 namespace vm {
+class Settings;
 class CloudFileSystem;
 class CloudFolderUpdateWatcher;
 class FileLoader;

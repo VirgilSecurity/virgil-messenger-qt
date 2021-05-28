@@ -32,18 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <iostream>
-#include <VSQApplication.h>
+#include "Logging.h"
+#include "VSQApplication.h"
+
 #if VS_MOBILE
 #    include <QGuiApplication>
 #else
 #    include <QApplication>
 #endif
-#include <logging/VSQLogging.h>
 
 #if (VSQ_WEBDRIVER_DEBUG)
 #    include "Test/Headers.h"
 #endif
+
+using namespace vm;
 
 int main(int argc, char *argv[])
 {
@@ -53,7 +55,7 @@ int main(int argc, char *argv[])
 #else
     QApplication a(argc, argv);
 #endif
-    VSQLogging logging;
+    Logging logging;
 
     QString baseUrl;
     if (2 == argc && argv[1] && argv[1][0]) {

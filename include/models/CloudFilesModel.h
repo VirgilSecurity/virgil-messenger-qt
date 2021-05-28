@@ -39,9 +39,8 @@
 #include "CloudFilesUpdate.h"
 #include "ListModel.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class CloudFilesModel : public ListModel
 {
     Q_OBJECT

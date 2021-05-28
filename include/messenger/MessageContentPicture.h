@@ -91,16 +91,7 @@ public:
     //
     void setThumbnail(MessageContentFile thumbnail);
 
-    //
-    //  Create picture message content from the given path.
-    //
-    static std::optional<MessageContentPicture> createFromLocalFile(const QUrl &localUrl, const QString &imageFormat,
-                                                                    const QSize &thumbnailMaxSize,
-                                                                    QString &errorString);
-
 private:
-    bool readImage(const QSize &thumbnailMaxSize, QString &errorString);
-
     QString m_previewPath;
     MessageContentFile m_thumbnail;
     qsizetype m_thumbnailWidth;

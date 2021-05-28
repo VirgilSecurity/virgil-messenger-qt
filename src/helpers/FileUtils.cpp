@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -34,17 +34,18 @@
 
 #include "FileUtils.h"
 
-#include "Utils.h"
+#include "UidUtils.h"
+#include "PlatformFs.h"
 
 #include <QCryptographicHash>
 #include <QDir>
 #include <QLoggingCategory>
-
-#include <android/VSQAndroid.h>
+#include <QMimeDatabase>
 
 Q_LOGGING_CATEGORY(lcFileUtils, "file-utils");
 
 using namespace vm;
+using namespace platform;
 using Self = vm::FileUtils;
 
 QString Self::calculateFingerprint(const QString &path)
@@ -75,7 +76,7 @@ QString Self::findUniqueFileName(const QString &fileName)
     auto baseName = info.baseName();
     auto suffix = info.completeSuffix();
     for (;;) {
-        auto uuid = Utils::createUuid().remove('-').left(6);
+        auto uuid = UidUtils::createUuid().remove('-').left(6);
         auto newFileName = dir.filePath(QString("%1-%2.%3").arg(baseName, uuid, suffix));
         if (!QFile::exists(newFileName)) {
             return newFileName;
@@ -91,16 +92,12 @@ bool Self::isValidUrl(const QUrl &url)
 
 QString Self::urlToLocalFile(const QUrl &url)
 {
-#if VS_ANDROID
-    qCDebug(lcFileUtils) << "Android file url (before urlToLocalFile):" << url.toString();
-    const auto resUrl = url.isLocalFile() ? url.adjusted(QUrl::RemoveScheme) : url;
-    const auto res = resUrl.toEncoded();
-    qCDebug(lcFileUtils) << "Android file url path:" << res;
-    return res;
-#else
-    qCDebug(lcFileUtils) << "File url:" << url.toLocalFile();
-    return url.toLocalFile();
-#endif
+    return PlatformFs::instance().urlToLocalFile(url);
+}
+
+QUrl Self::localFileToUrl(const QString &filePath)
+{
+    return PlatformFs::instance().localFileToUrl(filePath);
 }
 
 bool Self::forceCreateDir(const QString &absolutePath, bool isFatal)
@@ -124,19 +121,6 @@ bool Self::forceCreateDir(const QString &absolutePath, bool isFatal)
     return false;
 }
 
-QUrl Self::localFileToUrl(const QString &filePath)
-{
-#if VS_ANDROID
-    QUrl url(filePath);
-    if (url.scheme().isEmpty()) {
-        return QUrl::fromLocalFile(filePath);
-    }
-    return url;
-#else
-    return QUrl::fromLocalFile(filePath);
-#endif
-}
-
 std::optional<QString> Self::readTextFile(const QString &filePath)
 {
     QFile file(filePath);
@@ -153,6 +137,27 @@ bool Self::fileExists(const QString &filePath)
         return false;
     }
     return QFileInfo::exists(filePath);
+}
+
+bool Self::fileExists(const QUrl &fileUrl)
+{
+    return fileExists(urlToLocalFile(fileUrl));
+}
+
+quint64 Self::fileSize(const QUrl &fileUrl)
+{
+    return fileSize(urlToLocalFile(fileUrl));
+}
+
+quint64 Self::fileSize(const QString &filePath)
+{
+    QFileInfo fileInfo(filePath);
+
+    if (!fileInfo.exists()) {
+        return 0;
+    }
+
+    return fileInfo.size();
 }
 
 void Self::removeFile(const QString &filePath)
@@ -185,28 +190,7 @@ QString Self::fileExt(const QString &filePath)
 
 QString Self::attachmentFileName(const QUrl &url, bool isPicture)
 {
-    QString fileName;
-#if VS_ANDROID
-    Q_UNUSED(isPicture)
-    fileName = VSQAndroid::getDisplayName(url);
-#elif VS_IOS_SIMULATOR
-    fileName = url.fileName();
-#elif VS_IOS
-    if (isPicture) {
-        // Build file name from url, i.e.
-        // "file:assets-library://asset/asset.PNG?id=7CE20DC4-89A8-4079-88DC-AD37920581B5&ext=PNG"
-        QUrl urlWithoutFileScheme { url.toLocalFile() };
-        const QUrlQuery query(urlWithoutFileScheme.query());
-        fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
-    }
-#else
-    Q_UNUSED(url)
-    Q_UNUSED(isPicture)
-#endif
-    if (fileName.isEmpty()) {
-        fileName = Self::fileName(urlToLocalFile(url));
-    }
-    return fileName;
+    return PlatformFs::instance().fileDisplayName(url, isPicture);
 }
 
 QString Self::fileMimeType(const QString &filePath)

@@ -37,7 +37,7 @@
 #include "FileUtils.h"
 #include "Messenger.h"
 #include "Settings.h"
-#include "Utils.h"
+#include "UidUtils.h"
 #include "operations/EncryptFileOperation.h"
 #include "operations/UploadFileOperation.h"
 
@@ -48,7 +48,7 @@ EncryptUploadFileOperation::EncryptUploadFileOperation(NetworkOperation *parent,
     : NetworkOperation(parent),
       m_messenger(messenger),
       m_sourcePath(sourcePath),
-      m_tempPath(messenger->settings()->attachmentCacheDir().filePath(Utils::createUuid()))
+      m_tempPath(messenger->settings()->attachmentCacheDir().filePath(UidUtils::createUuid()))
 {
     setName(QLatin1String("EncryptUpload"));
 }

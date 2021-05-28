@@ -35,6 +35,7 @@
 #include "MessagesModel.h"
 
 #include "FileUtils.h"
+#include "FormatUtils.h"
 #include "MessagesProxyModel.h"
 #include "Messenger.h"
 #include "Model.h"
@@ -263,7 +264,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
 
     case AttachmentDisplaySizeRole: {
         if (attachment) {
-            return (attachment->size() > 0) ? Utils::formattedSize(attachment->size()) : QLatin1String("...");
+            return (attachment->size() > 0) ? FormatUtils::formattedSize(attachment->size()) : QLatin1String("...");
         }
         return QString();
     }
@@ -277,7 +278,7 @@ QVariant Self::data(const QModelIndex &index, int role) const
         if (auto picture = std::get_if<MessageContentPicture>(&message->content())) {
             totalSize += picture->thumbnail().encryptedSize();
         }
-        return Utils::formattedDataSizeProgress(attachment->processedSize(), totalSize);
+        return FormatUtils::formattedDataSizeProgress(attachment->processedSize(), totalSize);
     }
 
     case AttachmentDisplayTextRole: {
@@ -453,7 +454,11 @@ QString Self::statusIconPath(MessageHandler message)
         if (message->isOutgoing()) {
             // TODO(fpohtmeh): implement smarter check?
             if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Delivered)) {
-                return path.arg("M-Delivered"); // TODO(fpohtmeh): should be "M-Delivered"
+                if (message->isGroupChatMessage()) {
+                    return path.arg("M-Read");
+                } else {
+                    return path.arg("M-Delivered");
+                }
             } else if (message->stageString() == OutgoingMessageStageToString(OutgoingMessageStage::Read)) {
                 return path.arg("M-Read");
             }

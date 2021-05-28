@@ -37,9 +37,8 @@
 
 #include "Operation.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class ConvertImageFormatOperation : public Operation
 {
     Q_OBJECT

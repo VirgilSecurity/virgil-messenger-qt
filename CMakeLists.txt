@@ -32,91 +32,102 @@
 #
 #   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+if(XCODE_VERSION)
+    cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+else()
+    cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+endif()
+
+# ---------------------------------------------------------------------------
+# Define platform toolchain.
+# ---------------------------------------------------------------------------
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/vsplatforms.cmake")
+
+# ---------------------------------------------------------------------------
+# Define project.
+# ---------------------------------------------------------------------------
+project(messenger VERSION "3.11.0" LANGUAGES C CXX)
+
+# ---------------------------------------------------------------------------
+# Configuration.
+# ---------------------------------------------------------------------------
+set(VS_CORE_VERSION "0.2.1.94")
+set(VS_VERSION_DATABASE_SCHEME "3")
+
+# ---------------------------------------------------------------------------
+# Build options.
+# ---------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_VERBOSE_MAKEFILE OFF CACHE BOOL "" FORCE)
+
+# ---------------------------------------------------------------------------
+# Configurable build options.
+# ---------------------------------------------------------------------------
+set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangformat.")
+set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
+set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
+
 # ---------------------------------------------------------------------------
 # Include Cmake helpers
 # ---------------------------------------------------------------------------
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include(GNUInstallDirs)
+include(FetchContent)
 
-include(vsplatforms)
-include(clangformat)
-include(varpadding)
-include(getprebuild)
-include(customers)
-
-# ---------------------------------------------------------------------------
-# Project version
-# ---------------------------------------------------------------------------
-set(VERSIONMAJOR "3")
-set(VERSIONMINOR "10")
-set(VERSIONBUILD "14")
-set(VS_TARGET_VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}")
-set(VS_CORE_VERSION "0.2.1.94")
-set(VERSION_DATABASE_SCHEME "3")
-
-# ---------------------------------------------------------------------------
-# Code formatting
-# ---------------------------------------------------------------------------
-set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangformat.")
-
-# ---------------------------------------------------------------------------
-# Other build options.
-# ---------------------------------------------------------------------------
-set(ENABLE_IOS_EXTENSION OFF CACHE BOOL "On/Off building IOS extension.")
-set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
-set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/clangformat.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/android_version.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/getprebuild.cmake")
 
 # ---------------------------------------------------------------------------
 #   Customers selection
 # ---------------------------------------------------------------------------
 set(VS_CUSTOMER "Virgil" CACHE STRING "Customer for build")
 set(VS_CUSTOMER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/${VS_CUSTOMER}")
-set(VS_CUSTOMER_COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/customers/Common")
 message(STATUS "Current customer : [${VS_CUSTOMER}]")
 message(STATUS "Current customer directory: [${VS_CUSTOMER_DIR}]")
-message(STATUS "Include customer cmake target name: [customer-target.cmake]")
-# Include customer file for project target name
 include("${VS_CUSTOMER_DIR}/customer.cmake")
-include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
 
 # ---------------------------------------------------------------------------
-# Define project
+# Define platform specific settings.
 # ---------------------------------------------------------------------------
-project(${VS_TARGET_NAME} VERSION ${VS_TARGET_VERSION} LANGUAGES C CXX)
+if(XCODE_VERSION)
+    #
+    #   Available from CMake 3.19
+    #
+    set(CMAKE_XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY)
+endif()
 
-message(STATUS "CMAKE_PREFIX_PATH: [${CMAKE_PREFIX_PATH}]")
-message(STATUS "CMAKE_FIND_ROOT_PATH: [${CMAKE_FIND_ROOT_PATH}]")
+if(VS_PLATFORM STREQUAL "macos")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${VS_TARGET_NAME}")
 
-# ---------------------------------------------------------------------------
-# Detecting platform if VS_PLATFORM not specified
-# ---------------------------------------------------------------------------
-if (NOT VS_PLATFORM)
-    if (MINGW32 OR MINGW64 OR CYGWIN OR WIN32)
-        message(STATUS "Detected target platform: [Windows]")
-        set(VS_PLATFORM "windows")
-    elseif (ANDROID)
-        message(STATUS "Detected target platform: [Android]")
-        set(VS_PLATFORM "android")
-    elseif (IOS)
-        message(STATUS "Detected target platform: [IOS]")
-        set(VS_PLATFORM "ios")
-    elseif (APPLE)
-        message(STATUS "Detected target platform: [MacOS]")
-        set(VS_PLATFORM "macos")
-    elseif (UNIX)
-        message(STATUS "Detected target platform: [Unix]")
-        set(VS_PLATFORM "linux")
-    endif ()
-endif ()
+elseif(VS_PLATFORM STREQUAL "ios")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "9.0")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${VS_BUNDLE_PREFIX}.${VS_TARGET_NAME}")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${VS_TARGET_NAME}")
+
+elseif(VS_PLATFORM STREQUAL "android")
+    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/platforms/android/gradle" CACHE INTERNAL "")
+    set(QT_ANDROID_APPLICATION_BINARY ${VS_TARGET_NAME})
+endif()
 
 # ---------------------------------------------------------------------------
 # Get prebuild core libraries
 # ---------------------------------------------------------------------------
-get_prebuild()
+get_prebuild("${CMAKE_CURRENT_LIST_DIR}/ext")
 
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
-endif ()
+endif()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 message("-- Build type: [${CMAKE_BUILD_TYPE}]")
 
@@ -125,301 +136,451 @@ set(CMAKE_BUILD_TYPE_LOWER "release")
 set(PREBUILT_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/prebuilt")
 set(PREBUILT_QT_DIR "${PREBUILT_DIR}/qt")
 
-if (VS_IOS_SIMULATOR AND VS_PLATFORM STREQUAL "ios")
+if(VS_IOS_SIMULATOR AND VS_PLATFORM STREQUAL "ios")
     set(VS_IOS_SIM_PREFIX "-sim")
-endif ()
+endif()
 
-if (VS_PLATFORM STREQUAL "android")
+if(VS_PLATFORM STREQUAL "android")
     set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}.${ANDROID_ABI}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
 else ()
     set(PREBUILT_BASE_DIR "${PREBUILT_DIR}/${VS_PLATFORM}${VS_IOS_SIM_PREFIX}/${CMAKE_BUILD_TYPE_LOWER}/installed/usr/local")
-endif ()
+endif()
 
 set(PREBUILT_INCLUDE_DIR "${PREBUILT_BASE_DIR}/include")
 set(PREBUILT_LIB_DIR "${PREBUILT_BASE_DIR}/lib")
 set(QUICKFUTURE_DIR "${CMAKE_CURRENT_LIST_DIR}/ext/quickfuture/src")
 
 message(STATUS "Setting prebuild QT directory:      [${PREBUILT_QT_DIR}]")
-message(STATUS "Setting prebuild directory:	        [${PREBUILT_BASE_DIR}]")
-message(STATUS "Setting prebuild include directory:	[${PREBUILT_INCLUDE_DIR}]")
-message(STATUS "Setting prebuild library directory:	[${PREBUILT_LIB_DIR}]")
+message(STATUS "Setting prebuild directory:         [${PREBUILT_BASE_DIR}]")
+message(STATUS "Setting prebuild include directory: [${PREBUILT_INCLUDE_DIR}]")
+message(STATUS "Setting prebuild library directory: [${PREBUILT_LIB_DIR}]")
 
 # ---------------------------------------------------------------------------
-# Include customer file and prepare data
+#   Common libraries that is used by different targets.
 # ---------------------------------------------------------------------------
-include("${VS_CUSTOMER_DIR}/customer.cmake")
-include("${VS_CUSTOMER_COMMON_DIR}/customer_common.cmake")
-vs_customer_prepare()
+find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml REQUIRED)
 
-# ---------------------------------------------------------------------------
-# Prepare platform depends
-# ---------------------------------------------------------------------------
-set(VS_QT_EXTRA "")
+#
+#   CommKit
+#
+add_library(comm-kit INTERFACE)
 
-# IOS, IOS_SIM
-if (VS_PLATFORM STREQUAL "ios")
-    if (NOT XCODE_VERSION)
-        message(FATAL_ERROR "Xcode only")
-    endif ()
+target_include_directories(comm-kit
+        SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
+        )
 
-    # QT Extra packages
-    list(APPEND VS_QT_EXTRA QmlImportScanner Gui)
+target_link_libraries(comm-kit
+        INTERFACE
+        vsc_comm_kit
+        vsc_comm_kit_pb
+        vsc_brainkey_sdk
+        vsc_keyknox_sdk
+        vsc_core_sdk
+        vsc_foundation
+        vsc_foundation_pb
+        vsc_common
+        protobuf-nanopb
+        mbedcrypto
+        ed25519
+        json-c
+        )
 
-# Android
-elseif (VS_PLATFORM STREQUAL "android")
-    # Get firebase
-    get_firebase()
+target_link_directories(comm-kit
+        INTERFACE
+        "$<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>"
+        )
 
-    # Set Android version name
-    set(ANDROID_VERSION_NAME "${VS_TARGET_VERSION}")
-    # Fill Android version code
-    string(REPLACE "." ";" VS_VERSION_LIST ${VS_TARGET_VERSION})
+#
+#   Platform specific
+#
+add_library(platform-definitions INTERFACE)
+target_compile_definitions(platform-definitions
+        INTERFACE
+        $<BUILD_INTERFACE:VERSION=${PROJECT_VERSION}>
 
-    list(GET VS_VERSION_LIST 0 TMP_VERS)
-    PAD_STRING(ANDROID_VERSION_CODE 3 "0" "1${TMP_VERS}")
+        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
+        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
 
-    list(GET VS_VERSION_LIST 1 TMP_VERS)
-    PAD_STRING(TMP_VERS 2 "0" "${TMP_VERS}")
-    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
+        $<BUILD_INTERFACE:VS_ANDROID=$<STREQUAL:"${VS_PLATFORM}","android">>
+        $<BUILD_INTERFACE:VS_IOS=$<STREQUAL:"${VS_PLATFORM}","ios">>
+        $<BUILD_INTERFACE:VS_IOS_SIMULATOR=$<BOOL:${VS_IOS_SIMULATOR}>>
+        $<BUILD_INTERFACE:VS_MACOS=$<STREQUAL:"${VS_PLATFORM}","macos">>
+        $<BUILD_INTERFACE:VS_LINUX=$<STREQUAL:"${VS_PLATFORM}","linux">>
+        $<BUILD_INTERFACE:VS_WINDOWS=$<STREQUAL:"${VS_PLATFORM}","windows">>
 
-    list(GET VS_VERSION_LIST 2 TMP_VERS)
-    PAD_STRING(TMP_VERS 2 "0" "${TMP_VERS}")
-    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG>>
+        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
+        $<BUILD_INTERFACE:$<$<CONFIG:Debug>:QT_QML_DEBUG>>
+        $<BUILD_INTERFACE:$<$<CONFIG:RelWithDebInfo>:QT_QML_DEBUG>>
+        )
 
-    # Get build number ( or zero)
-    if (DEFINED ENV{BUILD_NUMBER})
-        set(VS_BUILD_NUMBER "$ENV{BUILD_NUMBER}")
-    else ()
-        set(VS_BUILD_NUMBER "0")
-    endif ()
-    PAD_STRING(TMP_VERS 3 "0" "${VS_BUILD_NUMBER}")
-    string(APPEND ANDROID_VERSION_CODE "${TMP_VERS}")
-    message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
-    message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
+#
+#   Customers.
+#
+configure_file(
+        "${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/include/VSQCustomer.h"
+        )
 
-    # Android QT Extra
-    string(APPEND VS_QT_EXTRA "AndroidExtras")
-    # Android gradle path
-    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/android")
+add_library(customer STATIC)
 
-# Linux
-elseif (VS_PLATFORM STREQUAL "linux")
-    string(APPEND VS_QT_EXTRA "Widgets")
+target_sources(customer
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/include/VSQCustomer.h"
 
-# MacOS
-elseif (VS_PLATFORM STREQUAL "macos")
-    string(APPEND VS_QT_EXTRA "Widgets")
+        "${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp"
+        )
 
-# Windows
-elseif (VS_PLATFORM STREQUAL "windows")
-    string(APPEND VS_QT_EXTRA "Widgets")
+target_include_directories(customer
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+        )
 
-endif ()
+target_link_libraries(customer
+        PUBLIC
+        Qt5::Core
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        PRIVATE
+        platform-definitions
+        )
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+#
+#   All platform dependent implementations.
+#
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/platforms")
 
-include(GNUInstallDirs)
-include(FetchContent)
+#
+#   Logging
+#
+add_library(logging STATIC)
 
-find_package(Qt5 COMPONENTS Core Quick Sql Network Concurrent Qml Xml ${VS_QT_EXTRA} REQUIRED)
+target_sources(logging
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/LogConfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/LogContext.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/Logging.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging/LogWorker.h"
 
-# ---------------------------------------------------------------------------
-#   Prepare for build target
-# ---------------------------------------------------------------------------
-# Add deployers targets
-include(deployers)
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/LogConfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/Logging.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/LogWorker.cpp"
+        )
 
-# Android
-if (VS_PLATFORM STREQUAL "android")
-    message("-- Prepare sources for Android ...")
-    add_library(${VS_TARGET_NAME} SHARED)
-    include(${ANDROID_SDK}/android_openssl/CMakeLists.txt)
+target_include_directories(logging
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/logging>"
+        )
 
-    if (ANDROID_ABI STREQUAL "armeabi-v7a")
-        set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm/")
-    elseif (ANDROID_ABI STREQUAL "arm64-v8a")
-        set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/arm64/")
-    elseif (ANDROID_ABI STREQUAL "x86")
-        set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/x86/")
-    elseif (ANDROID_ABI STREQUAL "x86_64")
-        set(VS_ANDROID_SSL_DIR "${SSL_ROOT_PATH}/latest/x86_64/")
-    endif ()
+target_link_libraries(logging
+        PUBLIC
+        Qt::Core
+        platform
 
-    message(STATUS "Android OpenSSL root path:    [${SSL_ROOT_PATH}]")
-    message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
-    message(STATUS "Android extra libraries:      [${ANDROID_EXTRA_LIBS}]")
+        PRIVATE
+        platform-definitions
+        )
 
-    add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
-          COMMAND touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
-          COMMENT "Touch CMakeCache.txt"
-    )
 
-# Linux
-elseif (VS_PLATFORM STREQUAL "linux")
-    add_executable(${VS_TARGET_NAME})
+#
+#   Helpers
+#
+add_library(helpers STATIC)
 
-# Windows
-elseif (VS_PLATFORM STREQUAL "windows")
-    add_executable(${VS_TARGET_NAME})
+target_sources(helpers
+        PRIVATE
+        #
+        #   Includes
+        #
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/FileUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/FormatUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/UidUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h"
 
-# MacOS
-elseif (VS_PLATFORM STREQUAL "macos")
-    set(App_ICON "${VS_CUSTOMER_DIR}/platforms/macos/pkg_resources/${MACOSX_BUNDLE_ICON_FILE}")
-    set_source_files_properties(${App_ICON}
-            PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+        #
+        #   Sources
+        #
+        "${CMAKE_CURRENT_LIST_DIR}/src/helpers/FileUtils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/helpers/FormatUtils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/helpers/UidUtils.cpp"
+        )
 
-    # Sparkle
-    message(STATUS "Copy Sparkle framework")
-    execute_process(
-            COMMAND mkdir -p ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks
-            COMMAND cp -Rf ${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework ${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.app/Contents/Frameworks
-    )
+target_include_directories(helpers
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>"
+        )
 
-    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE ${App_ICON})
+target_link_libraries(helpers
+        PUBLIC
+        Qt::Core
 
-    set_target_properties(${VS_TARGET_NAME}
-            PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/macos/Info.plist.in"
-            )
+        logging
+        platform-fs
 
-    add_custom_command(TARGET ${VS_TARGET_NAME}
-            POST_BUILD COMMAND
-            ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
-            $<TARGET_FILE:${VS_TARGET_NAME}>)
+        PRIVATE
+        platform-definitions
+        )
 
-    set_target_properties(${VS_TARGET_NAME}
-            PROPERTIES LINK_FLAGS "-F${PREBUILT_DIR}/${VS_PLATFORM}/sparkle -framework Sparkle -framework CoreFoundation -framework Foundation"
-            )
-# IOS
-elseif (VS_PLATFORM STREQUAL "ios")
+#
+#   Application settings.
+#
+add_library(settings STATIC)
 
-    if (VS_IOS_SIMULATOR)
-        set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphonesimulator")
-        set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphonesimulator")
-        set(CMAKE_OSX_ARCHITECTURES "x86_64")
-    else ()
-        set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos")
-        set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos")
+target_sources(settings
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/settings/Settings.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/settings/Settings.cpp"
+        )
 
-        set(CMAKE_OSX_ARCHITECTURES "arm64")
-    endif ()
+target_include_directories(settings
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/settings>"
+        )
 
-    set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
 
-    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-e,_qt_main_wrapper")
-    set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-    set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
+target_link_libraries(settings
+        PUBLIC
+        Qt5::Core
 
-    add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
+        customer
+        helpers
+        platform
+        platform-fs
 
-    # Settings for signing
-    if (VS_CODE_SIGN_IDENTITY)
-        SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_IDENTITY "${VS_CODE_SIGN_IDENTITY}")
-    endif ()
-    if (VS_DEVELOPMENT_TEAM)
-        SET_XCODE_PROPERTY(${VS_TARGET_NAME} DEVELOPMENT_TEAM "${VS_DEVELOPMENT_TEAM}")
-    endif ()
-    if (VS_PROVISIONING_PROFILE_SPECIFIER)
-        SET_XCODE_PROPERTY(${VS_TARGET_NAME} PROVISIONING_PROFILE_SPECIFIER "${VS_PROVISIONING_PROFILE_SPECIFIER}")
-    endif ()
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} CODE_SIGN_ENTITLEMENTS "${VS_CUSTOMER_DIR}/platforms/ios/Entitlements/VirgilMessenger.entitlements")
-    SET_XCODE_PROPERTY(${VS_TARGET_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+        PRIVATE
+        platform-definitions
+        )
 
-    set_target_properties(${VS_TARGET_NAME}
-            PROPERTIES
-            XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
-            XCODE_ATTRIBUTE_SKIP_INSTALL "No"
-            )
-    # Storyboard default
-    configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/LaunchScreen.storyboard.in"
-            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard" @ONLY)
-    configure_file("${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Default-568h@2x.png"
-            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png" COPYONLY)
+#
+#   Core Messenger
+#
+add_library(core-messenger STATIC)
 
-    set(STORYBOARD_DEFAULT
-            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard
-            ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png
-            )
+target_sources(core-messenger
+        PRIVATE
+        #
+        #   Includes
+        #
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFileId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsSharedGroupId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupAffiliation.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupInvitationStatus.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupMember.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupUpdate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContent.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentAttachment.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentDownloadStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentEncrypted.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentFile.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentGroupInvitation.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentJsonUtils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPicture.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentText.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentType.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdateable.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessageStage.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/User.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserId.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserImpl.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppContactManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppDiscoveryManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppLastActivityIq.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppLastActivityManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubIq.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppPushNotifications.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppRoomParticipantsManager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/network/NetworkAnalyzer.h"
 
-    set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
-    target_sources(${VS_TARGET_NAME} PRIVATE ${VS_ASSET_DIR} ${STORYBOARD_DEFAULT})
-    set_source_files_properties("${VS_ASSET_DIR}"
-            PROPERTIES
-            MACOSX_PACKAGE_LOCATION "Resources"
-            )
+        #
+        #   Sources
+        #
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFileId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolder.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsSharedGroupId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Contact.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ContactUpdate.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupAffiliation.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupInvitationStatus.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupMember.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupUpdate.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentAttachment.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentDownloadStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentEncrypted.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentFile.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentGroupInvitation.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentJsonUtils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPicture.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentText.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentType.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessageStage.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/User.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/UserId.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppContactManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppDiscoveryManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppLastActivityIq.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppLastActivityManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubIq.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppPushNotifications.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppRoomParticipantsManager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/network/NetworkAnalyzer.cpp"
+        )
 
-    set_target_properties(${VS_TARGET_NAME}
-            PROPERTIES
-            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/platforms/ios/Info.plist.in"
-            LINK_FLAGS "-framework Foundation -framework UserNotifications -framework QuickLook"
-            RESOURCE "${STORYBOARD_DEFAULT}"
-            )
-    #   IOS extension
-    if (ENABLE_IOS_EXTENSION)
-        set(EXT_SOURCE_FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.mm
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/NotificationService.h
-                )
+target_include_directories(core-messenger
+        SYSTEM PUBLIC
+        "$<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>"
+        "$<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>"
+        )
 
-        add_library(${VS_TARGET_NAME}_EXT MODULE ${EXT_SOURCE_FILES})
-        set_target_properties(${VS_TARGET_NAME}_EXT
-                PROPERTIES
-                BUNDLE YES
-                XCODE_PRODUCT_TYPE com.apple.product-type.app-extension)
+target_include_directories(core-messenger
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>"
 
-        target_include_directories(${VS_TARGET_NAME}_EXT
-                PUBLIC
-                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios>
-                )
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/network>"
+        )
 
-        find_library(UN_LIB UserNotifications)
-        find_library(UNUI_LIB UserNotificationsUI)
-        target_link_libraries(${VS_TARGET_NAME}_EXT PRIVATE ${UN_LIB} ${UNUI_LIB})
-    endif ()
+target_link_libraries(core-messenger
+    PUBLIC
+        qxmpp
+        comm-kit
+        helpers
+        settings
+        logging
+        platform-definitions
 
-    qt5_import_qml_plugins(${VS_TARGET_NAME})
-else ()
-    message(FATAL_ERROR "Unknown target platform")
-endif ()
+        Qt5::Core
+        Qt5::Concurrent
+        Qt5::Network
+        Qt5::Xml
+        )
+
+target_compile_definitions(core-messenger
+        PUBLIC
+        $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
+        $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
+        )
+
+#
+#   Core Messenger GUI
+#
+add_library(core-messenger-gui STATIC)
+
+target_sources(core-messenger-gui
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/Utils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPictureFactory.h"
+
+        "${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPictureFactory.cpp"
+        )
+
+target_include_directories(core-messenger
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>"
+        )
+
+target_link_libraries(core-messenger-gui
+        PUBLIC
+        Qt5::Gui
+        core-messenger
+        )
+
+#
+#   Format
+#
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(logging)
+    add_clangformat(helpers)
+    add_clangformat(settings)
+    add_clangformat(core-messenger)
+    add_clangformat(core-messenger-gui)
+endif()
 
 # ---------------------------------------------------------------------------
 #   Target sources and libraries
 # ---------------------------------------------------------------------------
+if(NOT TARGET ${VS_TARGET_NAME})
+    message(FATAL_ERROR "Unknown target platform")
+endif()
+
 target_sources(${VS_TARGET_NAME}
-
         PRIVATE
-
         #
         #  Includes
         #
         ${CMAKE_CURRENT_LIST_DIR}/include/JsonUtils.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQApplication.h
         ${CMAKE_CURRENT_LIST_DIR}/include/VSQClipboardProxy.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQContactManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CrashReporter.h
         ${CMAKE_CURRENT_LIST_DIR}/include/FileLoader.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQDiscoveryManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityIq.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQLastActivityManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Messenger.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/Settings.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQNetworkAnalyzer.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/Utils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/android/VSQAndroid.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ui/VSQUiHelper.h
         ${CMAKE_CURRENT_LIST_DIR}/include/KeyboardEventFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/include/Validator.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ContactAvatarLoader.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CustomerEnv.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileMember.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
@@ -427,72 +588,14 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFilesUpdate.h
         ${CMAKE_CURRENT_LIST_DIR}/include/TimeProfiler.h
         ${CMAKE_CURRENT_LIST_DIR}/include/TimeProfilerSection.h
-        # Messenger Core
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFileInfo.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolder.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsFolderInfo.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsNewFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CloudFsSharedGroupId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CommKitBridge.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Contact.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/ContactUpdate.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessenger.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerCloudFs.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/CoreMessengerStatus.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Group.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupAffiliation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupInvitationStatus.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupMember.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/GroupUpdate.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/IncomingMessageStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/Message.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContent.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentAttachment.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentDownloadStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentEncrypted.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentGroupInvitation.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentJsonUtils.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentPicture.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentText.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentType.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageContentUploadStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageGroupChatInfo.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageRequest.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageSender.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageStatus.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdate.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/MessageUpdateable.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/OutgoingMessageStage.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/User.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserId.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/UserImpl.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppRoomParticipantsManager.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubIq.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp/XmppMucSubManager.h
         # Controllers
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controller.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/AttachmentsController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/ChatsController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/CloudFilesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/Controllers.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/controllers/DocumentInteractionController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/MessagesController.h
         ${CMAKE_CURRENT_LIST_DIR}/include/controllers/UsersController.h
-        # Helpers
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/VSQSingleton.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FutureWorker.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/helpers/FileUtils.h
         # Applications states
         ${CMAKE_CURRENT_LIST_DIR}/include/states/ApplicationStateManager.h
         ${CMAKE_CURRENT_LIST_DIR}/include/states/BackupKeyState.h
@@ -530,10 +633,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version2/PatchCloudFiles.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchChats.h
         ${CMAKE_CURRENT_LIST_DIR}/include/database/patches/version3/PatchGroups.h
-        # Logging
-        ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogging.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQLogWorker.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/logging/VSQMessageLogContext.h
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/include/models/AccountSelectionModel.h
         ${CMAKE_CURRENT_LIST_DIR}/include/models/ChatObject.h
@@ -595,41 +694,18 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadAttachmentOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadFileOperation.h
         ${CMAKE_CURRENT_LIST_DIR}/include/operations/UploadCloudFileOperation.h
-        # Generated
-        ${CMAKE_CURRENT_LIST_DIR}/include/VSQCustomer.h
-        # Windows
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.h>
-        # MacOS
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/include/macos/VSQMacos.h>
-        # IOS
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionControllerDataSource.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionControllerPreviewItem.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
-        # Android
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/PushNotifications.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/XmppPushNotifications.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android/FirebaseListener.h>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/AndroidDocumentInteractionController.h>
 
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/include/windows/VSQWindows.h>
+        # Android
+        # TODO: Hide this under platform API.
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/include/VSQAndroid.h>
 
         #
         #  Sources
         #
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQClipboardProxy.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQContactManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CrashReporter.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/FileLoader.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQDiscoveryManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/Messenger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityIq.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQLastActivityManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/Settings.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/VSQNetworkAnalyzer.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/Utils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/android/VSQAndroid.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/VSQApplication.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/ui/VSQUiHelper.cpp
@@ -638,70 +714,18 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileId.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfiler.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfilerSection.cpp
-        # Messenger Core
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatType.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CommKitBridge.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Contact.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/ContactUpdate.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessenger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFileInfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolder.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsFolderInfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsNewFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CloudFsSharedGroupId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/CoreMessengerCloudFs.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Group.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupAffiliation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupInvitationStatus.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupMember.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/GroupUpdate.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/IncomingMessageStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/Message.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentAttachment.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentDownloadStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentEncrypted.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentGroupInvitation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentJsonUtils.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentPicture.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentText.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentType.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageContentUploadStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageGroupChatInfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageRequest.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageStatus.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/MessageUpdate.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/OutgoingMessageStage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/User.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/UserId.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppRoomParticipantsManager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubIq.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/messenger/xmpp/XmppMucSubManager.cpp
         # Controllers
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controller.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/AttachmentsController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/ChatsController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/CloudFilesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/Controllers.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/controllers/DocumentInteractionController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/MessagesController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/controllers/UsersController.cpp
-        # Helpers
-        ${CMAKE_CURRENT_LIST_DIR}/src/helpers/FileUtils.cpp
         # Applications states
         ${CMAKE_CURRENT_LIST_DIR}/src/states/ApplicationStateManager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/states/BackupKeyState.cpp
@@ -738,9 +762,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version2/PatchCloudFiles.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchChats.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/database/patches/version3/PatchGroups.cpp
-        # Logging
-        ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogging.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/logging/VSQLogWorker.cpp
         # Models
         ${CMAKE_CURRENT_LIST_DIR}/src/models/AccountSelectionModel.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/models/ChatObject.cpp
@@ -803,87 +824,33 @@ target_sources(${VS_TARGET_NAME}
         # QT QRC
         ${CMAKE_CURRENT_LIST_DIR}/src/resources.qrc
         ${VS_CUSTOMER_DIR}/src/customer.qrc
-        # Linux
-        $<$<STREQUAL:"${VS_PLATFORM}","linux">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
-        # Windows
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/platforms/windows/WindowsPlatform.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/windows/VSQWindows.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:${CMAKE_CURRENT_LIST_DIR}/src/winsparkle.qrc>
-        # MACOS
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:${CMAKE_CURRENT_LIST_DIR}/src/macos/VSQMacos.mm>
-        # IOS
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/apple/CustomerEnvApple.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/AppDelegate.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionController.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionControllerDataSource.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/platforms/ios/IosDocumentInteractionControllerPreviewItem.mm>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
-        # Android
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/PushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/XmppPushNotifications.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/src/notifications/android/FirebaseListener.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/AndroidDocumentInteractionController.cpp>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/default/CustomerEnvDefault.cpp>
-
         # Customer sources
         ${VS_CUSTOMER_SOURCES}
-        )
-
-target_link_directories(${VS_TARGET_NAME}
-        PRIVATE
-        $<BUILD_INTERFACE:${PREBUILT_LIB_DIR}>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${VS_ANDROID_SSL_DIR}>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/x64/Release>>
+        # Android
+        # TODO: Hide this under platform API.
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/src/VSQAndroid.cpp>
         )
 
 target_link_libraries(${VS_TARGET_NAME}
-        PUBLIC
+        PRIVATE
+        comm-kit
+        core-messenger
+        core-messenger-gui
+        customer
+        platform
+        platform-definitions
+        platform-fs
+        platform-updates
+        platform-gui
+        settings
 
-        # Qt5
-        qxmpp
         Qt5::Core
         Qt5::Quick
-        $<$<STREQUAL:"${VS_PLATFORM}","linux">:Qt5::Widgets>
-        $<$<STREQUAL:"${VS_PLATFORM}","macos">:Qt5::Widgets>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:Qt5::AndroidExtras>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:log>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:Qt5::Widgets>
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:WinSparkle>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::Gui>
-        $<$<STREQUAL:"${VS_PLATFORM}","ios">:Qt5::QIosOptionalPlugin_NSPhotoLibrary>
         Qt5::Sql
-        Qt5::Network
         Qt5::Concurrent
         Qt5::Qml
-        Qt5::Xml
 
-        vsc_comm_kit
-        vsc_comm_kit_pb
-        vsc_brainkey_sdk
-        vsc_keyknox_sdk
-        vsc_core_sdk
-        vsc_foundation
-        vsc_foundation_pb
-        vsc_common
-        protobuf-nanopb
-        mbedcrypto
-        ed25519
-        json-c
-
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_messaging>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_app>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:firebase_auth>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:curl>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:ssl_1_1>
-        $<$<STREQUAL:"${VS_PLATFORM}","android">:crypto_1_1>
-
-        $<$<STREQUAL:"${VS_PLATFORM}","linux">:curl>
-
-        $<$<STREQUAL:"${VS_PLATFORM}","windows">:curl>
+        platform-deps # must be the last
         )
 
 #
@@ -892,8 +859,6 @@ target_link_libraries(${VS_TARGET_NAME}
 target_include_directories(${VS_TARGET_NAME}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/helpers>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/database>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/models>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/ui>
@@ -901,73 +866,28 @@ target_include_directories(${VS_TARGET_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/controllers>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/states>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/operations>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/messenger/xmpp>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/notifications>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/platforms>
-
-        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${PREBUILT_INCLUDE_DIR}/qxmpp>
+        # TODO: Remove it when VSQAndroid will be hidden under platform API.
+        $<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/platforms/android/native/include>
 
         $<BUILD_INTERFACE:${VS_CUSTOMER_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${CMAKE_CURRENT_LIST_DIR}/include/notifications/android>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","android">:${PREBUILT_DIR}/firebase_cpp_sdk/include>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","macos">:${PREBUILT_DIR}/${VS_PLATFORM}/sparkle/Sparkle.framework/Headers>>
-        $<BUILD_INTERFACE:$<$<STREQUAL:"${VS_PLATFORM}","windows">:${PREBUILT_DIR}/${VS_PLATFORM}/winsparkle/include>>
         )
 
 target_compile_definitions(${VS_TARGET_NAME}
         PRIVATE
-
-        $<BUILD_INTERFACE:VERSION="${VS_TARGET_VERSION}">
-
-        $<BUILD_INTERFACE:VS_MSGR_ENV_DEV=$<STREQUAL:"${VS_ENV}","dev">>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_STG=$<STREQUAL:"${VS_ENV}","stg">>
-        $<BUILD_INTERFACE:VS_MSGR_ENV_PROD=$<STREQUAL:"${VS_ENV}","prod">>
-
+        $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
+        $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
 
         $<BUILD_INTERFACE:INFO_CLIENT=1>
         $<BUILD_INTERFACE:CFG_CLIENT=1>
-        $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VERSION_DATABASE_SCHEME}>
+        $<BUILD_INTERFACE:VERSION_DATABASE_SCHEME=${VS_VERSION_DATABASE_SCHEME}>
         $<BUILD_INTERFACE:VS_CUSTOMER=${VS_CUSTOMER}>
-        $<BUILD_INTERFACE:ENABLE_XMPP_LOGS=$<BOOL:${ENABLE_XMPP_LOGS}>>
-        $<BUILD_INTERFACE:ENABLE_XMPP_EXTRA_LOGS=$<BOOL:${ENABLE_XMPP_EXTRA_LOGS}>>
-
-        $<BUILD_INTERFACE:VS_ANDROID=$<STREQUAL:"${VS_PLATFORM}","android">>
-        $<BUILD_INTERFACE:VS_IOS=$<STREQUAL:"${VS_PLATFORM}","ios">>
-        $<BUILD_INTERFACE:VS_IOS_SIMULATOR=$<BOOL:${VS_IOS_SIMULATOR}>>
-        $<BUILD_INTERFACE:VS_MACOS=$<STREQUAL:"${VS_PLATFORM}","macos">>
-        $<BUILD_INTERFACE:VS_LINUX=$<STREQUAL:"${VS_PLATFORM}","linux">>
-        $<BUILD_INTERFACE:VS_WINDOWS=$<STREQUAL:"${VS_PLATFORM}","windows">>
-#        $<BUILD_INTERFACE:VS_WINSPARKLE=$<STREQUAL:"${VS_PLATFORM}","windows">>
-
-        $<BUILD_INTERFACE:VS_DESKTOP=$<IN_LIST:${VS_PLATFORM},${VS_DESKTOP_PLATFORM_LIST}>>
-        $<BUILD_INTERFACE:VS_MOBILE=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
-        $<BUILD_INTERFACE:VS_PUSHNOTIFICATIONS=$<IN_LIST:${VS_PLATFORM},${VS_MOBILE_PLATFORM_LIST}>>
-
-        $<BUILD_INTERFACE:$<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>>
         )
 
 target_compile_options(${VS_TARGET_NAME}
         INTERFACE
         -Wno-multichar
-        )
-
-#
-#  Generate .dSYM file for all configurations and strip them from the release.
-#
-if (CMAKE_GENERATOR STREQUAL "Xcode")
-  set_xcode_property(${VS_TARGET_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS "YES")
-  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=MinSizeRel] "YES")
-  set_xcode_property(${VS_TARGET_NAME} DEPLOYMENT_POSTPROCESSING[variant=Release] "YES")
-endif()
-
-# ---------------------------------------------------------------------------
-#   Additional debug parameters
-# ---------------------------------------------------------------------------
-target_compile_definitions(${VS_TARGET_NAME}
-        PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
         )
 
 if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)

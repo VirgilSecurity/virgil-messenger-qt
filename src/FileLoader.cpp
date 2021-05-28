@@ -39,9 +39,6 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-#include <QXmppClient.h>
-#include <QXmppUploadRequestManager.h>
-
 Q_LOGGING_CATEGORY(lcFileLoader, "fileLoader");
 
 using namespace vm;

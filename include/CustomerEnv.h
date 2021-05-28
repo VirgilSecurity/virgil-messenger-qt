@@ -47,9 +47,7 @@ public:
     static QString xmppServiceUrl();
     static QString xmppServiceDomain();
     static QString contactDiscoveryServiceUrl();
-    static QString caBundlePath();
     static QString version();
-    static QDir appDataLocation();
 };
 
 } // namespace vm

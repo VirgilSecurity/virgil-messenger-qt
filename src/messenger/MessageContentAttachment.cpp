@@ -35,8 +35,7 @@
 #include "MessageContentAttachment.h"
 
 #include "FileUtils.h"
-#include "Utils.h"
-#include "android/VSQAndroid.h"
+#include "UidUtils.h"
 
 using namespace vm;
 using Self = MessageContentAttachment;
@@ -200,22 +199,20 @@ bool Self::readLocalFile(const QUrl &localUrl, QString &errorString)
 
     const auto localFilePath = FileUtils::urlToLocalFile(localUrl);
     QFileInfo localInfo(localFilePath);
-    if (!localInfo.exists()) {
+    if (!FileUtils::fileExists(localFilePath)) {
         errorString = QObject::tr("File doesn't exist");
         return false;
     }
-    if (localInfo.size() == 0) {
+
+    const quint64 fileSize = FileUtils::fileSize(localFilePath);
+    // FIXME: Re-check Android here.
+    if (fileSize == 0) {
         errorString = QObject::tr("File is empty");
         return false;
     }
 
-#if VS_ANDROID
-    const quint64 fileSize = VSQAndroid::getFileSize(localUrl);
-#else
-    const quint64 fileSize = localInfo.size();
-#endif
-    setId(AttachmentId(Utils::createUuid()));
+    setId(AttachmentId(UidUtils::createUuid()));
     setSize(fileSize);
-    setLocalPath(localInfo.absoluteFilePath());
+    setLocalPath(QFileInfo(localFilePath).absoluteFilePath());
     return true;
 }

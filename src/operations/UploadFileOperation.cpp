@@ -38,14 +38,14 @@
 #include <QNetworkReply>
 
 #include "FileLoader.h"
-#include "Utils.h"
+#include "UidUtils.h"
 #include "operations/MessageOperation.h"
 
 using namespace vm;
 using Self = UploadFileOperation;
 
 Self::UploadFileOperation(NetworkOperation *parent, FileLoader *fileLoader, const QString &filePath)
-    : LoadFileOperation(parent), m_requestId(Utils::createUuid()), m_fileLoader(fileLoader)
+    : LoadFileOperation(parent), m_requestId(UidUtils::createUuid()), m_fileLoader(fileLoader)
 {
     setName(QLatin1String("UploadFile"));
     setFilePath(filePath);

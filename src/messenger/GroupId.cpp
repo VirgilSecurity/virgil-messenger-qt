@@ -34,7 +34,7 @@
 
 #include "GroupId.h"
 
-#include "Utils.h"
+#include "UidUtils.h"
 
 using namespace vm;
 using Self = GroupId;
@@ -55,7 +55,7 @@ bool Self::isValid() const noexcept
 
 Self Self::generate()
 {
-    return Self(Utils::createUuid());
+    return Self(UidUtils::createUuid());
 }
 
 bool vm::operator<(const vm::GroupId &lhs, const vm::GroupId &rhs)

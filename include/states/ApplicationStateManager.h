@@ -50,9 +50,8 @@
 #include "SignUpState.h"
 #include "VerifyProfileState.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class Controllers;
 class Messenger;
 class Models;

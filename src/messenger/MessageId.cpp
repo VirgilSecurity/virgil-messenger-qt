@@ -34,7 +34,7 @@
 
 #include "MessageId.h"
 
-#include "Utils.h"
+#include "UidUtils.h"
 
 using namespace vm;
 using Self = MessageId;
@@ -53,7 +53,7 @@ bool Self::isValid() const noexcept
 
 MessageId Self::generate()
 {
-    return MessageId(Utils::createUuid());
+    return MessageId(UidUtils::createUuid());
 }
 
 bool vm::operator<(const vm::MessageId &lhs, const vm::MessageId &rhs)

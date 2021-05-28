@@ -223,7 +223,6 @@ signals:
     // --
 
 private slots:
-    void onPushNotificationTokenUpdate();
     void onConnectionStateChanged(CoreMessenger::ConnectionState state);
     void onMessageReceived(ModifiableMessageHandler message);
 

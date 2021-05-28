@@ -41,9 +41,9 @@
 #include <QPointer>
 #include <QUrl>
 
-class Settings;
-
 namespace vm {
+
+class Settings;
 class Models;
 
 class AttachmentsController : public QObject

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/qml/resources/windows">
+        <file>dsa_pub.pem</file>
+    </qresource>
+</RCC>

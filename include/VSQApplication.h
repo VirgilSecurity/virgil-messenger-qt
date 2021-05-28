@@ -43,11 +43,6 @@
 #include "Validator.h"
 #include "Messenger.h"
 #include "Settings.h"
-#if VS_MACOS
-#    include <macos/VSQMacos.h>
-#elif VS_WINDOWS
-#    include <windows/VSQWindows.h>
-#endif // VS_MACOS
 #include "Controllers.h"
 #include "UserDatabase.h"
 #include "Models.h"
@@ -55,7 +50,9 @@
 
 class QNetworkAccessManager;
 
-class VSQLogging;
+namespace vm {
+
+class Logging;
 
 class VSQApplication : public QObject
 {
@@ -72,15 +69,20 @@ public:
 
     static void initialize();
 
-    int run(const QString &basePath, VSQLogging *logging);
+    int run(const QString &basePath, Logging *logging);
 
     Q_INVOKABLE
     void reloadQml();
 
     Q_INVOKABLE
+    bool isUpdatesSupported();
+
+    Q_INVOKABLE
     void checkUpdates();
 
     Q_INVOKABLE QString currentVersion() const;
+
+    Q_INVOKABLE void uiInit();
 
     // Names
 
@@ -111,5 +113,7 @@ private:
     vm::KeyboardEventFilter *m_keyboardEventFilter;
     vm::ApplicationStateManager m_applicationStateManager;
 };
+
+} // namespace vm
 
 #endif // VSQApplication

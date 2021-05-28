@@ -58,7 +58,7 @@ Page {
 
         FormPrimaryButton {
             text: qsTr("Check updates")
-            visible: Platform.isWindows
+            visible: app.isUpdatesSupported()
             onClicked: app.checkUpdates()
         }
 

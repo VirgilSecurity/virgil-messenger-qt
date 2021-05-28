@@ -32,31 +32,25 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include <QtCore>
-#include <QtQml>
-
+#include "Platform.h"
+#include "PlatformUpdates.h"
 #include "CustomerEnv.h"
 #include "Utils.h"
 #include "VSQApplication.h"
 #include "VSQClipboardProxy.h"
 #include "VSQCustomer.h"
-#include "VSQLogging.h"
+#include "Logging.h"
 #include "VSQUiHelper.h"
 
-#if VS_ANDROID
-#    include <android/VSQAndroid.h>
-#    include "FirebaseListener.h"
-#endif // VS_ANDROID
-
-#if VS_WINDOWS
-#    include "windows/WindowsPlatform.h"
-#endif // VS_WINDOWS
-
-#include <QGuiApplication>
-#include <QFont>
 #include <QDesktopServices>
+#include <QFont>
+#include <QGuiApplication>
+#include <QtCore>
+#include <QtQml>
 
 using namespace vm;
+using namespace platform;
+
 using Self = VSQApplication;
 
 /******************************************************************************/
@@ -84,12 +78,6 @@ Self::VSQApplication()
     m_userDatabase->moveToThread(m_databaseThread);
     m_databaseThread->setObjectName("DatabaseThread");
     m_databaseThread->start();
-
-#if VS_MACOS
-    VSQMacos::instance().startUpdatesTimer();
-#elif VS_WINDOWS && VS_WINSPARKLE
-    VSQWindows::instance().startUpdatesTimer();
-#endif
 }
 
 Self::~VSQApplication()
@@ -126,7 +114,7 @@ void Self::initialize()
 }
 
 /******************************************************************************/
-int Self::run(const QString &basePath, VSQLogging *logging)
+int Self::run(const QString &basePath, Logging *logging)
 {
 
     VSQUiHelper uiHelper;
@@ -160,22 +148,19 @@ int Self::run(const QString &basePath, VSQLogging *logging)
 
     reloadQml();
 
-    // Platforms
-#if (VS_ANDROID)
-    VSQAndroid::prepare();
-    notifications::android::FirebaseListener::instance().init();
-#endif
+    if (!Platform::instance().init()) {
+        // TODO: Improve - show error and then quit.
+        qCritical("Unable to prepare platform");
+        return -1;
+    }
 
-#if (VS_WINDOWS)
-    WindowsPlatform::prepare();
-#endif
+    PlatformUpdates::instance().startChecking();
 
     const auto result = QGuiApplication::instance()->exec();
     m_engine.reset(); // Engine must be deleted first since it uses most classes
     return result;
 }
 
-/******************************************************************************/
 void Self::reloadQml()
 {
     const QUrl url(QStringLiteral("main.qml"));
@@ -183,14 +168,14 @@ void Self::reloadQml()
     m_engine->load(url);
 }
 
-/******************************************************************************/
+bool Self::isUpdatesSupported()
+{
+    return PlatformUpdates::instance().isSupported();
+}
+
 void Self::checkUpdates()
 {
-#if VS_MACOS
-    VSQMacos::instance().checkUpdates();
-#elif VS_WINDOWS
-    VSQWindows::instance().checkUpdates();
-#endif
+    PlatformUpdates::instance().checkNow();
 }
 
 QString Self::organizationDisplayName() const
@@ -206,6 +191,11 @@ QString Self::applicationDisplayName() const
 QString Self::currentVersion() const
 {
     return CustomerEnv::version();
+}
+
+void Self::uiInit()
+{
+    Platform::instance().uiInit();
 }
 
 bool Self::isIosSimulator() const

@@ -40,9 +40,8 @@
 
 #include "Messenger.h"
 
-class Settings;
-
 namespace vm {
+class Settings;
 class Messenger;
 class CalculateAttachmentFingerprintOperation;
 class ConvertImageFormatOperation;

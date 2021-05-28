@@ -34,7 +34,7 @@
 
 #include "AttachmentId.h"
 
-#include "Utils.h"
+#include "UidUtils.h"
 
 using namespace vm;
 using Self = AttachmentId;
@@ -53,7 +53,7 @@ bool Self::isValid() const noexcept
 
 Self Self::generate()
 {
-    return Self(Utils::createUuid());
+    return Self(UidUtils::createUuid());
 }
 
 bool vm::operator<(const vm::AttachmentId &lhs, const vm::AttachmentId &rhs)
