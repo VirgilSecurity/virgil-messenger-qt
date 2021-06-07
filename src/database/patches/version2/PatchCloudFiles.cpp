@@ -41,7 +41,7 @@ using namespace version2;
 
 using Self = PatchCloudFiles;
 
-Self::PatchCloudFiles() : Patch(2) { }
+Self::PatchCloudFiles() : Patch(2) {}
 
 bool Self::apply(Database *database)
 {

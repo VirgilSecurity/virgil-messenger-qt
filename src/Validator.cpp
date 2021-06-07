@@ -46,7 +46,7 @@ Validator::Validator(QObject *parent)
 {
 }
 
-Validator::~Validator() { }
+Validator::~Validator() {}
 
 std::optional<QString> Validator::validatedUsername(const QString &username, QString *errorText) const
 {

@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = UserId;
 
-Self::UserId(QString userId) : m_userId(std::move(userId)) { }
+Self::UserId(QString userId) : m_userId(std::move(userId)) {}
 
 Self::operator QString() const
 {

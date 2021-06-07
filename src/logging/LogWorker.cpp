@@ -48,7 +48,7 @@ constexpr const qint64 LOG_MAX_FILESIZE = 1024 * 1024 / 2; // 0.5 Mb
 using namespace vm;
 using Self = LogWorker;
 
-Self::LogWorker(QObject *parent) : QObject(parent), m_logFile() { }
+Self::LogWorker(QObject *parent) : QObject(parent), m_logFile() {}
 
 void Self::processMessage(QtMsgType type, const LogContext &context, const QString &message)
 {

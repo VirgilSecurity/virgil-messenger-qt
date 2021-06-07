@@ -41,7 +41,7 @@ using namespace version3;
 
 using Self = PatchGroups;
 
-Self::PatchGroups() : Patch(3) { }
+Self::PatchGroups() : Patch(3) {}
 
 bool Self::apply(Database *database)
 {

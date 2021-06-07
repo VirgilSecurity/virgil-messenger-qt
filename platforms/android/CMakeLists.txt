@@ -60,10 +60,6 @@ message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
 get_firebase("${PROJECT_SOURCE_DIR}/ext")
 
-set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${PROJECT_VERSION}")
-message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
-message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
-
 find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
 
 # ---------------------------------------------------------------------------

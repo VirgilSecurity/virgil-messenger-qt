@@ -45,7 +45,7 @@ KeyboardEventFilter::KeyboardEventFilter(QObject *parent) : QObject(parent), m_i
             &KeyboardEventFilter::updateKeyboardRectangle);
 }
 
-KeyboardEventFilter::~KeyboardEventFilter() { }
+KeyboardEventFilter::~KeyboardEventFilter() {}
 
 void KeyboardEventFilter::install(QQuickItem *item)
 {

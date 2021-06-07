@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = MessageContentText;
 
-Self::MessageContentText(QString text) : m_text(text) { }
+Self::MessageContentText(QString text) : m_text(text) {}
 
 QString Self::text() const
 {

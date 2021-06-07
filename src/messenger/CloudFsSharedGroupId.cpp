@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = CloudFsSharedGroupId;
 
-Self::CloudFsSharedGroupId(QString id) : m_id(std::move(id)) { }
+Self::CloudFsSharedGroupId(QString id) : m_id(std::move(id)) {}
 
 Self::operator QString() const
 {

@@ -40,7 +40,7 @@
 using namespace vm;
 using Self = CloudFileMembersModel;
 
-Self::CloudFileMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger) { }
+Self::CloudFileMembersModel(Messenger *messenger, QObject *parent) : ContactsModel(parent), m_messenger(messenger) {}
 
 void Self::setMembers(const CloudFileMembers &members)
 {

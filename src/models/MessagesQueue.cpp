@@ -64,7 +64,7 @@ Self::MessagesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject *p
     addListener(new UniqueMessageDownloadOperationFilter(this));
 }
 
-Self::~MessagesQueue() { }
+Self::~MessagesQueue() {}
 
 Operation *Self::createOperation(OperationSourcePtr source)
 {

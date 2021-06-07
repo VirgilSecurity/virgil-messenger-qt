@@ -48,7 +48,7 @@ Self::XmppContactManager(QXmppClient *client, QObject *parent)
 {
 }
 
-Self::~XmppContactManager() { }
+Self::~XmppContactManager() {}
 
 bool Self::addContact(const QString &jid, const QString &name, const QString &reason)
 {

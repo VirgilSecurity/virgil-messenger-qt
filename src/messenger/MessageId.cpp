@@ -39,7 +39,7 @@
 using namespace vm;
 using Self = MessageId;
 
-Self::MessageId(QString messageId) : m_messageId(std::move(messageId)) { }
+Self::MessageId(QString messageId) : m_messageId(std::move(messageId)) {}
 
 Self::operator QString() const
 {

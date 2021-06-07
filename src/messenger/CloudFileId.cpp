@@ -37,11 +37,11 @@
 using namespace vm;
 using Self = CloudFileId;
 
-Self::CloudFileId() { }
+Self::CloudFileId() {}
 
-Self::CloudFileId(CloudFsFileId coreId) : m_coreId(std::move(coreId)) { }
+Self::CloudFileId(CloudFsFileId coreId) : m_coreId(std::move(coreId)) {}
 
-Self::CloudFileId(CloudFsFolderId coreId) : m_coreId(std::move(coreId)) { }
+Self::CloudFileId(CloudFsFolderId coreId) : m_coreId(std::move(coreId)) {}
 
 CloudFsFileId Self::coreFileId() const
 {

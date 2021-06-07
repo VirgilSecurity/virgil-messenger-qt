@@ -47,7 +47,7 @@ Self &Self::instance()
     return instance;
 }
 
-Self::LogConfig() : m_logsDir(Platform::instance().appDataLocation().filePath(QLatin1String("logs"))) { }
+Self::LogConfig() : m_logsDir(Platform::instance().appDataLocation().filePath(QLatin1String("logs"))) {}
 
 QDir Self::logsDir() const
 {

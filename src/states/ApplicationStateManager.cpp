@@ -71,4 +71,4 @@ Self::ApplicationStateManager(Messenger *messenger, Controllers *controllers, Mo
 {
 }
 
-Self::~ApplicationStateManager() { }
+Self::~ApplicationStateManager() {}
