@@ -116,8 +116,16 @@ elseif(VS_PLATFORM STREQUAL "ios")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VS_BUNDLE_PREFIX}.${VS_TARGET_NAME}")
 
 elseif(VS_PLATFORM STREQUAL "android")
-    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/platforms/android/gradle" CACHE INTERNAL "")
+    #
+    #   Next variables must be set before: find_package(Qt5 ...)
+    #
+    set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${PROJECT_VERSION}")
+    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/platforms/android/gradle")
     set(QT_ANDROID_APPLICATION_BINARY ${VS_TARGET_NAME})
+
+    message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
+    message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
+    message(STATUS "Android package source directory: [${ANDROID_PACKAGE_SOURCE_DIR}]")
 endif()
 
 # ---------------------------------------------------------------------------

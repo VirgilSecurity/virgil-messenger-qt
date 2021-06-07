@@ -72,7 +72,7 @@ function(SET_ANDROID_VERSION ANDROID_VERSION_NAME ANDROID_VERSION_CODE TARGET_VE
     else ()
         set(BUILD_NUMBER "0")
     endif ()
-    pad_string(TMP_VERS 3 "0" "${TARGET_VERSION}")
+    pad_string(TMP_VERS 3 "0" "${BUILD_NUMBER}")
     string(APPEND CODE "${TMP_VERS}")
 
     set(${ANDROID_VERSION_CODE} "${CODE}" PARENT_SCOPE)
