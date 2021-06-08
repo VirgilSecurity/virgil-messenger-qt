@@ -42,7 +42,7 @@
 using namespace vm;
 using Self = User;
 
-Self::User(std::unique_ptr<UserImpl> impl) : m_impl(std::move(impl)) {}
+Self::User(std::unique_ptr<UserImpl> impl) : m_impl(std::move(impl)) { }
 
 Self::~User() noexcept = default;
 

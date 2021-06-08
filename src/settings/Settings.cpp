@@ -83,7 +83,7 @@ Settings::Settings(QObject *parent)
     m_cloudFilesCacheDir.setPath(cacheDir.filePath(QLatin1String("cloudFiles")));
 }
 
-Settings::~Settings() {}
+Settings::~Settings() { }
 
 void Settings::print()
 {

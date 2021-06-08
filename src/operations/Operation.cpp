@@ -42,7 +42,7 @@ Q_LOGGING_CATEGORY(lcOperation, "operation")
 
 using namespace vm;
 
-Operation::Operation(const QString &name, QObject *parent) : QObject(parent), m_name(name) {}
+Operation::Operation(const QString &name, QObject *parent) : QObject(parent), m_name(name) { }
 
 Operation::~Operation()
 {

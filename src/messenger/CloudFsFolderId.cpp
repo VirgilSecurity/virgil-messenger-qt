@@ -37,7 +37,7 @@
 using namespace vm;
 using Self = CloudFsFolderId;
 
-Self::CloudFsFolderId(QString id) : m_id(std::move(id)) {}
+Self::CloudFsFolderId(QString id) : m_id(std::move(id)) { }
 
 Self::operator QString() const
 {

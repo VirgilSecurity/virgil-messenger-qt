@@ -41,7 +41,7 @@ using namespace version3;
 
 using Self = PatchChats;
 
-Self::PatchChats() : Patch(3) {}
+Self::PatchChats() : Patch(3) { }
 
 bool Self::apply(Database *database)
 {

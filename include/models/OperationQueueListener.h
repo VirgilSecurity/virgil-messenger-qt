@@ -47,7 +47,7 @@ class OperationQueueListener : public QObject
 
 public:
     using QObject::QObject;
-    virtual ~OperationQueueListener() {}
+    virtual ~OperationQueueListener() { }
 
     virtual bool preRun(OperationSourcePtr source)
     {
@@ -55,7 +55,7 @@ public:
         return true;
     }
     virtual void postRun(OperationSourcePtr source) { Q_UNUSED(source) }
-    virtual void clear() {}
+    virtual void clear() { }
 
 signals:
     void notificationCreated(const QString &notification, const bool error);

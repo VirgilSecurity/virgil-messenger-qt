@@ -41,9 +41,9 @@
 using namespace vm;
 using Self = CloudFileMember;
 
-Self::CloudFileMember() : m_memberId(), m_type(Type::Member), m_contact() {}
+Self::CloudFileMember() : m_memberId(), m_type(Type::Member), m_contact() { }
 
-Self::CloudFileMember(UserId memberId, Type type) : m_memberId(std::move(memberId)), m_type(type), m_contact() {}
+Self::CloudFileMember(UserId memberId, Type type) : m_memberId(std::move(memberId)), m_type(type), m_contact() { }
 
 Self::CloudFileMember(ContactHandler contact, Type type)
     : m_memberId(contact->userId()), m_type(type), m_contact(std::move(contact))

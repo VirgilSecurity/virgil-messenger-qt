@@ -45,9 +45,9 @@ PlatformUpdates &PlatformUpdates::instance()
     return impl;
 }
 
-void Self::startChecking() {}
+void Self::startChecking() { }
 
-void Self::checkNow() const {}
+void Self::checkNow() const { }
 
 bool Self::isSupported() const noexcept
 {

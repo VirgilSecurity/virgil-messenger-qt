@@ -36,7 +36,7 @@
 
 using namespace vm;
 
-VerifyProfileState::VerifyProfileState(QState *parent) : OperationState(parent) {}
+VerifyProfileState::VerifyProfileState(QState *parent) : OperationState(parent) { }
 
 void VerifyProfileState::verify(const int codeType, const QString &code)
 {

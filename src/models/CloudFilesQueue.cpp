@@ -71,7 +71,7 @@ Self::CloudFilesQueue(Messenger *messenger, UserDatabase *userDatabase, QObject 
     addCloudFileListener(new UniqueCloudFileFilter(this));
 }
 
-Self::~CloudFilesQueue() {}
+Self::~CloudFilesQueue() { }
 
 void Self::addCloudFileListener(CloudFilesQueueListenerPtr listener)
 {

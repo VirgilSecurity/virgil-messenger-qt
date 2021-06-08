@@ -48,7 +48,7 @@ static QString generateIdIfNeeded(QString id)
     }
 }
 
-Self::MessageRequest(QString id) : m_id(generateIdIfNeeded(std::move(id))), m_withId(), m_fromDate(), m_toDate() {}
+Self::MessageRequest(QString id) : m_id(generateIdIfNeeded(std::move(id))), m_withId(), m_fromDate(), m_toDate() { }
 
 Self::MessageRequest(UserId withUserId, QString id)
     : m_id(generateIdIfNeeded(std::move(id))), m_withId(std::move(withUserId)), m_fromDate(), m_toDate()

@@ -3273,9 +3273,9 @@ void Self::xmppOnMucSubscribedRoomReceived(const QString &id, const QString &roo
 void Self::xmppOnMucRoomSubscriberReceived(const QString &id, const QString &roomJid, const QString &subscriberJid,
                                            const std::list<XmppMucSubEvent> &events) {};
 
-void Self::xmppOnMucSubscribedRoomsProcessed(const QString &id) {}
+void Self::xmppOnMucSubscribedRoomsProcessed(const QString &id) { }
 
-void Self::xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &roomJid) {}
+void Self::xmppOnMucRoomSubscribersProcessed(const QString &id, const QString &roomJid) { }
 
 void Self::connectXmppRoomSignals(QXmppMucRoom *room)
 {

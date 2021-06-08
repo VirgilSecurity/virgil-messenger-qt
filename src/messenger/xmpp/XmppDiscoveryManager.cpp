@@ -52,7 +52,7 @@ Self::XmppDiscoveryManager(QXmppClient *client, QObject *parent)
     connect(m_manager, &QXmppDiscoveryManager::itemsReceived, this, &Self::onItemsReceived);
 }
 
-Self::~XmppDiscoveryManager() {}
+Self::~XmppDiscoveryManager() { }
 
 void Self::onClientConnected()
 {
