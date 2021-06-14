@@ -126,6 +126,7 @@ add_library(platform-notifications-api STATIC)
 target_sources(platform-notifications-api
         PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/PlatformNotifications.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformNotifications.cpp"
         )
 
 

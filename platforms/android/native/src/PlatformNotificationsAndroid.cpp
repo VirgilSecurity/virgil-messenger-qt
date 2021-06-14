@@ -34,15 +34,8 @@
 
 #include "PlatformNotificationsAndroid.h"
 
-#if USE_PUSHY_ME_NOTIFICATION_SERVICE
-#    include "PushyMeListener.h"
-#else
-#    include "FirebaseListener.h"
-#endif
-
 using namespace vm;
 using namespace platform;
-using namespace notifications;
 
 using Self = PlatformNotificationsAndroid;
 
@@ -52,11 +45,7 @@ PlatformNotifications &PlatformNotifications::instance()
     return impl;
 }
 
-void Self::init()
+bool Self::isPushSupported() const
 {
-#if USE_PUSHY_ME_NOTIFICATION_SERVICE
-    PushyMeListener::instance().init();
-#else
-    FirebaseListener::instance().init();
-#endif
+    return true;
 }

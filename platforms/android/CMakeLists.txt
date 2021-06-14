@@ -35,6 +35,12 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 # ---------------------------------------------------------------------------
+#   Android Build options.
+# ---------------------------------------------------------------------------
+set(USE_FIREBASE_NOTIFICATION_SERVICE ON CACHE BOOL "Use Firebase notification service.")
+set(USE_PUSHY_ME_NOTIFICATION_SERVICE OFF CACHE BOOL "Use pushy.me notification service.")
+
+# ---------------------------------------------------------------------------
 #   System introspection
 # ---------------------------------------------------------------------------
 include("${ANDROID_SDK}/android_openssl/CMakeLists.txt")
@@ -57,10 +63,6 @@ elseif(ANDROID_ABI STREQUAL "x86_64")
 endif()
 
 message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
-
-if(NOT USE_PUSHY_ME_NOTIFICATION_SERVICE)
-    get_firebase("${PROJECT_SOURCE_DIR}/ext")
-endif()
 
 find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
 
@@ -112,38 +114,26 @@ target_link_libraries(platform
 #
 #   Library: platform-notifications.
 #
-add_library(platform-notifications STATIC)
+if (USE_FIREBASE_NOTIFICATION_SERVICE OR USE_PUSHY_ME_NOTIFICATION_SERVICE)
+        add_library(platform-notifications STATIC)
 
-target_sources(platform-notifications
-        PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsAndroid.h"
-        "${CMAKE_CURRENT_LIST_DIR}/native/include/FirebaseListener.h"
+        target_sources(platform-notifications
+                PRIVATE
+                "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsAndroid.h"
+                "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsAndroid.cpp"
+                )
 
-        "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsAndroid.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/native/src/FirebaseListener.cpp"
-        )
+        target_include_directories(platform-notifications
+                PRIVATE
+                "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+                )
 
-target_include_directories(platform-notifications
-        PRIVATE
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
-        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/include>"
-        )
-
-target_link_libraries(platform-notifications
-        PUBLIC
-        Qt5::AndroidExtras
-
-        platform-notifications-api
-
-        firebase_messaging
-        firebase_app
-        firebase_auth
-        )
-
-target_compile_definitions(platform-notifications
-        PRIVATE
-        $<BUILD_INTERFACE:USE_PUSHY_ME_NOTIFICATION_SERVICE=$<BOOL:${USE_PUSHY_ME_NOTIFICATION_SERVICE}>>
-        )
+        target_link_libraries(platform-notifications
+                PUBLIC
+                Qt5::AndroidExtras
+                platform-notifications-api
+                )
+endif()
 
 #
 #   Library: platform-fs.
@@ -242,7 +232,6 @@ configure_file(
         @ONLY
         )
 
-set(VS_FIREBASE_DIR "${PREBUILT_DIR}/firebase_cpp_sdk")
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/gradle.properties.in"
         "${GRADLE_BUILD_DIR}/gradle.properties"
@@ -250,14 +239,15 @@ configure_file(
         )
 
 file(READ "${CMAKE_CURRENT_LIST_DIR}/build.gradle" BUILD_GRADLE_CONTENTS)
-if(USE_PUSHY_ME_NOTIFICATION_SERVICE)
-    file(READ "${CMAKE_CURRENT_LIST_DIR}/pushyme.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
-else()
-    file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
-endif()
-file(WRITE "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
 
-message(STATUS "### ${GRADLE_BUILD_DIR}/build.gradle")
+if(USE_FIREBASE_NOTIFICATION_SERVICE)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+
+elseif(USE_PUSHY_ME_NOTIFICATION_SERVICE)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/pushyme.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+endif()
+
+file(WRITE "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
 
 # ---------------------------------------------------------------------------
 #   Main target.

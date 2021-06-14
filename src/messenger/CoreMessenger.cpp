@@ -41,6 +41,7 @@
 #include "OutgoingMessage.h"
 #include "UserImpl.h"
 #include "Platform.h"
+#include "PlatformNotifications.h"
 
 #include "NetworkAnalyzer.h"
 #include "XmppDiscoveryManager.h"
@@ -400,7 +401,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_im
     //
     //  Configure Push Notifications
     //
-    connect(&Platform::instance(), &Platform::pushTokenUpdated, this, &Self::onRegisterPushNotifications);
+    connect(&PlatformNotifications::instance(), &PlatformNotifications::pushTokenUpdated, this,
+            &Self::onRegisterPushNotifications);
 }
 
 Self::~CoreMessenger() noexcept = default;
@@ -963,7 +965,7 @@ UserId Self::groupUserIdFromJid(const QString &jid)
 
 void Self::onRegisterPushNotifications()
 {
-    if (!Platform::instance().isPushAvailable()) {
+    if (!PlatformNotifications::instance().isPushAvailable()) {
         return;
     }
 
@@ -987,7 +989,7 @@ void Self::onRegisterPushNotifications()
 
 void Self::onDeregisterPushNotifications()
 {
-    if (!Platform::instance().isPushAvailable()) {
+    if (!PlatformNotifications::instance().isPushAvailable()) {
         return;
     }
 

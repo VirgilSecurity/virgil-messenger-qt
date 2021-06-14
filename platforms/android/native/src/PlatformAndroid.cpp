@@ -148,28 +148,10 @@ bool Self::uiInit() const
         return false;
     }
 
-    PlatformNotifications::instance().init();
-
     return true;
 }
 
 QString Self::caBundlePath() const
 {
     return appDataLocation().filePath("cert.pem");
-}
-
-bool Self::isPushAvailable() const
-{
-    return !m_pushToken.isEmpty();
-}
-
-void Self::updatePushToken(QString pushToken)
-{
-    m_pushToken = std::move(pushToken);
-    emit pushTokenUpdated(m_pushToken);
-}
-
-QString Self::pushToken() const
-{
-    return m_pushToken;
 }

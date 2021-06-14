@@ -32,28 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "PushyMeListener.h"
+#include "PlatformNotifications.h"
 
-#include "PlatformAndroid.h"
+using namespace vm;
+using namespace platform;
 
-#include <QLoggingCategory>
-#include <QtAndroid>
+using Self = PlatformNotifications;
 
-Q_DECLARE_LOGGING_CATEGORY(lcPushyMeListener);
-Q_LOGGING_CATEGORY(lcPushyMeListener, "pushyme");
-
-using namespace vm::platform;
-using namespace vm::notifications;
-using Self = PushyMeListener;
-
-PushyMeListener &Self::instance()
+bool Self::isPushAvailable() const
 {
-    static Self instance;
-    return instance;
+    return isPushSupported() && !m_pushToken.isEmpty();
 }
 
-void Self::init()
+void Self::updatePushToken(QString pushToken)
 {
-    qCDebug(lcPushyMeListener) << "Initializing listener...";
-    // TODO: implement
+    m_pushToken = std::move(pushToken);
+    emit pushTokenUpdated(m_pushToken);
 }
+
+QString Self::pushToken() const { return m_pushToken; }

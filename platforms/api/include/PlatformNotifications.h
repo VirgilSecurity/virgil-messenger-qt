@@ -35,24 +35,51 @@
 #ifndef VM_PLATFORM_PLATFORM_NOTIFICATONS
 #define VM_PLATFORM_PLATFORM_NOTIFICATONS
 
+#include <QObject>
+
 namespace vm {
 namespace platform {
 
 //
 //  Provides API for application notifications.
 //
-class PlatformNotifications
+class PlatformNotifications : public QObject
 {
+    Q_OBJECT
+
+signals:
+    void pushTokenUpdated(const QString &pushToken);
+
 public:
     //
-    //  Initializes notifications service
+    //  Return true if Push Notifications are supported by a platform.
     //
-    virtual void init() = 0;
+    virtual bool isPushSupported() const = 0;
+
+    //
+    //  Return true if Push Notifications are supported and push token is available.
+    //
+    bool isPushAvailable() const;
+
+    //
+    //  Return valid push token, or an empty string
+    //  if push notifications are not supported or token is not available yet.
+    //
+    QString pushToken() const;
+
+    //
+    //  Update push token.
+    //  Emit signal: 'pushTokenUpdated()'.
+    //
+    void updatePushToken(QString pushToken);
 
     //
     //  This method should be implemented within derived class.
     //
     static PlatformNotifications &instance();
+
+private:
+    QString m_pushToken;
 };
 
 } // namespace platform

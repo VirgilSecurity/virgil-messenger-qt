@@ -52,28 +52,9 @@ public:
     QDir appDataLocation() const override;
 
     //
-    //  Return true if push token is defined.
-    //
-    bool isPushAvailable() const override;
-
-    //
-    //  Return a push token if defined.
-    //
-    QString pushToken() const override;
-
-    //
-    //  Update push token.
-    //  Emit a correspond signal from the API class.
-    //
-    void updatePushToken(QString pushToken);
-
-    //
     //  Defined it's own singleton access method to give access to specific methods.
     //
     static PlatformIos &instance();
-
-private:
-    QString m_pushToken;
 };
 
 } // namespace platform

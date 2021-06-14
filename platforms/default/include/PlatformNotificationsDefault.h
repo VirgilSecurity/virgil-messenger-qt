@@ -44,9 +44,14 @@ class PlatformNotificationsDefault : public PlatformNotifications
 {
 public:
     //
-    //  Do nothing.
+    //  Return false.
     //
-    void init() override;
+    bool isPushSupported() const override;
+
+    //
+    //  Return an invalid or an empty string.
+    //
+    QString pushToken() const override;
 };
 } // namespace platform
 } // namespace vm

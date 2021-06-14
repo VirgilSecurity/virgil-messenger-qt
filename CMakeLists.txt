@@ -72,7 +72,6 @@ set(CMAKE_VERBOSE_MAKEFILE OFF CACHE BOOL "" FORCE)
 set(ENABLE_CLANGFORMAT ON CACHE BOOL "On/Off formatting source code with clangformat.")
 set(ENABLE_XMPP_LOGS OFF CACHE BOOL "On/Off noisy XMPP logs.")
 set(ENABLE_XMPP_EXTRA_LOGS OFF CACHE BOOL "On/Off QXMPP logs.")
-set(USE_PUSHY_ME_NOTIFICATION_SERVICE OFF CACHE BOOL "Use pushy.me notification service.")
 
 # ---------------------------------------------------------------------------
 # Include Cmake helpers

@@ -42,7 +42,10 @@ namespace platform {
 class PlatformNotificationsAndroid : public PlatformNotifications
 {
 public:
-    void init() override;
+    //
+    //  Return true.
+    //
+    bool isPushSupported() const override;
 };
 } // namespace platform
 } // namespace vm

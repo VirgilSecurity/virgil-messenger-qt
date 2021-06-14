@@ -32,21 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_NOTIFICATIONS_ANDROID_PUSHY_ME_LISTENER_H
-#define VM_NOTIFICATIONS_ANDROID_PUSHY_ME_LISTENER_H
+#include "PlatformNotificationsIos.h"
 
-namespace vm {
-namespace notifications {
+using namespace vm;
+using namespace platform;
 
-class PushyMeListener
+using Self = PlatformNotificationsIos;
+
+PlatformNotifications &PlatformNotifications::instance()
 {
-public:
-    static PushyMeListener &instance();
+    static Self impl;
+    return impl;
+}
 
-    void init();
-};
-
-} // namespace notifications
-} // namespace vm
-
-#endif // VM_NOTIFICATIONS_ANDROID_PUSHY_ME_LISTENER_H
+bool Self::isPushSupported() const
+{
+    return true;
+}

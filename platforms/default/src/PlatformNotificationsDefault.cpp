@@ -45,4 +45,7 @@ PlatformNotifications &PlatformNotifications::instance()
     return impl;
 }
 
-void Self::init() { }
+bool Self::isPushSupported() const
+{
+    return false;
+}

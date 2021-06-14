@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,22 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
-#define VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#ifndef VM_PLATFORM_PLATFORM_NOTIFICATIONS_IOS
+#define VM_PLATFORM_PLATFORM_NOTIFICATIONS_IOS
 
-#include <firebase/messaging.h>
-#include <firebase/app.h>
-#include <firebase/util.h>
-
-#include <QtCore>
-
-class QAndroidJniEnvironment;
+#include "PlatformNotifications.h"
 
 namespace vm {
-namespace notifications {
-
-class FirebaseListener : public firebase::messaging::Listener
+namespace platform {
+class PlatformNotificationsIos : public PlatformNotifications
 {
 public:
-    static FirebaseListener &instance();
-
-    void init();
-
-    void OnTokenReceived(const char *token) override;
-
-    void OnMessage(const firebase::messaging::Message &message) override;
-
-private:
-    FirebaseListener();
-
-    void showNotification(QString title, QString message);
-
-private:
-    QAndroidJniEnvironment *m_jniEnv;
-    firebase::App *m_app;
-    firebase::ModuleInitializer m_initializer;
+    //
+    //  Return true.
+    //
+    bool isPushSupported() const override;
 };
-
-} // namespace notifications
+} // namespace platform
 } // namespace vm
 
-#endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#endif // VM_PLATFORM_PLATFORM_NOTIFICATIONS_IOS
