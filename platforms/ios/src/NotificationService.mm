@@ -59,6 +59,9 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
 
+    Logging logging;
+    Settings settings;
+
     //
     //  Extract encrypted message.
     //
@@ -72,6 +75,16 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
         return;
     } else {
         qCDebug(lcNotificationExtension) << "Sender JID" << senderJid;
+    }
+
+    auto senderId = CoreMessenger::userIdFromJid(QString::fromNSString(senderJid));
+    auto senderUsername = settings.usernameForId(senderId);
+    if (!senderUsername.isEmpty() && settings.usersList().contains(senderUsername)) {
+        //
+        //  Ignore self push notifications that come from group chats.
+        //
+        self.contentHandler = nil;
+        return;
     }
 
     if (0 == recipientJid.length) {
@@ -91,9 +104,6 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
     //
     //  Try to decrypt encrypted message.
     //
-    Logging logging;
-    Settings settings;
-
     auto decryptResult = CoreMessenger::decryptStandaloneMessage(settings, QString::fromNSString(recipientJid),
         QString::fromNSString(senderJid), QString::fromNSString(ciphertext));
 

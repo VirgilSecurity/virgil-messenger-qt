@@ -276,6 +276,19 @@ signals:
     //
     //--
 
+public:
+    //
+    //  Helpers.
+    //
+    static UserId userIdFromJid(const QString &jid);
+    QString userIdToJid(const UserId &userId) const;
+    QString currentUserJid() const;
+
+    static QString groupChatsDomain();
+    static QString groupIdToJid(const GroupId &userId);
+    static GroupId groupIdFromJid(const QString &jid);
+    static UserId groupUserIdFromJid(const QString &jid);
+
 private:
     //
     //  Helper types.
@@ -359,15 +372,6 @@ private:
     //
     //  Helpers.
     //
-    static UserId userIdFromJid(const QString &jid);
-    QString userIdToJid(const UserId &userId) const;
-    QString currentUserJid() const;
-
-    static QString groupChatsDomain();
-    static QString groupIdToJid(const GroupId &userId);
-    static GroupId groupIdFromJid(const QString &jid);
-    static UserId groupUserIdFromJid(const QString &jid);
-
     bool isXmppConnected() const noexcept;
     bool isXmppConnecting() const noexcept;
     bool isXmppDisconnected() const noexcept;
