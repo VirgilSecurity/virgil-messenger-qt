@@ -106,8 +106,6 @@ target_sources(platform-gui
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerDataSourceIos.mm"
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerIos.mm"
         "${CMAKE_CURRENT_LIST_DIR}/src/PlatformDocumentInteractionControllerPreviewItemIos.mm"
-
-        "${CMAKE_CURRENT_LIST_DIR}/src/AppDelegate.mm"
         )
 
 target_include_directories(platform-gui
@@ -137,10 +135,6 @@ else ()
     set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos")
     set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
-
-set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
-set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
 
 
 # ---------------------------------------------------------------------------
@@ -213,6 +207,8 @@ if(VS_PROVISIONING_PROFILE_SPECIFIER)
             )
 endif()
 
+set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} TARGETED_DEVICE_FAMILY "1,2")
+set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} ONLY_ACTIVE_ARCH NO)
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME} IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
 set_xcode_property(${VS_TARGET_NOTIFICATION_EXTENSION_NAME}
         CODE_SIGN_ENTITLEMENTS
@@ -237,6 +233,20 @@ endif()
 #   Main Application.
 # ---------------------------------------------------------------------------
 add_executable(${VS_TARGET_NAME} MACOSX_BUNDLE)
+
+target_sources(${VS_TARGET_NAME}
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/src/AppDelegate.mm"
+        )
+
+#   TODO: Remove next includes when Notifications goes to a separate library.
+target_include_directories(${VS_TARGET_NAME}
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        )
+
+set_xcode_property(${VS_TARGET_NAME} TARGETED_DEVICE_FAMILY "1,2")
+set_xcode_property(${VS_TARGET_NAME} ONLY_ACTIVE_ARCH NO)
 
 #
 #   Dependencies.
@@ -286,19 +296,19 @@ set_target_properties(${VS_TARGET_NAME}
 #
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/LaunchScreen.storyboard.in"
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/LaunchScreen.storyboard"
         @ONLY
         )
 
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/Default-568h@2x.png"
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/Default-568h@2x.png"
         COPYONLY
         )
 
 set(STORYBOARD_DEFAULT
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/LaunchScreen.storyboard"
-        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj/Default-568h@2x.png"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/LaunchScreen.storyboard"
+        "${CMAKE_BINARY_DIR}/${VS_TARGET_NAME}.xcodeproj/Default-568h@2x.png"
         )
 
 set(VS_ASSET_DIR "${VS_CUSTOMER_DIR}/platforms/ios/Assets.xcassets")
@@ -354,23 +364,23 @@ add_custom_target(xcarchive
         COMMENT "Building xcarchive..."
 
         COMMAND xcodebuild
-            -project "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.xcodeproj"
-            -scheme ${PROJECT_NAME}
+            -project "${PROJECT_BINARY_DIR}/messenger.xcodeproj"
+            -scheme ${VS_TARGET_NAME}
             -sdk iphoneos
             -destination generic/platform=iOS
             -configuration Release
             archive
-            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
 
         COMMAND "${CMAKE_COMMAND}" -E
-            tar czf "${PROJECT_NAME}-${PROJECT_VERSION}.tgz" -- "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            tar czf "${VS_TARGET_NAME}-${PROJECT_VERSION}.tgz" -- "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
         )
 
 add_custom_target(upload
         COMMENT "Upload xcarchive..."
         COMMAND xcodebuild
             -exportArchive
-            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+            -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
             -exportOptionsPlist "${CMAKE_CURRENT_LIST_DIR}/exportOptions.plist"
             -allowProvisioningUpdates
         )
@@ -379,7 +389,7 @@ add_custom_target(ipa
         COMMENT "Build IPA..."
         COMMAND xcodebuild
         -exportArchive
-        -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.xcarchive"
+        -archivePath "${CMAKE_CURRENT_BINARY_DIR}/${VS_TARGET_NAME}.xcarchive"
         -exportOptionsPlist "${CMAKE_CURRENT_LIST_DIR}/exportOptions-ipa.plist"
         -allowProvisioningUpdates
         -exportPath "${CMAKE_BINARY_DIR}"

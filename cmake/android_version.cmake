@@ -53,26 +53,26 @@ function(SET_ANDROID_VERSION ANDROID_VERSION_NAME ANDROID_VERSION_CODE TARGET_VE
     set(${ANDROID_VERSION_NAME} "${TARGET_VERSION}" PARENT_SCOPE)
 
     # Fill Android version code
-    string(REPLACE "." ";" VS_VERSION_LIST ${VS_TARGET_VERSION})
+    string(REPLACE "." ";" VERSION_LIST ${TARGET_VERSION})
 
-    list(GET VS_VERSION_LIST 0 TMP_VERS)
+    list(GET VERSION_LIST 0 TMP_VERS)
     pad_string(CODE 3 "0" "1${TMP_VERS}")
 
-    list(GET VS_VERSION_LIST 1 TMP_VERS)
+    list(GET VERSION_LIST 1 TMP_VERS)
     pad_string(TMP_VERS 2 "0" "${TMP_VERS}")
     string(APPEND CODE "${TMP_VERS}")
 
-    list(GET VS_VERSION_LIST 2 TMP_VERS)
+    list(GET VERSION_LIST 2 TMP_VERS)
     pad_string(TMP_VERS 2 "0" "${TMP_VERS}")
     string(APPEND CODE "${TMP_VERS}")
 
     # Get build number (or zero)
     if (DEFINED ENV{BUILD_NUMBER})
-        set(VS_BUILD_NUMBER "$ENV{BUILD_NUMBER}")
+        set(BUILD_NUMBER "$ENV{BUILD_NUMBER}")
     else ()
-        set(VS_BUILD_NUMBER "0")
+        set(BUILD_NUMBER "0")
     endif ()
-    pad_string(TMP_VERS 3 "0" "${VS_BUILD_NUMBER}")
+    pad_string(TMP_VERS 3 "0" "${BUILD_NUMBER}")
     string(APPEND CODE "${TMP_VERS}")
 
     set(${ANDROID_VERSION_CODE} "${CODE}" PARENT_SCOPE)

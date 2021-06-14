@@ -48,6 +48,7 @@ static const QString kUsersGroup = "Users";
 static const QString kUsersList = "UsersList";
 static const QString kCredenitalsGroup = "Credentials";
 static const QString kUsersInfoGroup = "UsersInfo";
+static const QString kUsersUsernameGroup = "UsersUsername";
 static const QString kChatsLastSyncDateGroup = "ChatsLastSyncDateGroup";
 
 static const QString kDeviceId = "DeviceId";
@@ -179,9 +180,15 @@ QString Settings::userInfo(const QString &username) const
     return groupValue(kUsersInfoGroup, username).toString();
 }
 
-void Settings::setUserInfo(const QString &username, const QString &userInfo)
+QString Settings::usernameForId(const QString &userId) const
+{
+    return groupValue(kUsersUsernameGroup, userId).toString();
+}
+
+void Settings::setUserInfo(const QString &username, const QString &userId, const QString &userInfo)
 {
     setGroupValue(kUsersInfoGroup, username, userInfo);
+    setGroupValue(kUsersUsernameGroup, userId, username);
     sync();
 }
 

@@ -62,10 +62,6 @@ if(NOT USE_PUSHY_ME_NOTIFICATION_SERVICE)
     get_firebase("${PROJECT_SOURCE_DIR}/ext")
 endif()
 
-set_android_version(ANDROID_VERSION_NAME ANDROID_VERSION_CODE "${VS_TARGET_VERSION}")
-message(STATUS "Android version name: [${ANDROID_VERSION_NAME}]")
-message(STATUS "Android version code: [${ANDROID_VERSION_CODE}]")
-
 find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
 
 # ---------------------------------------------------------------------------
@@ -294,12 +290,14 @@ if(ANDROID_SDK_PLATFORM)
     message(STATUS "Android deploy QT platform: [${ANDROID_SDK_PLATFORM}]")
 endif()
 
+set(QT_ANDROID_APPLICATION_BINARY ${VS_TARGET_NAME})
+
 add_custom_target(apk_release
         COMMENT "Making APK release..."
         COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${DEPLOY_QT}
         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
         --output "${CMAKE_BINARY_DIR}/android-build"
-        --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
+        --apk "${CMAKE_BINARY_DIR}/android-build/${VS_TARGET_NAME}.apk"
         ${android_deploy_qt_platform}
         ${android_deploy_qt_jdk}
         --gradle

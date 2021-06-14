@@ -55,8 +55,7 @@ QString Self::fileDisplayName(const QUrl &url, bool isPicture) const
         const QUrlQuery query(urlWithoutFileScheme.query());
         const auto fileName = query.queryItemValue("id") + QChar('.') + query.queryItemValue("ext").toLower();
         return fileName;
-
-#elif VS_IOS_SIMULATOR
-    return url.fileName();
-#endif
     }
+#endif
+    return url.fileName();
+}

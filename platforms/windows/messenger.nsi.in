@@ -3,17 +3,17 @@
 
 !include "MUI2.nsh"
 
-!define APPNAME "@PROJECT_NAME@"
+!define APPNAME "@VS_TARGET_NAME@"
 !define COMPANYNAME "@VS_ORGANIZATION_NAME@"
 !define DESCRIPTION "@VS_APPLICATION_DISPLAY_NAME@"
-!define VERSIONMAJOR @VERSIONMAJOR@
-!define VERSIONMINOR @VERSIONMINOR@
-!define VERSIONBUILD @VERSIONBUILD@
+!define VERSIONMAJOR @PROJECT_VERSION_MAJOR@
+!define VERSIONMINOR @PROJECT_VERSION_MINOR@
+!define VERSIONPATCH @PROJECT_VERSION_PATCH@
 ;!define HELPURL "http://..."
 ;!define UPDATEURL "http://..."
 ;!define ABOUTURL "http://..."
 
-!define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}"
+!define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
 Name "${APPNAME} ${VERSION}"
 OutFile "${APPNAME}-installer-${VERSION}.exe"
 InstallDir "$LOCALAPPDATA\${COMPANYNAME}\${APPNAME}"
@@ -61,7 +61,7 @@ FunctionEnd
 
 ;--------------------------------
 ;Languages
- 
+
   !insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
@@ -94,7 +94,7 @@ Section "${APPNAME} (required)" SecMain
 ;  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "HelpLink" "$\"${HELPURL}$\""
 ;  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLUpdateInfo" "$\"${UPDATEURL}$\""
 ;  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLInfoAbout" "$\"${ABOUTURL}$\""
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayVersion" "$\"${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}$\""
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayVersion" "$\"${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}$\""
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "VersionMajor" ${VERSIONMAJOR}
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "VersionMinor" ${VERSIONMINOR}
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "NoModify" 1

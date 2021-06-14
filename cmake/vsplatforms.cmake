@@ -59,7 +59,6 @@ endfunction()
 # ---------------------------------------------------------------------------
 #   Qt creator runs cmake several time for Multi ABI configuration, so
 #   next configurable variables must be preserved:
-#       - VS_PLATFORM
 #       - VS_CUSTOMER
 #       - VS_ENV
 #       - CMAKE_BUILD_TYPE
@@ -81,7 +80,7 @@ function(ADD_TRANSITIVE_ARG path name value)
     file(STRINGS "${path}" file_content)
 
     if(NOT file_content MATCHES "${name}")
-        file(APPEND "${path}" "set(${name} \"${value}\" CACHE INTERNAL \"\")\n")
+        file(APPEND "${path}" "set(${name} \"${value}\" CACHE STRING \"\" FORCE)\n")
     endif()
 endfunction()
 
@@ -131,11 +130,8 @@ message(STATUS "Current environment : [${VS_ENV}]")
 #   Write options to the "transitive-args.cmake".
 #
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_ENV "${VS_ENV}")
-add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_PLATFORM "${VS_PLATFORM}")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" VS_CUSTOMER "${VS_CUSTOMER}")
-add_transitive_arg("${TRANSITIVE_ARGS_FILE}" ANDROID_SDK "${ANDROID_SDK}")
 add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
-add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 
 # ---------------------------------------------------------------------------
 # Prepare target platform
@@ -143,6 +139,7 @@ add_transitive_arg("${TRANSITIVE_ARGS_FILE}" CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PR
 list(APPEND VS_PLATFORM_LIST "linux" "android" "ios" "macos" "windows")
 set(VS_DESKTOP_PLATFORM_LIST "linux" "macos" "windows")
 set(VS_MOBILE_PLATFORM_LIST "ios" "android")
+
 
 if(VS_PLATFORM)
     message(STATUS "Autodetecting environment for target platform: [${VS_PLATFORM}]")
@@ -158,13 +155,19 @@ if(VS_PLATFORM)
     elseif(VS_PLATFORM STREQUAL "android")
         set(QT_PREFIX_PATH "android")
         #   Android NDK ABIs
-        set(ANDROID_ABI "x86" CACHE STRING "Android default ABI")
+        set(ANDROID_ABI "x86_64" CACHE STRING "Android default ABI")
         set(ANDROID_BUILD_ABI_arm64-v8a ON CACHE BOOL "Build arm64-v8a architecture")
         set(ANDROID_BUILD_ABI_armeabi-v7a ON CACHE BOOL "Build armeabi-v7a architecture")
         set(ANDROID_BUILD_ABI_x86 ON CACHE BOOL "Build x86 architecture")
         set(ANDROID_BUILD_ABI_x86_64 ON CACHE BOOL "Build x86_64 architecture")
 
-        message(STATUS "Android default ABI: [${ANDROID_ABI}]")
+        set(ANDROID_MIN_SDK_VERSION "26")
+        set(ANDROID_TARGET_SDK_VERSION "29")
+        set(ANDROID_SDK_PLATFORM "${ANDROID_TARGET_SDK_VERSION}")
+        set(ANDROID_NATIVE_API_LEVEL "${ANDROID_MIN_SDK_VERSION}")
+
+        message(STATUS "Android API level: [${ANDROID_NATIVE_API_LEVEL}]")
+        message(STATUS "Android ABI: [${ANDROID_ABI}]")
         message(STATUS "ANDROID_BUILD_ABI_arm64-v8a: ${ANDROID_BUILD_ABI_arm64-v8a}")
         message(STATUS "ANDROID_BUILD_ABI_armeabi-v7a: ${ANDROID_BUILD_ABI_armeabi-v7a}")
         message(STATUS "ANDROID_BUILD_ABI_x86: ${ANDROID_BUILD_ABI_x86}")
@@ -173,9 +176,9 @@ if(VS_PLATFORM)
         #  Android NDK
         if(NOT CMAKE_TOOLCHAIN_FILE)
             if(ANDROID_NDK)
-                set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+                set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake" CACHE PATH "")
             elseif(DEFINED ENV{ANDROID_NDK})
-                set(CMAKE_TOOLCHAIN_FILE "$ENV{ANDROID_NDK}/build/cmake/android.toolchain.cmake")
+                set(CMAKE_TOOLCHAIN_FILE "$ENV{ANDROID_NDK}/build/cmake/android.toolchain.cmake" CACHE PATH "")
             else ()
                 message(FATAL_ERROR "-- Enviroment variable ANDROID_NDK not set")
             endif()
@@ -228,3 +231,5 @@ if(VS_PLATFORM)
     prepare_qt_sdk(CMAKE_PREFIX_PATH CMAKE_FIND_ROOT_PATH QT_QMAKE_EXECUTABLE QT_RELATIVE_PATH)
 endif()
 
+message(STATUS "CMAKE_PREFIX_PATH: [${CMAKE_PREFIX_PATH}]")
+message(STATUS "CMAKE_FIND_ROOT_PATH: [${CMAKE_FIND_ROOT_PATH}]")

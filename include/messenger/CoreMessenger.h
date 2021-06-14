@@ -226,6 +226,15 @@ public:
     QFuture<Result> sendMessage(MessageHandler message);
 
     //
+    //  Try to decrypt given message for any local user.
+    //  It is used to decrypt notification messages.
+    //
+    static std::variant<Result, MessageHandler> decryptStandaloneMessage(const Settings &settings,
+                                                                         const QString &recipientJid,
+                                                                         const QString &senderJid,
+                                                                         const QString &ciphertext);
+
+    //
     //  Encrypt given file and returns a key for decryption and signature.
     //
     std::tuple<Result, QByteArray, QByteArray> encryptFile(const QString &sourceFilePath, const QString &destFilePath);
@@ -267,6 +276,19 @@ signals:
     //
     //--
 
+public:
+    //
+    //  Helpers.
+    //
+    static UserId userIdFromJid(const QString &jid);
+    QString userIdToJid(const UserId &userId) const;
+    QString currentUserJid() const;
+
+    static QString groupChatsDomain();
+    static QString groupIdToJid(const GroupId &userId);
+    static GroupId groupIdFromJid(const QString &jid);
+    static UserId groupUserIdFromJid(const QString &jid);
+
 private:
     //
     //  Helper types.
@@ -298,10 +320,10 @@ private:
     //  Message processing helpers.
     //
     QByteArray packMessage(const MessageHandler &message);
-    CoreMessengerStatus unpackMessage(const QByteArray &messageData, Message &message);
+    static CoreMessengerStatus unpackMessage(const QByteArray &messageData, Message &message);
 
     QByteArray packXmppMessageBody(const QByteArray &messageCiphertext, PushType pushType);
-    std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QXmppMessage &xmppMessage);
+    static std::variant<CoreMessengerStatus, QByteArray> unpackXmppMessageBody(const QString &xmppMessageBody);
 
     //
     //  Message sending / processing helpers.
@@ -350,15 +372,6 @@ private:
     //
     //  Helpers.
     //
-    UserId userIdFromJid(const QString &jid) const;
-    QString userIdToJid(const UserId &userId) const;
-    QString currentUserJid() const;
-
-    QString groupChatsDomain() const;
-    QString groupIdToJid(const GroupId &userId) const;
-    GroupId groupIdFromJid(const QString &jid) const;
-    UserId groupUserIdFromJid(const QString &jid) const;
-
     bool isXmppConnected() const noexcept;
     bool isXmppConnecting() const noexcept;
     bool isXmppDisconnected() const noexcept;

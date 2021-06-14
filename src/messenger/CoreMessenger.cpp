@@ -114,6 +114,7 @@ using vssq_messenger_file_cipher_ptr_t = vsc_unique_ptr<vssq_messenger_file_ciph
 using vssq_messenger_user_ptr_t = vsc_unique_ptr<const vssq_messenger_user_t>;
 using vssq_messenger_user_list_ptr_t = vsc_unique_ptr<vssq_messenger_user_list_t>;
 using vssq_messenger_group_ptr_t = vsc_unique_ptr<vssq_messenger_group_t>;
+using vssq_messenger_config_ptr_t = vsc_unique_ptr<vssq_messenger_config_t>;
 
 static vscf_ctr_drbg_ptr_t vscf_ctr_drbg_wrap_ptr(vscf_ctr_drbg_t *ptr)
 {
@@ -178,6 +179,11 @@ static vssq_messenger_group_ptr_t vssq_messenger_group_wrap_ptr(vssq_messenger_g
 static vssq_messenger_group_ptr_t vssq_messenger_group_null()
 {
     return vssq_messenger_group_ptr_t { nullptr, vssq_messenger_group_delete };
+}
+
+static vssq_messenger_config_ptr_t vssq_messenger_config_wrap_ptr(vssq_messenger_config_t *ptr)
+{
+    return vssq_messenger_config_ptr_t { ptr, vssq_messenger_config_delete };
 }
 
 static CoreMessengerStatus mapStatus(vssq_status_t status)
@@ -720,6 +726,7 @@ Self::Result Self::saveCurrentUserInfo()
 
     const auto credentials = vsc_str_to_qstring(vssc_json_object_as_str(credsJson.get()));
     const auto username = vsc_str_to_qstring(vssq_messenger_user_username(user));
+    const auto userId = vsc_str_to_qstring(vssq_messenger_user_identity(user));
     m_impl->settings->setUserCredential(username, credentials);
 
     //
@@ -734,7 +741,7 @@ Self::Result Self::saveCurrentUserInfo()
     }
 
     const auto userInfo = vsc_str_to_qstring(vssc_json_object_as_str(userJson.get()));
-    m_impl->settings->setUserInfo(username, userInfo);
+    m_impl->settings->setUserInfo(username, userId, userInfo);
 
     return Self::Result::Success;
 }
@@ -904,9 +911,9 @@ QFuture<Self::Result> Self::signOut()
         qCInfo(lcCoreMessenger) << "Signing out";
 
         emit deregisterPushNotifications();
-        emit cleanupCommKitMessenger();
-        emit cleanupXmppMucRooms();
         emit disconnectXmppServer();
+        emit cleanupXmppMucRooms();
+        emit cleanupCommKitMessenger();
 
         return Self::Result::Success;
     });
@@ -920,7 +927,7 @@ QString Self::currentUserJid() const
             + m_impl->settings->deviceId();
 }
 
-UserId Self::userIdFromJid(const QString &jid) const
+UserId Self::userIdFromJid(const QString &jid)
 {
     return UserId(jid.split("@").first());
 }
@@ -934,22 +941,22 @@ QString Self::userIdToJid(const UserId &userId) const
     }
 }
 
-QString Self::groupChatsDomain() const
+QString Self::groupChatsDomain()
 {
     return "conference." + CustomerEnv::xmppServiceDomain();
 }
 
-QString Self::groupIdToJid(const GroupId &groupId) const
+QString Self::groupIdToJid(const GroupId &groupId)
 {
     return groupId + "@" + groupChatsDomain();
 }
 
-GroupId Self::groupIdFromJid(const QString &jid) const
+GroupId Self::groupIdFromJid(const QString &jid)
 {
     return GroupId(jid.split("@").first());
 }
 
-UserId Self::groupUserIdFromJid(const QString &jid) const
+UserId Self::groupUserIdFromJid(const QString &jid)
 {
     return UserId(jid.split("/").last());
 }
@@ -1520,10 +1527,143 @@ Self::Result Self::sendGroupMessage(const MessageHandler &message)
     if (isSent) {
         qCDebug(lcCoreMessenger) << "XMPP message was sent";
         return Self::Result::Success;
+
     } else {
         qCWarning(lcCoreMessenger) << "Can not send message - XMPP send failed";
         return Self::Result::Error_SendMessageFailed;
     }
+}
+
+std::variant<Self::Result, MessageHandler> Self::decryptStandaloneMessage(const Settings &settings,
+                                                                          const QString &recipientJid,
+                                                                          const QString &senderJid,
+                                                                          const QString &ciphertext)
+{
+    //
+    //  Find recipient's credentials.
+    //
+    auto recipientId = userIdFromJid(recipientJid);
+    auto recipientUsername = settings.usernameForId(recipientId);
+    if (recipientUsername.isEmpty()) {
+        qCWarning(lcCoreMessenger) << "User name was not found locally by it's identifier";
+        return Self::Result::Error_NoCred;
+    }
+
+    auto recipientCredentialsString = settings.userCredential(recipientUsername).toStdString();
+    if (recipientCredentialsString.empty()) {
+        qCWarning(lcCoreMessenger) << "User credentials are not found locally";
+        return Self::Result::Error_NoCred;
+    }
+
+    //
+    //  Parse recipient's credentials.
+    //
+    qCInfo(lcCoreMessenger) << "Parse user credentials";
+    vssq_error_t error;
+    vssq_error_reset(&error);
+    auto recipientCredentials = vssq_messenger_creds_wrap_ptr(
+            vssq_messenger_creds_from_json_str(vsc_str_from(recipientCredentialsString), &error));
+
+    if (vssq_error_has_error(&error)) {
+        qCWarning(lcCoreMessenger) << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+        return Self::Result::Error_ImportCredentials;
+    }
+
+    //
+    //  Create CommKit messenger.
+    //
+    auto messengerServiceUrlStd = CustomerEnv::messengerServiceUrl().toStdString();
+    auto xmppServiceUrlStd = CustomerEnv::xmppServiceUrl().toStdString();
+    auto contactDiscoveryServiceUrlStd = CustomerEnv::contactDiscoveryServiceUrl().toStdString();
+
+    const auto config = vssq_messenger_config_wrap_ptr(vssq_messenger_config_new_with(
+            vsc_str_from(messengerServiceUrlStd), vsc_str_from(contactDiscoveryServiceUrlStd),
+            vsc_str_from(xmppServiceUrlStd)));
+
+    auto caBundlePath = Platform::instance().caBundlePath().toStdString();
+    if (!caBundlePath.empty()) {
+        vssq_messenger_config_set_ca_bundle(config.get(), vsc_str_from(caBundlePath));
+    }
+
+    auto messenger = vssq_messenger_wrap_ptr(vssq_messenger_new_with_config(config.get()));
+
+    const auto initStatus = vssq_messenger_setup_defaults(messenger.get());
+    if (initStatus != vssq_status_SUCCESS) {
+        qCWarning(lcCoreMessenger) << "Got error status:"
+                                   << vsc_str_to_qstring(vssq_error_message_from_status(initStatus));
+        return Self::Result::Error_CryptoInit;
+    }
+
+    //
+    //  Authenticate the recipient.
+    //
+    qCInfo(lcCoreMessenger) << "Authenticate user";
+    const auto authStatus = vssq_messenger_authenticate(messenger.get(), recipientCredentials.get());
+
+    if (authStatus != vssq_status_SUCCESS) {
+        qCWarning(lcCoreMessenger) << "Got error status:"
+                                   << vsc_str_to_qstring(vssq_error_message_from_status(authStatus));
+        return Self::Result::Error_Signin;
+    }
+
+    //
+    //  Find sender.
+    //
+    auto senderIdStdStr = QString(userIdFromJid(senderJid)).toStdString();
+    if (senderIdStdStr.empty()) {
+        qCWarning(lcCoreMessenger) << "Given sender is not defined";
+        return Self::Result::Error_UserNotFound;
+    }
+
+    auto sender = vssq_messenger_user_wrap_ptr(
+            vssq_messenger_find_user_with_identity(messenger.get(), vsc_str_from(senderIdStdStr), &error));
+    if (vssq_error_has_error(&error)) {
+        qCDebug(lcCoreMessenger) << "User not found";
+        qCWarning(lcCoreMessenger) << "Got error status:" << vsc_str_to_qstring(vssq_error_message_from_error(&error));
+        return nullptr;
+    }
+
+    //
+    //  Decrypt message.
+    //
+    if (ciphertext.isEmpty()) {
+        qCWarning(lcCoreMessenger) << "Given ciphertext is empty";
+        return Self::Result::Error_InvalidMessageCiphertext;
+    }
+
+    auto ciphertextDecoded = QByteArray::fromBase64Encoding(ciphertext.toLatin1());
+    if (!ciphertextDecoded) {
+        qCWarning(lcCoreMessenger) << "Given ciphertext is not base64 encoded";
+        return Self::Result::Error_InvalidMessageCiphertext;
+    }
+
+    auto ciphertextData = std::move(*ciphertextDecoded);
+
+    auto plaintextDataMinLen = vssq_messenger_decrypted_message_len(messenger.get(), ciphertextData.size());
+
+    auto [messageData, plaintext] = makeMappedBuffer(plaintextDataMinLen);
+
+    const vssq_status_t decryptionStatus =
+            vssq_messenger_decrypt_data(messenger.get(), vsc_data_from(ciphertextData), sender.get(), plaintext.get());
+
+    if (decryptionStatus != vssq_status_SUCCESS) {
+        qCWarning(lcCoreMessenger) << "Can not decrypt ciphertext:"
+                                   << vsc_str_to_qstring(vssq_error_message_from_status(decryptionStatus));
+        return Self::Result::Error_InvalidMessageCiphertext;
+    }
+
+    adjustMappedBuffer(plaintext, messageData);
+
+    //
+    //  Unpack message.
+    //
+    auto message = std::make_unique<IncomingMessage>();
+
+    if (auto result = unpackMessage(messageData, *message); result != Self::Result::Success) {
+        return result;
+    }
+
+    return message;
 }
 
 QFuture<Self::Result> Self::processReceivedXmppMessage(const QXmppMessage &xmppMessage)
@@ -1593,7 +1733,7 @@ Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessag
     //
     //  Decode message body from Base64 and JSON.
     //
-    auto messageCiphertextResult = unpackXmppMessageBody(xmppMessage);
+    auto messageCiphertextResult = unpackXmppMessageBody(xmppMessage.body());
     if (auto status = std::get_if<CoreMessengerStatus>(&messageCiphertextResult)) {
         return *status;
     }
@@ -1634,14 +1774,18 @@ Self::Result Self::processChatReceivedXmppMessage(const QXmppMessage &xmppMessag
 
 Self::Result Self::processGroupChatReceivedXmppMessage(const QXmppMessage &xmppMessage)
 {
+    const auto groupId = groupIdFromJid(xmppMessage.from());
+    const auto senderId = groupUserIdFromJid(xmppMessage.from());
+    const auto recipientId = UserId(groupId);
 
-    auto groupId = groupIdFromJid(xmppMessage.from());
+    if (senderId == currentUser()->id()) {
+        return processGroupChatReceivedXmppCarbonMessage(xmppMessage);
+    }
 
     auto message = std::make_unique<IncomingMessage>();
-
     message->setId(MessageId(xmppMessage.id()));
-    message->setRecipientId(UserId(QString(groupIdFromJid(xmppMessage.from()))));
-    message->setSenderId(groupUserIdFromJid(xmppMessage.from()));
+    message->setRecipientId(recipientId);
+    message->setSenderId(senderId);
     message->setCreatedAt(xmppMessage.stamp());
     message->setGroupChatInfo(std::make_unique<MessageGroupChatInfo>(groupId));
 
@@ -1651,7 +1795,7 @@ Self::Result Self::processGroupChatReceivedXmppMessage(const QXmppMessage &xmppM
     //
     //  Decode message body from Base64 and JSON.
     //
-    auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
+    auto ciphertextResult = unpackXmppMessageBody(xmppMessage.body());
     if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
         return *status;
     }
@@ -1772,7 +1916,7 @@ Self::Result Self::processChatReceivedXmppCarbonMessage(const QXmppMessage &xmpp
     //
     //  Decode message body from Base64 and JSON.
     //
-    auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
+    auto ciphertextResult = unpackXmppMessageBody(xmppMessage.body());
     if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
         return *status;
     }
@@ -1842,7 +1986,7 @@ Self::Result Self::processGroupChatReceivedXmppCarbonMessage(const QXmppMessage 
     //
     //  Decode message body from Base64 and JSON.
     //
-    auto ciphertextResult = unpackXmppMessageBody(xmppMessage);
+    auto ciphertextResult = unpackXmppMessageBody(xmppMessage.body());
     if (auto status = std::get_if<CoreMessengerStatus>(&ciphertextResult)) {
         return *status;
     }
@@ -2477,14 +2621,7 @@ CoreMessengerStatus Self::unpackMessage(const QByteArray &messageData, Message &
     message.setSenderUsername(std::move(senderUsername));
 
     auto recipientUsername = messageJson["to"].toString();
-    if (recipientUsername.isEmpty()) {
-        qCWarning(lcCoreMessenger) << "Got message without 'to' username";
-        //
-        //  TODO: Check if next line is redundant.
-        //
-        message.setRecipientUsername(currentUser()->username());
-    } else {
-
+    if (!recipientUsername.isEmpty()) {
         message.setRecipientUsername(std::move(recipientUsername));
     }
 
@@ -2525,7 +2662,7 @@ QByteArray Self::packXmppMessageBody(const QByteArray &messageCiphertext, PushTy
         break;
 
     case PushType::Alert:
-        messageBodyJson["pushType"] = "alertBare";
+        messageBodyJson["pushType"] = "alert";
         break;
 
     case PushType::Voip:
@@ -2538,13 +2675,12 @@ QByteArray Self::packXmppMessageBody(const QByteArray &messageCiphertext, PushTy
     return MessageContentJsonUtils::toBytes(messageBodyJson).toBase64();
 }
 
-std::variant<CoreMessengerStatus, QByteArray> Self::unpackXmppMessageBody(const QXmppMessage &xmppMessage)
+std::variant<CoreMessengerStatus, QByteArray> Self::unpackXmppMessageBody(const QString &xmppMessageBody)
 {
-
     //
     //  Decode message body from Base64 and JSON.
     //
-    auto messageBody = xmppMessage.body().toLatin1();
+    auto messageBody = xmppMessageBody.toLatin1();
     if (messageBody.isEmpty()) {
         qCWarning(lcCoreMessenger) << "Got invalid XMPP message - body is empty";
         return Self::Result::Error_InvalidMessageFormat;
@@ -3509,20 +3645,20 @@ void Self::onSendMessageStatusDisplayed(const MessageHandler &message)
         return;
     }
 
-    QXmppMessage mark;
-
-    switch (message->chatType()) {
-    case ChatType::Personal:
-        mark.setType(QXmppMessage::Chat);
-        mark.setTo(userIdToJid(message->senderId()));
-        break;
-
-    case ChatType::Group:
-        mark.setType(QXmppMessage::GroupChat);
-        mark.setTo(groupIdToJid(message->groupChatInfo()->groupId()));
-        break;
+    if (message->chatType() != ChatType::Personal) {
+        //
+        //  For now "displayed" should be send for personal messages only.
+        //  Motivation:
+        //      - Marker "Displayed" triggers push-notification, and should be filtered within messenger application.
+        //      - This marker is not used for Group Chats as expected:
+        //          - "Displayed" status is not shown per group member.
+        //
+        return;
     }
 
+    QXmppMessage mark;
+    mark.setType(QXmppMessage::Chat);
+    mark.setTo(userIdToJid(message->senderId()));
     mark.setFrom(currentUserJid());
     mark.setId(QXmppUtils::generateStanzaUuid());
     mark.setMarkerId(message->id());
