@@ -3000,12 +3000,10 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                 //
                 //  Subscribe to Muc/Sub events.
                 //
+                m_impl->xmppMucSubManager->unsubscribe(room->jid());
                 m_impl->xmppMucSubManager->subscribe(
                         {
                                 XmppMucSubEvent::Messages,
-                                XmppMucSubEvent::Affiliations,
-                                XmppMucSubEvent::Subscribers,
-                                XmppMucSubEvent::Presence,
                         },
                         room->jid(), currentUser()->id());
 
