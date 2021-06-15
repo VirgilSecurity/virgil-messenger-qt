@@ -47,11 +47,6 @@ public:
     //  Return false.
     //
     bool isPushSupported() const override;
-
-    //
-    //  Return an invalid or an empty string.
-    //
-    QString pushToken() const override;
 };
 } // namespace platform
 } // namespace vm

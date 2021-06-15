@@ -53,6 +53,11 @@ android {
        }
     }
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -70,3 +75,7 @@ android {
 }
 
 apply plugin: 'com.google.gms.google-services'
+
+task showMeCache doLast() {
+    configurations.compileClasspath.each { println it }
+}

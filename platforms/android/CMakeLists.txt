@@ -119,8 +119,8 @@ if (USE_FIREBASE_NOTIFICATION_SERVICE OR USE_PUSHY_ME_NOTIFICATION_SERVICE)
 
         target_sources(platform-notifications
                 PRIVATE
-                "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsAndroid.h"
-                "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsAndroid.cpp"
+                "$<$<BOOL:USE_FIREBASE_NOTIFICATION_SERVICE>:${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsFirebase.h>"
+                "$<$<BOOL:USE_FIREBASE_NOTIFICATION_SERVICE>:${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsFirebase.cpp>"
                 )
 
         target_include_directories(platform-notifications
@@ -132,6 +132,7 @@ if (USE_FIREBASE_NOTIFICATION_SERVICE OR USE_PUSHY_ME_NOTIFICATION_SERVICE)
                 PUBLIC
                 Qt5::AndroidExtras
                 platform-notifications-api
+                core-messenger
                 )
 endif()
 

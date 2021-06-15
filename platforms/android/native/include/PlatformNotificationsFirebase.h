@@ -32,16 +32,23 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_PLATFORM_PLATFORM_NOTIFICATIONS_ANDROID
-#define VM_PLATFORM_PLATFORM_NOTIFICATIONS_ANDROID
+#ifndef VM_PLATFORM_PLATFORM_NOTIFICATIONS_FIREBASE
+#define VM_PLATFORM_PLATFORM_NOTIFICATIONS_FIREBASE
 
 #include "PlatformNotifications.h"
 
+#include <jni.h>
+
 namespace vm {
 namespace platform {
-class PlatformNotificationsAndroid : public PlatformNotifications
+class PlatformNotificationsFirebase : public PlatformNotifications
 {
 public:
+    //
+    //  Request Firebase push token.
+    //
+    void init() override;
+
     //
     //  Return true.
     //
@@ -50,4 +57,11 @@ public:
 } // namespace platform
 } // namespace vm
 
-#endif // VM_PLATFORM_PLATFORM_NOTIFICATIONS_ANDROID
+extern "C" {
+JNIEXPORT void JNICALL Java_org_virgil_notification_FirebaseMessageReceiver_updatePushToken(JNIEnv *, jclass, jstring);
+JNIEXPORT jobject JNICALL Java_org_virgil_notification_FirebaseMessageReceiver_decryptNotification(JNIEnv *, jclass,
+                                                                                                   jstring, jstring,
+                                                                                                   jstring);
+}
+
+#endif // VM_PLATFORM_PLATFORM_NOTIFICATIONS_FIREBASE

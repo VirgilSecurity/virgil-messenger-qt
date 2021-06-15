@@ -148,6 +148,8 @@ bool Self::uiInit() const
         return false;
     }
 
+    PlatformNotifications::instance().init();
+
     return true;
 }
 

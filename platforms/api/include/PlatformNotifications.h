@@ -52,6 +52,11 @@ signals:
 
 public:
     //
+    //  Perform platform dependent initialization.
+    //
+    virtual void init();
+
+    //
     //  Return true if Push Notifications are supported by a platform.
     //
     virtual bool isPushSupported() const = 0;

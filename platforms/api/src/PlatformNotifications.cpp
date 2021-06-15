@@ -34,10 +34,16 @@
 
 #include "PlatformNotifications.h"
 
+#include <QLoggingCategory>
+
 using namespace vm;
 using namespace platform;
 
 using Self = PlatformNotifications;
+
+Q_LOGGING_CATEGORY(lcPlatformNotifications, "platform-notifications");
+
+void Self::init() {}
 
 bool Self::isPushAvailable() const
 {
@@ -46,6 +52,8 @@ bool Self::isPushAvailable() const
 
 void Self::updatePushToken(QString pushToken)
 {
+    qCDebug(lcPlatformNotifications) << "Got updated push token:" << pushToken;
+
     m_pushToken = std::move(pushToken);
     emit pushTokenUpdated(m_pushToken);
 }
