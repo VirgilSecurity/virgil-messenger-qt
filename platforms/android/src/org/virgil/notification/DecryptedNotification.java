@@ -5,11 +5,11 @@ public class DecryptedNotification {
     private String title;
     private String body;
 
-    DecryptedNotification() {
+    public DecryptedNotification() {
         this.isSuccess = false;
     }
 
-    DecryptedNotification(String title, String body) {
+    public DecryptedNotification(String title, String body) {
         this.isSuccess = true;
         this.title = title;
         this.body = body;
