@@ -98,15 +98,14 @@ public class PushHandlerService extends QtService
             builder.setPriority(NotificationCompat.PRIORITY_MAX);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-
-            synchronized(notificationManager){
-                notificationManager.notify();
-            }
+            notificationManager.notify(notificationId, builder.build());
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannel() {
+        Log.d(TAG, "Create notification channel: " + MESSAGE_CHANNEL_ID);
+
         CharSequence name = getString(R.string.message_channel_name);
         String description = getString(R.string.message_channel_description);
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
