@@ -32,35 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#include "PlatformNotificationsFirebase.h"
+#ifndef VM_PLATFORM_ANDROID_PUSH_HANDLER_SERVICE
+#define VM_PLATFORM_ANDROID_PUSH_HANDLER_SERVICE
 
-#include <QAndroidJniObject>
+#include <jni.h>
 
-#include <android/log.h>
-
-using namespace vm;
-using namespace platform;
-
-using Self = PlatformNotificationsFirebase;
-
-PlatformNotifications &PlatformNotifications::instance()
-{
-    static Self impl;
-    return impl;
+extern "C" {
+JNIEXPORT jobject JNICALL Java_org_virgil_notification_PushHandlerService_decryptNotification(JNIEnv *, jclass, jstring,
+                                                                                              jstring, jstring);
 }
 
-void Self::init()
-{
-    QAndroidJniObject::callStaticMethod<void>("org/virgil/notification/FirebaseMessageReceiver", "init", "()V");
-}
-
-bool Self::isPushSupported() const
-{
-    return true;
-}
-
-void Java_org_virgil_notification_FirebaseMessageReceiver_updatePushToken(JNIEnv *, jclass, jstring jPushToken)
-{
-    QAndroidJniObject pushToken(jPushToken);
-    PlatformNotifications::instance().updatePushToken(pushToken.toString());
-}
+#endif // VM_PLATFORM_ANDROID_PUSH_HANDLER_SERVICE

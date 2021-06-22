@@ -261,6 +261,36 @@ add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
 )
 
 # ---------------------------------------------------------------------------
+#   Separate library that decrypts push notifications.
+# ---------------------------------------------------------------------------
+add_library(push-handler SHARED)
+
+target_sources(push-handler
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PushHandlerService.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PushHandlerService.cpp"
+        )
+
+target_include_directories(push-handler
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+        )
+
+target_link_libraries(push-handler
+        PRIVATE
+        core-messenger
+        platform-notifications
+
+        Qt5::Core
+        Qt5::AndroidExtras
+        log
+        )
+
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(push-handler)
+endif()
+
+# ---------------------------------------------------------------------------
 #   Deploy
 # ---------------------------------------------------------------------------
 find_program(DEPLOY_QT androiddeployqt)

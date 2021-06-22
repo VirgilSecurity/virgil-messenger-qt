@@ -1,18 +1,9 @@
 package org.virgil.notification;
 
-import org.virgil.notification.DecryptedNotification;
-import com.virgilsecurity.android.virgil.R;
-
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,15 +11,13 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import com.virgilsecurity.android.virgil.R;
+
 public class FirebaseMessageReceiver extends FirebaseMessagingService {
 
     private static final String TAG = "FirebaseMessageReceiver";
 
-    private static final String MESSAGE_CHANNEL_ID = "notification_channel_message";
-
     private static native void updatePushToken(String token);
-
-    private static native DecryptedNotification decryptNotification(String recipientJid, String senderJid, String ciphertext);
 
     /**
      * Request push token.
@@ -43,7 +32,9 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
                         return;
                     }
 
-                    // Get new FCM registration token
+                    //
+                    // Get new FCM registration token.
+                    //
                     String token = task.getResult();
 
                     Log.d(TAG, "Got token: " + token);
@@ -56,23 +47,6 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        createNotificationChannel();
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.message_channel_name);
-            String description = getString(R.string.message_channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(MESSAGE_CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 
     /**
@@ -141,31 +115,21 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
         }
 
         //
-        //  Try to decrypt encrypted message.
+        //  Pack push message and send it to the push handler service.
         //
-        DecryptedNotification decryptedNotification = decryptNotification(recipientJid, senderJid, ciphertext);
+        Intent intent = new Intent(this, PushHandlerService.class);
+        intent.setAction(Constants.PUSH.HANDLE_PUSH_ACTION);
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        intent.putExtra(Constants.PUSH.MESSAGE_ID, remoteMessage.getMessageId());
+        intent.putExtra(Constants.PUSH.SENDER_ID, remoteMessage.getSenderId());
+        intent.putExtra(Constants.PUSH.SENDER_JID, senderJid);
+        intent.putExtra(Constants.PUSH.RECIPIENT_JID, recipientJid);
+        intent.putExtra(Constants.PUSH.CIPHERTEXT, ciphertext);
 
-        if (!decryptedNotification.isSuccess()) {
-            Log.w(TAG, "Failed to decrypt notification.");
-            return;
-        }
-
-        Log.d(TAG, "Notification was decrypted.");
-        showNotification(remoteMessage.getSentTime(), decryptedNotification.getTitle(), decryptedNotification.getBody());
-    }
-
-    // Method to display the notifications
-    public void showNotification(Long notificationId, String title, String body) {
-        Log.d(TAG, "Got message: " + body);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MESSAGE_CHANNEL_ID)
-                .setSmallIcon(R.drawable.icon)
-                .setAutoCancel(true);
-        builder.setContentTitle(title);
-        builder.setContentText(body);
-        builder.setPriority(NotificationCompat.PRIORITY_MAX);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(notificationId.intValue(), builder.build());
+        //
+        //  Note, the message priority has to be set to high to allow the app to launch the background service intent!
+        //
+        Log.d(TAG, "Starting PushHandlerService...");
+        startService(intent);
     }
 }
