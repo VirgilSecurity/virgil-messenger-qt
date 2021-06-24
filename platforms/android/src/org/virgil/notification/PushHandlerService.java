@@ -69,6 +69,7 @@ public class PushHandlerService extends QtService
             DecryptedNotification decryptedNotification = decryptNotification(recipientJid, senderJid, ciphertext);
 
             if (!decryptedNotification.isSuccess()) {
+                showNotification(messageId.hashCode(), "New Message", "Encrypted");
                 Log.w(TAG, "Failed to decrypt notification.");
                 return;
             }
