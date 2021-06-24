@@ -3321,12 +3321,10 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
         // TODO: Maybe replace it with MUC/Sub Subscribers mechanism?
         m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
 
+        m_impl->xmppMucSubManager->unsubscribe(room->jid());
         m_impl->xmppMucSubManager->subscribe(
                 {
                         XmppMucSubEvent::Messages,
-                        XmppMucSubEvent::Affiliations,
-                        XmppMucSubEvent::Subscribers,
-                        XmppMucSubEvent::Presence,
                 },
                 room->jid(), currentUser()->id());
 
