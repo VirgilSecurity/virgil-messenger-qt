@@ -78,7 +78,7 @@ public class PushHandlerService extends QtService
             //
             //  Show notification.
             //
-            showNotification(senderId.hashCode(), decryptedNotification.getTitle(), decryptedNotification.getBody());
+            showNotification(messageId.hashCode(), decryptedNotification.getTitle(), decryptedNotification.getBody());
 
             //
             //  Stop the working thread.
@@ -92,10 +92,10 @@ public class PushHandlerService extends QtService
             Context context = mContext.get();
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MESSAGE_CHANNEL_ID)
                     .setSmallIcon(R.drawable.icon)
-                    .setAutoCancel(true);
-            builder.setContentTitle(title);
-            builder.setContentText(body);
-            builder.setPriority(NotificationCompat.PRIORITY_MAX);
+                    .setAutoCancel(true)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setPriority(NotificationManager.IMPORTANCE_DEFAULT);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(notificationId, builder.build());
