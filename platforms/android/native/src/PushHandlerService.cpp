@@ -53,29 +53,93 @@ jobject Java_org_virgil_notification_PushHandlerService_decryptNotification(JNIE
 {
     Settings settings;
 
-    QAndroidJniObject recipientJid(jRecipientJid);
-    QAndroidJniObject senderJid(jSenderJid);
-    QAndroidJniObject ciphertext(jCiphertext);
+    QString recipientJid = QAndroidJniObject(jRecipientJid).toString();
+    QString senderJid = QAndroidJniObject(jSenderJid).toString();
+    QString ciphertext = QAndroidJniObject(jCiphertext).toString();
 
+    //
+    //  Create JNI helpers.
+    //
     jclass jResultClass = jenv->FindClass("org/virgil/notification/DecryptedNotification");
     Q_ASSERT(jResultClass);
 
+    auto createFailedResult = [jenv, jResultClass]() -> jobject {
+        jmethodID jResultCtor = jenv->GetStaticMethodID(jResultClass, "createFailed",
+                                                        "()Lorg/virgil/notification/DecryptedNotification;");
+
+        return jenv->CallStaticObjectMethod(jResultClass, jResultCtor);
+    };
+
+    auto createSkippedResult = [jenv, jResultClass]() -> jobject {
+        jmethodID jResultCtor = jenv->GetStaticMethodID(jResultClass, "createSkipped",
+                                                        "()Lorg/virgil/notification/DecryptedNotification;");
+
+        return jenv->CallStaticObjectMethod(jResultClass, jResultCtor);
+    };
+
+    auto createDecryptedResult = [jenv, jResultClass](const QString &title, const QString &body) -> jobject {
+        jstring jTitle = jenv->NewStringUTF(title.toStdString().c_str());
+        jstring jBody = jenv->NewStringUTF(body.toStdString().c_str());
+
+        jmethodID jResultCtor = jenv->GetStaticMethodID(
+                jResultClass, "createDecrypted",
+                "(Ljava/lang/String;Ljava/lang/String;)Lorg/virgil/notification/DecryptedNotification;");
+
+        return jenv->CallStaticObjectMethod(jResultClass, jResultCtor, jTitle, jBody);
+    };
+
+    //
+    //  Check input arguments.
+    //
+    if (senderJid.isEmpty()) {
+        __android_log_print(ANDROID_LOG_WARN, lcPushHandlerService, "Required field 'sender' is missing.");
+
+        return createFailedResult();
+    }
+
+    //
+    //  Check if notification should be skipped.
+    //
+    const bool isGroupMessage = ciphertext.isEmpty();
+    auto senderId = CoreMessenger::userIdFromJid(senderJid);
+    auto senderUsername = settings.usernameForId(senderId);
+    if (isGroupMessage && !senderUsername.isEmpty() && settings.usersList().contains(senderUsername)) {
+        __android_log_print(ANDROID_LOG_DEBUG, lcPushHandlerService,
+                            "Ignore self push notifications that come from group chats.");
+
+        return createSkippedResult();
+    }
+
+    //
+    //  Try to decrypt notification.
+    //
     __android_log_print(ANDROID_LOG_DEBUG, lcPushHandlerService, "Start to decrypt notification...");
 
-    auto decryptResult = CoreMessenger::decryptStandaloneMessage(settings, recipientJid.toString(),
-                                                                 senderJid.toString(), ciphertext.toString());
+    if (recipientJid.isEmpty()) {
+        __android_log_print(ANDROID_LOG_WARN, lcPushHandlerService, "Required field 'recipient' is missing.");
+
+        return createFailedResult();
+    }
+
+    if (ciphertext.isEmpty()) {
+        __android_log_print(ANDROID_LOG_WARN, lcPushHandlerService, "Required field 'ciphertext' is missing.");
+
+        return createFailedResult();
+    }
+
+    auto decryptResult = CoreMessenger::decryptStandaloneMessage(settings, recipientJid, senderJid, ciphertext);
 
     if (auto result = std::get_if<CoreMessengerStatus>(&decryptResult)) {
         __android_log_print(ANDROID_LOG_WARN, lcPushHandlerService, "Failed to decrypt notification.");
 
-        jmethodID jResultCtor = jenv->GetMethodID(jResultClass, "<init>", "()V");
-        jobject jResult = jenv->NewObject(jResultClass, jResultCtor);
-
-        return jResult;
+        return createFailedResult();
     }
 
-    __android_log_print(ANDROID_LOG_DEBUG, lcPushHandlerService, "Notification was decrypted...");
+    __android_log_print(ANDROID_LOG_DEBUG, lcPushHandlerService, "Notification was decrypted.");
 
+    //
+    //  Make and return the result.
+    //
     auto message = std::move(*std::get_if<MessageHandler>(&decryptResult));
     QString title = message->senderUsername();
 
@@ -96,16 +160,10 @@ jobject Java_org_virgil_notification_PushHandlerService_decryptNotification(JNIE
         __android_log_print(ANDROID_LOG_WARN, lcPushHandlerService, "Unexpected message content.");
     }
 
-    jstring jTitle = jenv->NewStringUTF(title.toStdString().c_str());
-    jstring jBody = jenv->NewStringUTF(body.toStdString().c_str());
-
-    jmethodID jResultCtor = jenv->GetMethodID(jResultClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
-    jobject jResult = jenv->NewObject(jResultClass, jResultCtor, jTitle, jBody);
-
     __android_log_print(ANDROID_LOG_DEBUG, lcPushHandlerService,
                         "Right before decrypted notification will be returned.");
 
-    return jResult;
+    return createDecryptedResult(title, body);
 }
 
 int main(int argc, char *argv[])

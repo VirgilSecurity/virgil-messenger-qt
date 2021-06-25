@@ -68,18 +68,22 @@ public class PushHandlerService extends QtService
             //
             DecryptedNotification decryptedNotification = decryptNotification(recipientJid, senderJid, ciphertext);
 
-            if (!decryptedNotification.isSuccess()) {
-                Log.w(TAG, "Failed to decrypt notification.");
-                showNotification(messageId.hashCode(), "New Message", "Encrypted");
-                return;
+            //
+            //  Show notification or ignore it.
+            //
+            switch(decryptedNotification.getResult()) {
+                case DECRYPTED:
+                    showNotification(messageId.hashCode(), decryptedNotification.getTitle(), decryptedNotification.getBody());
+                    break;
+
+                case FAILED:
+                    showNotification(messageId.hashCode(), "New Message", "Encrypted");
+                    break;
+
+                case SKIPPED:
+                    break;
+
             }
-
-            Log.d(TAG, "Notification was decrypted.");
-
-            //
-            //  Show notification.
-            //
-            showNotification(messageId.hashCode(), decryptedNotification.getTitle(), decryptedNotification.getBody());
 
             //
             //  Stop the working thread.

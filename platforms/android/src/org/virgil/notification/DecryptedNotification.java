@@ -1,22 +1,36 @@
 package org.virgil.notification;
 
 public class DecryptedNotification {
-    private boolean isSuccess;
+    private Result result;
     private String title;
     private String body;
 
-    public DecryptedNotification() {
-        this.isSuccess = false;
+    public enum Result {
+        DECRYPTED,
+        FAILED,
+        SKIPPED
     }
 
-    public DecryptedNotification(String title, String body) {
-        this.isSuccess = true;
+    public static DecryptedNotification createDecrypted(String title, String body) {
+        return new DecryptedNotification(Result.DECRYPTED, title, body);
+    }
+
+    public static DecryptedNotification createFailed() {
+        return new DecryptedNotification(Result.FAILED, "", "");
+    }
+
+    public static DecryptedNotification createSkipped() {
+        return new DecryptedNotification(Result.SKIPPED, "", "");
+    }
+
+    private DecryptedNotification(Result result, String title, String body) {
+        this.result = result;
         this.title = title;
         this.body = body;
     }
 
-    public boolean isSuccess() {
-        return this.isSuccess;
+    public Result getResult() {
+        return this.result;
     }
 
     public String getTitle() {

@@ -89,30 +89,9 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
             return;
         }
 
-        String senderJid = remoteMessage.getData().get("sender");
-        String recipientJid = remoteMessage.getData().get("recipient");
-        String ciphertext = remoteMessage.getData().get("ciphertext");
-
-        if (senderJid.isEmpty()) {
-            Log.w(TAG, "Required field 'from' is missing.");
-            return;
-        } else {
-            Log.d(TAG, "Sender JID: " + senderJid);
-        }
-
-        if (recipientJid.isEmpty()) {
-            Log.w(TAG, "Required field 'to' is missing.");
-            return;
-        } else {
-            Log.d(TAG, "Recipient JID: " + recipientJid);
-        }
-
-        if (ciphertext.isEmpty()) {
-            Log.w(TAG, "Required field 'ciphertext' is missing.");
-            return;
-        } else {
-            Log.d(TAG, "Ciphertext: " + ciphertext);
-        }
+        String senderJid = remoteMessage.getData().getOrDefault("sender", "");
+        String recipientJid = remoteMessage.getData().getOrDefault("recipient", "");
+        String ciphertext = remoteMessage.getData().getOrDefault("ciphertext", "");
 
         //
         //  Pack push message and send it to the push handler service.
