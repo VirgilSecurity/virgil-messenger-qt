@@ -2435,7 +2435,7 @@ void Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage)
     //  Got non archived message so send 'received' mark.
     //  TODO: Decide if need to filter group chat messages.
     //
-    const bool isIncomingValidMarkableMessage = (xmppMessage.type() != QXmppMessage::Error)
+    const bool isIncomingValidMarkableMessage = (xmppMessage.type() == QXmppMessage::Chat)
             && !xmppMessage.from().isEmpty() && !xmppMessage.id().isEmpty() && xmppMessage.isMarkable();
 
     if (isIncomingValidMarkableMessage) {
