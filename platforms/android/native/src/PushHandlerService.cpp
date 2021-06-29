@@ -101,13 +101,11 @@ jobject Java_org_virgil_notification_PushHandlerService_decryptNotification(JNIE
     //  Check if notification should be skipped.
     //
     const bool isGroupMessage = ciphertext.isEmpty();
-    auto senderId = CoreMessenger::userIdFromJid(senderJid);
-    auto senderUsername = settings.usernameForId(senderId);
-    if (isGroupMessage && !senderUsername.isEmpty() && settings.usersList().contains(senderUsername)) {
+    if (isGroupMessage) {
         __android_log_print(ANDROID_LOG_DEBUG, lcPushHandlerService,
                             "Ignore self push notifications that come from group chats.");
 
-        return createSkippedResult();
+        return createDecryptedResult("New Message", "Encrypted (group)");
     }
 
     //
