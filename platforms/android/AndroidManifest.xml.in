@@ -99,7 +99,12 @@
         </service>
 
 
-        <service android:name="org.virgil.notification.PushHandlerService" android:enabled="true" android:exported="false">
+        <service
+            android:process=":push_handler_service"
+            android:name="org.virgil.notification.PushHandlerService"
+            android:enabled="true"
+            android:exported="false">
+
             <intent-filter>
                 <action android:name="org.virgil.messenger.HANDLE_PUSH_ACTION"/>
             </intent-filter>
