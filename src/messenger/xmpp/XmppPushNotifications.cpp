@@ -54,8 +54,10 @@ static const QString kPushNotificationsFormTypeVal = "http://jabber.org/protocol
 
 static const QString kPushNotificationsService = "service";
 
-#if VS_ANDROID
+#if VS_ANDROID && VS_ANDROID_PUSH_FCM
 static const QString kPushNotificationsServiceVal = "fcm";
+#elif VS_ANDROID && VS_ANDROID_PUSH_PUSHY
+static const QString kPushNotificationsServiceVal = "pushy";
 #elif VS_IOS
 static const QString kPushNotificationsServiceVal = "apns";
 #else

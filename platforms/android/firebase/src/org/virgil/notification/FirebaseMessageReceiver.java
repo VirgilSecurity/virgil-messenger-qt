@@ -5,44 +5,15 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.virgilsecurity.android.virgil.R;
+import org.virgil.notification.PushService;
 
 public class FirebaseMessageReceiver extends FirebaseMessagingService {
 
     private static final String TAG = "FirebaseMessageReceiver";
-
-    private static native void updatePushToken(String token);
-
-    /**
-     * Request push token.
-     */
-    public static void init() {
-        FirebaseMessaging.getInstance().getToken()
-            .addOnCompleteListener(new OnCompleteListener < String > () {
-                @Override
-                public void onComplete(Task < String > task) {
-                    if (!task.isSuccessful()) {
-                        Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                        return;
-                    }
-
-                    //
-                    // Get new FCM registration token.
-                    //
-                    String token = task.getResult();
-
-                    Log.d(TAG, "Got token: " + token);
-
-                    updatePushToken(token);
-                }
-            });
-    }
 
     @Override
     public void onCreate() {
@@ -62,10 +33,7 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
     public void onNewToken(String token) {
         Log.d(TAG, "Refreshed token: " + token);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // FCM registration token to your app server.
-        updatePushToken(token);
+        PushService.updatePushToken(token);
     }
 
     // Override onMessageReceived() method to extract the
@@ -100,7 +68,6 @@ public class FirebaseMessageReceiver extends FirebaseMessagingService {
         intent.setAction(Constants.PUSH.HANDLE_PUSH_ACTION);
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.putExtra(Constants.PUSH.MESSAGE_ID, remoteMessage.getMessageId());
-        intent.putExtra(Constants.PUSH.SENDER_ID, remoteMessage.getSenderId());
         intent.putExtra(Constants.PUSH.SENDER_JID, senderJid);
         intent.putExtra(Constants.PUSH.RECIPIENT_JID, recipientJid);
         intent.putExtra(Constants.PUSH.CIPHERTEXT, ciphertext);

@@ -1,0 +1,13 @@
+//
+//  Firebase
+//
+enableFeaturePreview('VERSION_CATALOGS')
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            alias('firebase-messaging').to('com.google.firebase:firebase-messaging:22.0.0')
+            bundle('notifications', ['firebase-messaging'])
+        }
+    }
+}

@@ -57,7 +57,6 @@ public class PushHandlerService extends QtService
         public void handleMessage(Message message) {
             Log.d(TAG, "Handle message");
             String messageId = message.getData().getString(Constants.PUSH.MESSAGE_ID);
-            String senderId = message.getData().getString(Constants.PUSH.SENDER_ID);
             String senderJid = message.getData().getString(Constants.PUSH.SENDER_JID);
             String recipientJid = message.getData().getString(Constants.PUSH.RECIPIENT_JID);
             String ciphertext = message.getData().getString(Constants.PUSH.CIPHERTEXT);
@@ -149,7 +148,6 @@ public class PushHandlerService extends QtService
 
         Bundle data = new Bundle();
         data.putString(Constants.PUSH.MESSAGE_ID, intent.getStringExtra(Constants.PUSH.MESSAGE_ID));
-        data.putString(Constants.PUSH.SENDER_ID, intent.getStringExtra(Constants.PUSH.SENDER_ID));
         data.putString(Constants.PUSH.SENDER_JID, intent.getStringExtra(Constants.PUSH.SENDER_JID));
         data.putString(Constants.PUSH.RECIPIENT_JID, intent.getStringExtra(Constants.PUSH.RECIPIENT_JID));
         data.putString(Constants.PUSH.CIPHERTEXT, intent.getStringExtra(Constants.PUSH.CIPHERTEXT));

@@ -519,6 +519,7 @@ target_link_libraries(core-messenger
         settings
         logging
         platform-definitions
+        platform-notifications
 
         Qt5::Core
         Qt5::Concurrent
@@ -862,6 +863,11 @@ target_link_libraries(${VS_TARGET_NAME}
         Qt5::Qml
 
         platform-deps # must be the last
+        )
+
+target_compile_definitions(${VS_TARGET_NAME}
+        PUBLIC
+        BBB=1
         )
 
 #

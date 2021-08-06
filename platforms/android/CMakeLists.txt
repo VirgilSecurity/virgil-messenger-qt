@@ -114,27 +114,32 @@ target_link_libraries(platform
 #
 #   Library: platform-notifications.
 #
-if (USE_FIREBASE_NOTIFICATION_SERVICE OR USE_PUSHY_ME_NOTIFICATION_SERVICE)
-        add_library(platform-notifications STATIC)
+add_library(platform-notifications STATIC)
 
-        target_sources(platform-notifications
-                PRIVATE
-                "$<$<BOOL:USE_FIREBASE_NOTIFICATION_SERVICE>:${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsFirebase.h>"
-                "$<$<BOOL:USE_FIREBASE_NOTIFICATION_SERVICE>:${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsFirebase.cpp>"
-                )
+target_sources(platform-notifications
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsAndroid.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsAndroid.cpp"
+        )
 
-        target_include_directories(platform-notifications
-                PRIVATE
-                "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
-                )
+target_include_directories(platform-notifications
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+        )
 
-        target_link_libraries(platform-notifications
-                PUBLIC
-                Qt5::AndroidExtras
-                platform-notifications-api
-                core-messenger
-                )
-endif()
+target_link_libraries(platform-notifications
+        PUBLIC
+        Qt5::AndroidExtras
+        platform-notifications-api
+        core-messenger
+        )
+
+target_compile_definitions(platform-notifications
+        PUBLIC
+        HOO=1
+        "$<BUILD_INTERFACE:VS_ANDROID_PUSH_FCM=$<BOOL:${USE_FIREBASE_NOTIFICATION_SERVICE}>>"
+        "$<BUILD_INTERFACE:VS_ANDROID_PUSH_PUSHY=$<BOOL:${USE_PUSHY_ME_NOTIFICATION_SERVICE}>>"
+        )
 
 #
 #   Library: platform-fs.
@@ -210,11 +215,11 @@ file(COPY "${VS_CUSTOMER_DIR}/platforms/android/" DESTINATION "${GRADLE_BUILD_DI
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradle" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew.bat" DESTINATION "${GRADLE_BUILD_DIR}")
-file(COPY "${CMAKE_CURRENT_LIST_DIR}/project.properties" DESTINATION "${GRADLE_BUILD_DIR}")
 
 #
 #  Copy Source file.
 #
+file(REMOVE_RECURSE "${GRADLE_BUILD_DIR}/src")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/src" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/res" DESTINATION "${GRADLE_BUILD_DIR}")
 
@@ -234,21 +239,61 @@ configure_file(
         )
 
 configure_file(
-        "${CMAKE_CURRENT_LIST_DIR}/gradle.properties.in"
+        "${CMAKE_CURRENT_LIST_DIR}/gradle.properties"
         "${GRADLE_BUILD_DIR}/gradle.properties"
-        @ONLY
+        COPYONLY
         )
 
-file(READ "${CMAKE_CURRENT_LIST_DIR}/build.gradle" BUILD_GRADLE_CONTENTS)
+configure_file(
+        "${CMAKE_CURRENT_LIST_DIR}/build.gradle"
+        "${GRADLE_BUILD_DIR}/build.gradle"
+        COPYONLY
+        )
 
 if(USE_FIREBASE_NOTIFICATION_SERVICE)
-    file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+    configure_file(
+            "${CMAKE_CURRENT_LIST_DIR}/firebase/AndroidManifest_NotificationServices.xml"
+            "${GRADLE_BUILD_DIR}/AndroidManifest_NotificationServices.xml"
+            COPYONLY
+            )
+
+    configure_file(
+            "${CMAKE_CURRENT_LIST_DIR}/firebase/settings.gradle"
+            "${GRADLE_BUILD_DIR}/settings.gradle"
+            COPYONLY
+            )
+
+    configure_file(
+            "${CMAKE_CURRENT_LIST_DIR}/firebase/runscript.gradle"
+            "${GRADLE_BUILD_DIR}/runscript.gradle"
+            COPYONLY
+            )
+
+    configure_file(
+            "${CMAKE_CURRENT_LIST_DIR}/google_project.properties"
+            "${GRADLE_BUILD_DIR}/project.properties"
+            COPYONLY
+    )
+
+    file(COPY "${CMAKE_CURRENT_LIST_DIR}/firebase/src" DESTINATION "${GRADLE_BUILD_DIR}")
 
 elseif(USE_PUSHY_ME_NOTIFICATION_SERVICE)
-    file(READ "${CMAKE_CURRENT_LIST_DIR}/pushyme.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
-endif()
+    configure_file(
+            "${CMAKE_CURRENT_LIST_DIR}/pushy/AndroidManifest_NotificationServices.xml"
+            "${GRADLE_BUILD_DIR}/AndroidManifest_NotificationServices.xml"
+            COPYONLY
+            )
 
-file(WRITE "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
+    configure_file(
+            "${CMAKE_CURRENT_LIST_DIR}/pushy/settings.gradle"
+            "${GRADLE_BUILD_DIR}/settings.gradle"
+            COPYONLY
+            )
+
+    file(WRITE "${GRADLE_BUILD_DIR}/runscript.gradle" "")
+    file(WRITE "${GRADLE_BUILD_DIR}/project.properties" "")
+    file(COPY "${CMAKE_CURRENT_LIST_DIR}/pushy/src" DESTINATION "${GRADLE_BUILD_DIR}")
+endif()
 
 # ---------------------------------------------------------------------------
 #   Main target.

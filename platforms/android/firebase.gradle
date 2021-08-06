@@ -1,7 +1,0 @@
-
-//
-//  Add Firebase
-//
-dependencies {
-    compile 'com.google.firebase:firebase-messaging:22.0.0'
-}

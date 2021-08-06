@@ -17,7 +17,7 @@
         android:roundIcon="@drawable/icon_round">
         <activity
             android:configChanges="orientation|keyboardHidden"
-            android:name="org.qtproject.qt5.android.bindings.QtActivity"
+            android:name="org.virgil.main.MainActivity"
             android:label="@VS_APPLICATION_NAME@"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
@@ -91,14 +91,6 @@
                 android:resource="@xml/provider_paths"/>
         </provider>
 
-
-        <service android:name="org.virgil.notification.FirebaseMessageReceiver" android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-
         <service
             android:process=":push_handler_service"
             android:name="org.virgil.notification.PushHandlerService"
@@ -141,4 +133,5 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 </manifest>

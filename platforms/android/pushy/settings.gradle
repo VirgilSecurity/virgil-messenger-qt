@@ -1,0 +1,13 @@
+//
+//  Firebase
+//
+enableFeaturePreview('VERSION_CATALOGS')
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            alias('pushy').to('me.pushy:sdk:1.0.70')
+            bundle('notifications', ['pushy'])
+        }
+    }
+}
